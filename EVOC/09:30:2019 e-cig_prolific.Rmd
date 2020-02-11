@@ -1,0 +1,875 @@
+---
+title: "09/30/2019 ecig"
+author: "Yi"
+date: "10/2/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#Clear existing data and graphics
+rm(list=ls())
+graphics.off()
+#Load Hmisc library
+library(Hmisc)
+#Read Data
+data = read.csv('/Users/zhan039/Desktop/USC HEAL/EVOC (CONJOINT)/DATA/Prolific/ConjointAnalysisProl_DATA_2019-10-01_1108.csv')
+#Setting Labels
+
+label(data$redcapid)="Record ID"
+label(data$redcap_survey_identifier)="Survey Identifier"
+label(data$worker_id_timestamp)="Survey Timestamp"
+label(data$prolificid)="Please enter your Prolific ID:"
+label(data$worker_id_complete)="Complete?"
+label(data$demographics_timestamp)="Survey Timestamp"
+label(data$age1)="How old are you?"
+label(data$birth_year)=" What year were you born?"
+label(data$gender)="With which gender identity do you most identify?"
+label(data$eth)=" Are you Hispanic or Latino?"
+label(data$race___1)=" Which of the following races do you identify with? (choice=American Indian or Alaska Native)"
+label(data$race___2)=" Which of the following races do you identify with? (choice=Asian)"
+label(data$race___3)=" Which of the following races do you identify with? (choice=Black or African American)"
+label(data$race___4)=" Which of the following races do you identify with? (choice=Native Hawaiian or Pacific Islander)"
+label(data$race___5)=" Which of the following races do you identify with? (choice=White)"
+label(data$race___6)=" Which of the following races do you identify with? (choice=Multi-ethnic or Multi-racial)"
+label(data$race___7)=" Which of the following races do you identify with? (choice=Other)"
+label(data$degree_program)="What is the highest grade or level of school you have completed?"
+label(data$current_degree_program)="Are you currently enrolled in a degree program?"
+label(data$degree_type)="Which type of degree program are you currently enrolled in?"
+label(data$own_rent)="Do you own or rent your home?"
+label(data$home)="Where do you currently live? If you live in more than one place throughout the year, please answer for where you are currently staying."
+label(data$overall_income)="Considering your own income and the income from any other people who help you, how would you describe your overall personal financial situation?"
+label(data$family_income)="Think about your family when you were growing up, from birth to age 16. Would you say your family during that time was pretty well off financially, about average, or poor?"
+label(data$country)="In which country do you currently live? "
+label(data$specify_country)="Please specify:"
+label(data$state)="In which state do you currently live?"
+label(data$demographics_complete)="Complete?"
+label(data$ecigarettes_timestamp)="Survey Timestamp"
+label(data$ever_disp)="Disposable device"
+label(data$ever_pen)="Vape pen or pen-like rechargeable device (such as eGO or small startup kit)"
+label(data$ever_mod)="Mod or mech-mod rechargeable device"
+label(data$ever_box_mod)="Box mod"
+label(data$ever_juul)="Juul"
+label(data$ever_pod)="Other pod mod (e.g., Suorin)"
+label(data$ever_other)="Another type of electronic nicotine device"
+label(data$first_disp)="Disposable device"
+label(data$first_pen)="Vape pen or pen-like rechargeable device (such as eGO or small startup kit)"
+label(data$first_mod)="Mod or mech-mod rechargeable device"
+label(data$first_box)="Box mod"
+label(data$first_juul)="Juul"
+label(data$first_otherpod)="Other pod mod (e.g., Suorin)"
+label(data$first_other)="Another type of electronic nicotine device"
+label(data$last_30_ecig_yn)="In the past 30 days, have you used any electronic nicotine device to vape either nicotine or flavors?"
+label(data$last_30_ecig_dispose)="Disposable device"
+label(data$last_30_ecig_pen)="Vape pen or pen-like rechargeable device (such as eGO or small startup kit)"
+label(data$last_30_ecig_mod)="Mod or mech-mod rechargeable device"
+label(data$last_30_ecig_box_mod)="Box mod"
+label(data$last_30_ecig_juul)="Juul"
+label(data$last_30_ecig_pod)="Other pod mod (e.g., Suorin)"
+label(data$last_30_ecig_other)="Another type of electronic nicotine device"
+label(data$disp_most)="Disposable device"
+label(data$pen_most)="Vape pen or pen-like rechargeable device (such as eGO or small startup kit)"
+label(data$mod_most)="Mod or mech-mod rechargeable device"
+label(data$box_most)="Box mod"
+label(data$juul_most)="Juul"
+label(data$pod_most)="Other pod mod (e.g., Suorin)"
+label(data$other_most)="Another type of electronic nicotine device"
+label(data$disp_30_days)="Disposable device"
+label(data$pen_30_days)="Vape pen or pen-like rechargeable device (such as eGO or small startup kit)"
+label(data$mod_30_days)="Mod or mech-mod rechargeable device"
+label(data$box_30_days)="Box mod"
+label(data$juul_30_days)="Juul"
+label(data$att_check2)="Please select 3 to 5 days as your answer for this question."
+label(data$pod_30_days)="Other pod mod (e.g., Suorin)"
+label(data$other_30_days)="Another type of electronic nicotine device"
+label(data$every_day_vape)="Was there ever a time when you vaped every day?"
+label(data$flavor_first)="Which flavor did you use the first time you vaped?"
+label(data$eliq_flavor2)="How would you best describe the types of flavors you use most often?"
+label(data$flav_number)="In the past 30 days, about how many different flavors have you used with electronic nicotine devices? "
+label(data$nic_form)="What type of nicotine formulation do you usually use?"
+label(data$nic_level___1)=" (choice=0 mg/mL)"
+label(data$nic_level___2)=" (choice=1-3 mg/mL)"
+label(data$nic_level___3)=" (choice=4-6 mg/mL)"
+label(data$nic_level___4)=" (choice=7-12 mg/mL)"
+label(data$nic_level___5)=" (choice=13-18 mg/mL or higher)"
+label(data$nic_level___6)=" (choice=not sure)"
+label(data$nicotine_percent___1)=" (choice=0%)"
+label(data$nicotine_percent___2)=" (choice=1%)"
+label(data$nicotine_percent___3)=" (choice=2%)"
+label(data$nicotine_percent___4)=" (choice=3%)"
+label(data$nicotine_percent___5)=" (choice=4%)"
+label(data$nicotine_percent___6)=" (choice=5%)"
+label(data$nicotine_percent___7)=" (choice=6%)"
+label(data$nicotine_percent___8)=" (choice=7% or higher)"
+label(data$nicotine_percent___9)=" (choice=not sure)"
+label(data$ecig_bout_times_last30)="On the days you vaped nicotine, how many times did you usually pick up your e-cigarette device to vape?"
+label(data$ecig_bout_puffs_last30)="Each time you picked up your e-cigarette to vape, how many puffs did you usually take before putting it away?"
+label(data$att_check1___1)=" Which of the following objects have wheels? (Please select all that apply.) (choice=Truck)"
+label(data$att_check1___2)=" Which of the following objects have wheels? (Please select all that apply.) (choice=Table)"
+label(data$att_check1___3)=" Which of the following objects have wheels? (Please select all that apply.) (choice=Pencil)"
+label(data$att_check1___4)=" Which of the following objects have wheels? (Please select all that apply.) (choice=Bike)"
+label(data$att_check1___5)=" Which of the following objects have wheels? (Please select all that apply.) (choice=Bus)"
+label(data$ecig_1)=" Have you ever been to a vape shop (shop where e-cigarettes and e-cigarette juices are sold)?"
+label(data$ecig_2)=" Do you own, or have you ever owned, an e-cigarette device?"
+label(data$juul_usage_day)="How many Juul pods do you use per day on average?"
+label(data$juul_usage_week)="How many Juul pods do you use per week on average?"
+label(data$juul_usage_month)="How many Juul pods do you use per month on average?"
+label(data$ecigarettes_complete)="Complete?"
+label(data$product_attributes_timestamp)="Survey Timestamp"
+label(data$device_type)=" How important is the type of device?  (for example, pod vs. juul vs. box mod vs. vape pen)"
+label(data$device_brand)=" How important is the brand of device? (Juul, Mojo, Vuse, Blu, etc.)"
+label(data$device_price)=" How important is the price of the device?"
+label(data$device_size)=" How important is the size of device? (e.g. easily fits in your pocket) "
+label(data$device_hit)=" How important is the strength of the hit that the device provides? (strong hit vs. weak hit)"
+label(data$device_customize)=" How important is it to be able to customize the device? "
+label(data$device_temp_volt)=" How important is it to be able to change the temperature or voltage of the device? "
+label(data$device_popular)=" How important is it that the device is new or popular?"
+label(data$attention_check)="Please select Not Important."
+label(data$device_nicform)=" How important is the devices compatibility with your preferred nicotine formulation? (e.g. can be used with salted and/or free base nicotine) "
+label(data$device_color)=" How important is the color of the device?"
+label(data$eliquid_flavor)="How important is the flavor of the e-liquid?"
+label(data$eliquid_name)=" How important is the name of the e-liquid flavor?"
+label(data$eliquid_price)=" How important is the price of the e-liquid?"
+label(data$eliquid_niclevel)=" How important is the nicotine level of the e-liquid? (low vs. high nicotine) "
+label(data$eliquid_nicform)=" How important is the nicotine formulation of the e-liquid? (salted vs. non-salted)"
+label(data$eliquid_brand)=" How important is the brand of e-liquid solution?"
+label(data$eliquid_bottle)=" How important is the material of the e-liquid bottle? (e.g. glass vs. plastic)"
+label(data$eliquid_dripdrop)=" How important is the e-liquid bottle top? (e.g. dripper vs. dropper) "
+label(data$eliquid_design)=" How important is the packaging design of the e-liquid?"
+label(data$product_attributes_complete)="Complete?"
+label(data$ecigarette_use_patterns_timestamp)="Survey Timestamp"
+label(data$vape_addiction1)="A. Have you ever tried to quit vaping, but couldnt?"
+label(data$vape_addiction2)="B. Do you vape now because it is really hard to quit?"
+label(data$vape_addiction3)="C. Have you ever felt like you were addicted to vaping?"
+label(data$vape_addiction4)="D. Do you ever have strong cravings to vape?"
+label(data$vape_addiction5)="E. Have you ever felt like you really needed to vape?"
+label(data$vape_addiction6)="F. Is it hard to keep from vaping in places where you are not supposed to?"
+label(data$vape_quit_effects1)="A. Did you find it hard to concentrate because you couldnt vape?"
+label(data$vape_quit_effects2)="B. Did you feel more irritable because you couldnt vape?"
+label(data$vape_quit_effects3)="C. Did you feel a strong need or urge to vape?"
+label(data$vape_quit_effects4)="D. Did you feel nervous, restless or anxious because you couldnt vape?"
+label(data$stop_ecig)="Have you ever tried to stop using electronic nicotine devices, or cut down on your use of electronic nicotine devices?"
+label(data$stop_ecig_depressed)="A.  Feel depressed?"
+label(data$stop_ecig_sleep)="B.  Have difficulty falling asleep or staying asleep?"
+label(data$stop_ecig_concentrate)="C. Have difficulty concentrating?"
+label(data$stop_ecig_gain_weight)="D.  Eat more than usual or gain weight?"
+label(data$stop_ecig_angry)="E.  Become easily irritated, angry, or frustrated?"
+label(data$stop_ecig_anxious)="F.  Feel anxious or nervous?"
+label(data$stop_ecig_heart)="G.  Feel your heart beating more slowly than usual?"
+label(data$stop_ecig_restless)="H.  Feel more restless than usual?"
+label(data$ecigarette_use_patterns_complete)="Complete?"
+label(data$advertisements_timestamp)="Survey Timestamp"
+label(data$social_media_fb)="Facebook"
+label(data$social_media_instagram)="Instagram"
+label(data$social_media_twitter)="Twitter"
+label(data$social_media_youtube)="Youtube"
+label(data$mediafollowbrands___5)="Have you liked or followed any of the following brands on Facebook, Twitter or other social media sites? (Select all that apply) (choice=Blu)"
+label(data$mediafollowbrands___6)="Have you liked or followed any of the following brands on Facebook, Twitter or other social media sites? (Select all that apply) (choice=Fin)"
+label(data$mediafollowbrands___7)="Have you liked or followed any of the following brands on Facebook, Twitter or other social media sites? (Select all that apply) (choice=Vuse)"
+label(data$mediafollowbrands___8)="Have you liked or followed any of the following brands on Facebook, Twitter or other social media sites? (Select all that apply) (choice=NJOY)"
+label(data$mediafollowbrands___9)="Have you liked or followed any of the following brands on Facebook, Twitter or other social media sites? (Select all that apply) (choice=JUUL)"
+label(data$mediafollowbrands___10)="Have you liked or followed any of the following brands on Facebook, Twitter or other social media sites? (Select all that apply) (choice=Suorin)"
+label(data$mediafollowbrands___98)="Have you liked or followed any of the following brands on Facebook, Twitter or other social media sites? (Select all that apply) (choice=Other (please specify))"
+label(data$mediafollowbrands___99)="Have you liked or followed any of the following brands on Facebook, Twitter or other social media sites? (Select all that apply) (choice=Dont know)"
+label(data$mediafollowbrands___100)="Have you liked or followed any of the following brands on Facebook, Twitter or other social media sites? (Select all that apply) (choice=None of the above)"
+label(data$mediafollowbrands_other)="Please specify the other brands you have liked or followed on Facebook, Twitter or other social media sites."
+label(data$mediadonemonth_1)="Send a friend request on Facebook"
+label(data$mediadonemonth_2)="Receive a friend request on Facebook"
+label(data$mediadonemonth_3)="Update your Facebook status"
+label(data$mediadonemonth_4)="Post a picture on Facebook"
+label(data$mediadonemonth_5)="Share a link on Facebook"
+label(data$mediadonemonth_6)="See a post about tobacco or nicotine products on Facebook"
+label(data$mediadonemonth_7)="Post about tobacco or nicotine products on Facebook"
+label(data$mediadonemonth_8a)="Post a picture on Instagram"
+label(data$mediadonemonth_8b)="See a post about tobacco or nicotine products on Instagram"
+label(data$mediadonemonth_9)="Post about tobacco or nicotine products on Instagram"
+label(data$mediadonemonth_10)="Tweet"
+label(data$mediadonemonth_11)="Retweet"
+label(data$mediadonemonth_12)="Read other peoples tweets on Twitter"
+label(data$mediadonemonth_13)="Begin to follow someone on Twitter"
+label(data$mediadonemonth_14)="Have someone new follow you on Twitter"
+label(data$mediadonemonth_16)="Read a tweet about tobacco or nicotine products"
+label(data$mediadonemonth_15)="Tweet about tobacco or nicotine products on Twitter"
+label(data$mediadonemonth_17)="Watch a video on YouTube"
+label(data$mediadonemonth_18)="Post a video on YouTube"
+label(data$mediadonemonth_19)="See a video about tobacco or nicotine products on YouTube"
+label(data$mediadonemonth_20)="Post a video about tobacco or nicotine products on YouTube"
+label(data$mediadonemonth_21)="Visit a tobacco company website"
+label(data$mediadonemonth_22)="Visit an e-cigarette, vape pen, mod or other electronic vaping device website"
+label(data$mediadonemonth_23)="Order tobacco or other nicotine products or supplies online"
+label(data$mediadonemonth_24)="See posts from your friends about tobacco or nicotine products"
+label(data$mediadonemonth_25)="See posts from celebrities or influencers about tobacco or nicotine products"
+label(data$mediadonemonth_26)="Like posts about tobacco or nicotine products"
+label(data$ad_image1)="Have you ever seen this ad?"
+label(data$ad_brand1)="What brand is being advertised?"
+label(data$ad_where1___1)="Where did you see this ad? (select all that apply) (choice=Social media)"
+label(data$ad_where1___2)="Where did you see this ad? (select all that apply) (choice=Website)"
+label(data$ad_where1___3)="Where did you see this ad? (select all that apply) (choice=Television)"
+label(data$ad_where1___4)="Where did you see this ad? (select all that apply) (choice=Convenience store)"
+label(data$ad_where1___5)="Where did you see this ad? (select all that apply) (choice=Billboard)"
+label(data$ad_where1___6)="Where did you see this ad? (select all that apply) (choice=Dont know)"
+label(data$ad_image6)="Have you ever seen this ad?"
+label(data$ad_brand6)="What brand is being advertised?"
+label(data$ad_where6___1)="Where did you see this ad? (select all that apply) (choice=Social media)"
+label(data$ad_where6___2)="Where did you see this ad? (select all that apply) (choice=Website)"
+label(data$ad_where6___3)="Where did you see this ad? (select all that apply) (choice=Television)"
+label(data$ad_where6___4)="Where did you see this ad? (select all that apply) (choice=Convenience store)"
+label(data$ad_where6___5)="Where did you see this ad? (select all that apply) (choice=Billboard)"
+label(data$ad_where6___6)="Where did you see this ad? (select all that apply) (choice=Dont know)"
+label(data$ad_image10)="Have you ever seen this ad?"
+label(data$ad_brand10)="What brand is being advertised?"
+label(data$ad_where10___1)="Where did you see this ad? (select all that apply) (choice=Social media)"
+label(data$ad_where10___2)="Where did you see this ad? (select all that apply) (choice=Website)"
+label(data$ad_where10___3)="Where did you see this ad? (select all that apply) (choice=Television)"
+label(data$ad_where10___4)="Where did you see this ad? (select all that apply) (choice=Convenience store)"
+label(data$ad_where10___5)="Where did you see this ad? (select all that apply) (choice=Billboard)"
+label(data$ad_where10___6)="Where did you see this ad? (select all that apply) (choice=Dont know)"
+label(data$ad_follow)="Do you follow or like ads from any tobacco or e-cigarette companies on social media (e.g. Twitter, Instagram, Snapchat, etc.)?"
+label(data$list_comp)="Please list the companies here."
+label(data$att_check3a)=" Research in decision making shows that people, when making decisions and answering questions, prefer not to pay attention and minimize their effort as much as possible. Some studies show that over 50% of people dont carefully read questions. If you are reading this question and have read all the other questions, please select the box marked Other and type the words Decision making in the box below. Do not select Leadership dynamics. Thank you for participating and taking the time to read through the questions carefully!"
+label(data$att_check3b)="Please specify Other:"
+label(data$advertisements_complete)="Complete?"
+#Setting Units
+
+
+#Setting Factors(will create new variable for factors)
+data$worker_id_complete.factor = factor(data$worker_id_complete,levels=c("0","1","2"))
+data$age1.factor = factor(data$age1,levels=c("1","2","3","4","5","6","7","8","9","10","11","12","13"))
+data$birth_year.factor = factor(data$birth_year,levels=c("0","1","2","3","4","5","6","7","8","9","10","11","12","13","14"))
+data$gender.factor = factor(data$gender,levels=c("1","2","3","4","5","6","7"))
+data$eth.factor = factor(data$eth,levels=c("1","0"))
+data$race___1.factor = factor(data$race___1,levels=c("0","1"))
+data$race___2.factor = factor(data$race___2,levels=c("0","1"))
+data$race___3.factor = factor(data$race___3,levels=c("0","1"))
+data$race___4.factor = factor(data$race___4,levels=c("0","1"))
+data$race___5.factor = factor(data$race___5,levels=c("0","1"))
+data$race___6.factor = factor(data$race___6,levels=c("0","1"))
+data$race___7.factor = factor(data$race___7,levels=c("0","1"))
+data$degree_program.factor = factor(data$degree_program,levels=c("1","2","3","4","5","6","7","8","9","10","11","12"))
+data$current_degree_program.factor = factor(data$current_degree_program,levels=c("1","0","9"))
+data$degree_type.factor = factor(data$degree_type,levels=c("1","2","3","4","5","9"))
+data$own_rent.factor = factor(data$own_rent,levels=c("1","2","3","9"))
+data$home.factor = factor(data$home,levels=c("1","2","3","4","5","6","7","8","9"))
+data$overall_income.factor = factor(data$overall_income,levels=c("1","2","3","4"))
+data$family_income.factor = factor(data$family_income,levels=c("1","2","3","4"))
+data$country.factor = factor(data$country,levels=c("1","2","3"))
+data$state.factor = factor(data$state,levels=c("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","99"))
+data$demographics_complete.factor = factor(data$demographics_complete,levels=c("0","1","2"))
+data$ever_disp.factor = factor(data$ever_disp,levels=c("0","1","2"))
+data$ever_pen.factor = factor(data$ever_pen,levels=c("0","1","2"))
+data$ever_mod.factor = factor(data$ever_mod,levels=c("0","1","2"))
+data$ever_box_mod.factor = factor(data$ever_box_mod,levels=c("0","1","2"))
+data$ever_juul.factor = factor(data$ever_juul,levels=c("0","1","2"))
+data$ever_pod.factor = factor(data$ever_pod,levels=c("0","1","2"))
+data$ever_other.factor = factor(data$ever_other,levels=c("0","1","2"))
+data$first_disp.factor = factor(data$first_disp,levels=c("1"))
+data$first_pen.factor = factor(data$first_pen,levels=c("1"))
+data$first_mod.factor = factor(data$first_mod,levels=c("1"))
+data$first_box.factor = factor(data$first_box,levels=c("1"))
+data$first_juul.factor = factor(data$first_juul,levels=c("1"))
+data$first_otherpod.factor = factor(data$first_otherpod,levels=c("1"))
+data$first_other.factor = factor(data$first_other,levels=c("1"))
+data$last_30_ecig_yn.factor = factor(data$last_30_ecig_yn,levels=c("1","0"))
+data$last_30_ecig_dispose.factor = factor(data$last_30_ecig_dispose,levels=c("0","1","9"))
+data$last_30_ecig_pen.factor = factor(data$last_30_ecig_pen,levels=c("0","1","9"))
+data$last_30_ecig_mod.factor = factor(data$last_30_ecig_mod,levels=c("0","1","9"))
+data$last_30_ecig_box_mod.factor = factor(data$last_30_ecig_box_mod,levels=c("0","1","9"))
+data$last_30_ecig_juul.factor = factor(data$last_30_ecig_juul,levels=c("0","1","9"))
+data$last_30_ecig_pod.factor = factor(data$last_30_ecig_pod,levels=c("0","1","9"))
+data$last_30_ecig_other.factor = factor(data$last_30_ecig_other,levels=c("0","1","9"))
+data$disp_most.factor = factor(data$disp_most,levels=c("1"))
+data$pen_most.factor = factor(data$pen_most,levels=c("1"))
+data$mod_most.factor = factor(data$mod_most,levels=c("1"))
+data$box_most.factor = factor(data$box_most,levels=c("1"))
+data$juul_most.factor = factor(data$juul_most,levels=c("1"))
+data$pod_most.factor = factor(data$pod_most,levels=c("1"))
+data$other_most.factor = factor(data$other_most,levels=c("1"))
+data$disp_30_days.factor = factor(data$disp_30_days,levels=c("1","2","3","4","5","6","7"))
+data$pen_30_days.factor = factor(data$pen_30_days,levels=c("1","2","3","4","5","6","7"))
+data$mod_30_days.factor = factor(data$mod_30_days,levels=c("1","2","3","4","5","6","7"))
+data$box_30_days.factor = factor(data$box_30_days,levels=c("1","2","3","4","5","6","7"))
+data$juul_30_days.factor = factor(data$juul_30_days,levels=c("1","2","3","4","5","6","7"))
+data$att_check2.factor = factor(data$att_check2,levels=c("1","2","3","4","5","6","7"))
+data$pod_30_days.factor = factor(data$pod_30_days,levels=c("1","2","3","4","5","6","7"))
+data$other_30_days.factor = factor(data$other_30_days,levels=c("1","2","3","4","5","6","7"))
+data$every_day_vape.factor = factor(data$every_day_vape,levels=c("1","0"))
+data$flavor_first.factor = factor(data$flavor_first,levels=c("1","2","3","4","5","6","7"))
+data$eliq_flavor2.factor = factor(data$eliq_flavor2,levels=c("1","2","3","4","5","6"))
+data$flav_number.factor = factor(data$flav_number,levels=c("1","2","3","4"))
+data$nic_form.factor = factor(data$nic_form,levels=c("1","2","9"))
+data$nic_level___1.factor = factor(data$nic_level___1,levels=c("0","1"))
+data$nic_level___2.factor = factor(data$nic_level___2,levels=c("0","1"))
+data$nic_level___3.factor = factor(data$nic_level___3,levels=c("0","1"))
+data$nic_level___4.factor = factor(data$nic_level___4,levels=c("0","1"))
+data$nic_level___5.factor = factor(data$nic_level___5,levels=c("0","1"))
+data$nic_level___6.factor = factor(data$nic_level___6,levels=c("0","1"))
+data$nicotine_percent___1.factor = factor(data$nicotine_percent___1,levels=c("0","1"))
+data$nicotine_percent___2.factor = factor(data$nicotine_percent___2,levels=c("0","1"))
+data$nicotine_percent___3.factor = factor(data$nicotine_percent___3,levels=c("0","1"))
+data$nicotine_percent___4.factor = factor(data$nicotine_percent___4,levels=c("0","1"))
+data$nicotine_percent___5.factor = factor(data$nicotine_percent___5,levels=c("0","1"))
+data$nicotine_percent___6.factor = factor(data$nicotine_percent___6,levels=c("0","1"))
+data$nicotine_percent___7.factor = factor(data$nicotine_percent___7,levels=c("0","1"))
+data$nicotine_percent___8.factor = factor(data$nicotine_percent___8,levels=c("0","1"))
+data$nicotine_percent___9.factor = factor(data$nicotine_percent___9,levels=c("0","1"))
+data$ecig_bout_times_last30.factor = factor(data$ecig_bout_times_last30,levels=c("1","2","3","4","5","6","7"))
+data$ecig_bout_puffs_last30.factor = factor(data$ecig_bout_puffs_last30,levels=c("1","2","3","4","5","6","7"))
+data$att_check1___1.factor = factor(data$att_check1___1,levels=c("0","1"))
+data$att_check1___2.factor = factor(data$att_check1___2,levels=c("0","1"))
+data$att_check1___3.factor = factor(data$att_check1___3,levels=c("0","1"))
+data$att_check1___4.factor = factor(data$att_check1___4,levels=c("0","1"))
+data$att_check1___5.factor = factor(data$att_check1___5,levels=c("0","1"))
+data$ecig_1.factor = factor(data$ecig_1,levels=c("1","2","0"))
+data$ecig_2.factor = factor(data$ecig_2,levels=c("1","0"))
+data$ecigarettes_complete.factor = factor(data$ecigarettes_complete,levels=c("0","1","2"))
+data$product_attributes_complete.factor = factor(data$product_attributes_complete,levels=c("0","1","2"))
+data$vape_addiction1.factor = factor(data$vape_addiction1,levels=c("1","0"))
+data$vape_addiction2.factor = factor(data$vape_addiction2,levels=c("1","0"))
+data$vape_addiction3.factor = factor(data$vape_addiction3,levels=c("1","0"))
+data$vape_addiction4.factor = factor(data$vape_addiction4,levels=c("1","0"))
+data$vape_addiction5.factor = factor(data$vape_addiction5,levels=c("1","0"))
+data$vape_addiction6.factor = factor(data$vape_addiction6,levels=c("1","0"))
+data$vape_quit_effects1.factor = factor(data$vape_quit_effects1,levels=c("1","0"))
+data$vape_quit_effects2.factor = factor(data$vape_quit_effects2,levels=c("1","0"))
+data$vape_quit_effects3.factor = factor(data$vape_quit_effects3,levels=c("1","0"))
+data$vape_quit_effects4.factor = factor(data$vape_quit_effects4,levels=c("1","0"))
+data$stop_ecig.factor = factor(data$stop_ecig,levels=c("1","0"))
+data$stop_ecig_depressed.factor = factor(data$stop_ecig_depressed,levels=c("1","0"))
+data$stop_ecig_sleep.factor = factor(data$stop_ecig_sleep,levels=c("1","0"))
+data$stop_ecig_concentrate.factor = factor(data$stop_ecig_concentrate,levels=c("1","0"))
+data$stop_ecig_gain_weight.factor = factor(data$stop_ecig_gain_weight,levels=c("1","0"))
+data$stop_ecig_angry.factor = factor(data$stop_ecig_angry,levels=c("1","0"))
+data$stop_ecig_anxious.factor = factor(data$stop_ecig_anxious,levels=c("1","0"))
+data$stop_ecig_heart.factor = factor(data$stop_ecig_heart,levels=c("1","0"))
+data$stop_ecig_restless.factor = factor(data$stop_ecig_restless,levels=c("1","0"))
+data$ecigarette_use_patterns_complete.factor = factor(data$ecigarette_use_patterns_complete,levels=c("0","1","2"))
+data$social_media_fb.factor = factor(data$social_media_fb,levels=c("1","2","3","4","5","99"))
+data$social_media_instagram.factor = factor(data$social_media_instagram,levels=c("1","2","3","4","5","99"))
+data$social_media_twitter.factor = factor(data$social_media_twitter,levels=c("1","2","3","4","5","99"))
+data$social_media_youtube.factor = factor(data$social_media_youtube,levels=c("1","2","3","4","5","99"))
+data$mediafollowbrands___5.factor = factor(data$mediafollowbrands___5,levels=c("0","1"))
+data$mediafollowbrands___6.factor = factor(data$mediafollowbrands___6,levels=c("0","1"))
+data$mediafollowbrands___7.factor = factor(data$mediafollowbrands___7,levels=c("0","1"))
+data$mediafollowbrands___8.factor = factor(data$mediafollowbrands___8,levels=c("0","1"))
+data$mediafollowbrands___9.factor = factor(data$mediafollowbrands___9,levels=c("0","1"))
+data$mediafollowbrands___10.factor = factor(data$mediafollowbrands___10,levels=c("0","1"))
+data$mediafollowbrands___98.factor = factor(data$mediafollowbrands___98,levels=c("0","1"))
+data$mediafollowbrands___99.factor = factor(data$mediafollowbrands___99,levels=c("0","1"))
+data$mediafollowbrands___100.factor = factor(data$mediafollowbrands___100,levels=c("0","1"))
+data$mediadonemonth_1.factor = factor(data$mediadonemonth_1,levels=c("1","2","3","4","99"))
+data$mediadonemonth_2.factor = factor(data$mediadonemonth_2,levels=c("1","2","3","4","99"))
+data$mediadonemonth_3.factor = factor(data$mediadonemonth_3,levels=c("1","2","3","4","99"))
+data$mediadonemonth_4.factor = factor(data$mediadonemonth_4,levels=c("1","2","3","4","99"))
+data$mediadonemonth_5.factor = factor(data$mediadonemonth_5,levels=c("1","2","3","4","99"))
+data$mediadonemonth_6.factor = factor(data$mediadonemonth_6,levels=c("1","2","3","4","99"))
+data$mediadonemonth_7.factor = factor(data$mediadonemonth_7,levels=c("1","2","3","4","99"))
+data$mediadonemonth_8a.factor = factor(data$mediadonemonth_8a,levels=c("1","2","3","4","99"))
+data$mediadonemonth_8b.factor = factor(data$mediadonemonth_8b,levels=c("1","2","3","4","99"))
+data$mediadonemonth_9.factor = factor(data$mediadonemonth_9,levels=c("1","2","3","4","99"))
+data$mediadonemonth_10.factor = factor(data$mediadonemonth_10,levels=c("1","2","3","4","99"))
+data$mediadonemonth_11.factor = factor(data$mediadonemonth_11,levels=c("1","2","3","4","99"))
+data$mediadonemonth_12.factor = factor(data$mediadonemonth_12,levels=c("1","2","3","4","99"))
+data$mediadonemonth_13.factor = factor(data$mediadonemonth_13,levels=c("1","2","3","4","99"))
+data$mediadonemonth_14.factor = factor(data$mediadonemonth_14,levels=c("1","2","3","4","99"))
+data$mediadonemonth_16.factor = factor(data$mediadonemonth_16,levels=c("1","2","3","4","99"))
+data$mediadonemonth_15.factor = factor(data$mediadonemonth_15,levels=c("1","2","3","4","99"))
+data$mediadonemonth_17.factor = factor(data$mediadonemonth_17,levels=c("1","2","3","4","99"))
+data$mediadonemonth_18.factor = factor(data$mediadonemonth_18,levels=c("1","2","3","4","99"))
+data$mediadonemonth_19.factor = factor(data$mediadonemonth_19,levels=c("1","2","3","4","99"))
+data$mediadonemonth_20.factor = factor(data$mediadonemonth_20,levels=c("1","2","3","4","99"))
+data$mediadonemonth_21.factor = factor(data$mediadonemonth_21,levels=c("1","2","3","4","99"))
+data$mediadonemonth_22.factor = factor(data$mediadonemonth_22,levels=c("1","2","3","4","99"))
+data$mediadonemonth_23.factor = factor(data$mediadonemonth_23,levels=c("1","2","3","4","99"))
+data$mediadonemonth_24.factor = factor(data$mediadonemonth_24,levels=c("1","2","3","4","99"))
+data$mediadonemonth_25.factor = factor(data$mediadonemonth_25,levels=c("1","2","3","4","99"))
+data$mediadonemonth_26.factor = factor(data$mediadonemonth_26,levels=c("1","2","3","4","99"))
+data$ad_image1.factor = factor(data$ad_image1,levels=c("1","0"))
+data$ad_where1___1.factor = factor(data$ad_where1___1,levels=c("0","1"))
+data$ad_where1___2.factor = factor(data$ad_where1___2,levels=c("0","1"))
+data$ad_where1___3.factor = factor(data$ad_where1___3,levels=c("0","1"))
+data$ad_where1___4.factor = factor(data$ad_where1___4,levels=c("0","1"))
+data$ad_where1___5.factor = factor(data$ad_where1___5,levels=c("0","1"))
+data$ad_where1___6.factor = factor(data$ad_where1___6,levels=c("0","1"))
+data$ad_image6.factor = factor(data$ad_image6,levels=c("1","0"))
+data$ad_where6___1.factor = factor(data$ad_where6___1,levels=c("0","1"))
+data$ad_where6___2.factor = factor(data$ad_where6___2,levels=c("0","1"))
+data$ad_where6___3.factor = factor(data$ad_where6___3,levels=c("0","1"))
+data$ad_where6___4.factor = factor(data$ad_where6___4,levels=c("0","1"))
+data$ad_where6___5.factor = factor(data$ad_where6___5,levels=c("0","1"))
+data$ad_where6___6.factor = factor(data$ad_where6___6,levels=c("0","1"))
+data$ad_image10.factor = factor(data$ad_image10,levels=c("1","0"))
+data$ad_where10___1.factor = factor(data$ad_where10___1,levels=c("0","1"))
+data$ad_where10___2.factor = factor(data$ad_where10___2,levels=c("0","1"))
+data$ad_where10___3.factor = factor(data$ad_where10___3,levels=c("0","1"))
+data$ad_where10___4.factor = factor(data$ad_where10___4,levels=c("0","1"))
+data$ad_where10___5.factor = factor(data$ad_where10___5,levels=c("0","1"))
+data$ad_where10___6.factor = factor(data$ad_where10___6,levels=c("0","1"))
+data$ad_follow.factor = factor(data$ad_follow,levels=c("1","0"))
+data$att_check3a.factor = factor(data$att_check3a,levels=c("1","2","3","4"))
+data$advertisements_complete.factor = factor(data$advertisements_complete,levels=c("0","1","2"))
+
+levels(data$worker_id_complete.factor)=c("Incomplete","Unverified","Complete")
+levels(data$age1.factor)=c("18","19","20","21","22","23","24","25","26","27","28","29","30")
+levels(data$birth_year.factor)=c("2002","2001","2000","1999","1998","1997","1996","1995","1994","1993","1992","1991","1990","1989","1988")
+levels(data$gender.factor)=c("Male/Masculine","Female/Feminine","Transgender male","Transgender female","Gender variant/Non-binary","Additional gender category/identity","Prefer not to disclose")
+levels(data$eth.factor)=c("Yes","No")
+levels(data$race___1.factor)=c("Unchecked","Checked")
+levels(data$race___2.factor)=c("Unchecked","Checked")
+levels(data$race___3.factor)=c("Unchecked","Checked")
+levels(data$race___4.factor)=c("Unchecked","Checked")
+levels(data$race___5.factor)=c("Unchecked","Checked")
+levels(data$race___6.factor)=c("Unchecked","Checked")
+levels(data$race___7.factor)=c("Unchecked","Checked")
+levels(data$degree_program.factor)=c("Less than high school","Some high school, no diploma","GED","High school graduate, diploma","Some college but no degree","Associate degree--occupational/vocational","Associate degree--academic program","Bachelors degree (ex: BA, AB, BS)","Masters degree (ex: MA, MS, MEng, MEd, MSW)","Professional school degree (ex: MD, DDS, DVM, JD)","Doctorate degree (ex: PhD, EdD)","Dont know")
+levels(data$current_degree_program.factor)=c("Yes","No","Dont know")
+levels(data$degree_type.factor)=c("Technical/vocational program","2-year degree program","4-year degree program","Graduate/professional program","Other type of degree program","Dont know")
+levels(data$own_rent.factor)=c("Own","Rent","Something else","Dont know")
+levels(data$home.factor)=c("At home with parents or guardians","In a dorm or other campus housing","In a fraternity or sorority house","In an apartment, condo or house on my own (without a spouse, children or roommates)","In an apartment, condo or house with a spouse or romantic partner","In an apartment, condo or house with friends or other roommates","In an apartment, condo or house with another relative or family friend","Someplace else","Dont know")
+levels(data$overall_income.factor)=c("Live comfortably","Meet needs with a little left","Just meet basic expenses","Dont meet basic expenses")
+levels(data$family_income.factor)=c("Pretty well off financially","About average","Poor","It varied")
+levels(data$country.factor)=c("United States","Canada","Other (please specify)")
+levels(data$state.factor)=c("Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming","District of Columbia","Other")
+levels(data$demographics_complete.factor)=c("Incomplete","Unverified","Complete")
+levels(data$ever_disp.factor)=c("No","Yes, but not in the last 6 months","Yes, in the last 6 months")
+levels(data$ever_pen.factor)=c("No","Yes, but not in the last 6 months","Yes, in the last 6 months")
+levels(data$ever_mod.factor)=c("No","Yes, but not in the last 6 months","Yes, in the last 6 months")
+levels(data$ever_box_mod.factor)=c("No","Yes, but not in the last 6 months","Yes, in the last 6 months")
+levels(data$ever_juul.factor)=c("No","Yes, but not in the last 6 months","Yes, in the last 6 months")
+levels(data$ever_pod.factor)=c("No","Yes, but not in the last 6 months","Yes, in the last 6 months")
+levels(data$ever_other.factor)=c("No","Yes, but not in the last 6 months","Yes, in the last 6 months")
+levels(data$first_disp.factor)=c("I used this product first")
+levels(data$first_pen.factor)=c("I used this product first")
+levels(data$first_mod.factor)=c("I used this product first")
+levels(data$first_box.factor)=c("I used this product first")
+levels(data$first_juul.factor)=c("I used this product first")
+levels(data$first_otherpod.factor)=c("I used this product first")
+levels(data$first_other.factor)=c("I used this product first")
+levels(data$last_30_ecig_yn.factor)=c("Yes","No")
+levels(data$last_30_ecig_dispose.factor)=c("No","Yes","Dont know")
+levels(data$last_30_ecig_pen.factor)=c("No","Yes","Dont know")
+levels(data$last_30_ecig_mod.factor)=c("No","Yes","Dont know")
+levels(data$last_30_ecig_box_mod.factor)=c("No","Yes","Dont know")
+levels(data$last_30_ecig_juul.factor)=c("No","Yes","Dont know")
+levels(data$last_30_ecig_pod.factor)=c("No","Yes","Dont know")
+levels(data$last_30_ecig_other.factor)=c("No","Yes","Dont know")
+levels(data$disp_most.factor)=c("I used this product most often")
+levels(data$pen_most.factor)=c("I used this product most often")
+levels(data$mod_most.factor)=c("I used this product most often")
+levels(data$box_most.factor)=c("I used this product most often")
+levels(data$juul_most.factor)=c("I used this product most often")
+levels(data$pod_most.factor)=c("I used this product most often")
+levels(data$other_most.factor)=c("I used this product most often")
+levels(data$disp_30_days.factor)=c("0 days","1 or 2 days","3 to 5 days","6 to 9 days","10 to 19 days","20 to 29 days","All 30 days")
+levels(data$pen_30_days.factor)=c("0 days","1 or 2 days","3 to 5 days","6 to 9 days","10 to 19 days","20 to 29 days","All 30 days")
+levels(data$mod_30_days.factor)=c("0 days","1 or 2 days","3 to 5 days","6 to 9 days","10 to 19 days","20 to 29 days","All 30 days")
+levels(data$box_30_days.factor)=c("0 days","1 or 2 days","3 to 5 days","6 to 9 days","10 to 19 days","20 to 29 days","All 30 days")
+levels(data$juul_30_days.factor)=c("0 days","1 or 2 days","3 to 5 days","6 to 9 days","10 to 19 days","20 to 29 days","All 30 days")
+levels(data$att_check2.factor)=c("0 days","1 or 2 days","3 to 5 days","6 to 9 days","10 to 19 days","20 to 29 days","All 30 days")
+levels(data$pod_30_days.factor)=c("0 days","1 or 2 days","3 to 5 days","6 to 9 days","10 to 19 days","20 to 29 days","All 30 days")
+levels(data$other_30_days.factor)=c("0 days","1 or 2 days","3 to 5 days","6 to 9 days","10 to 19 days","20 to 29 days","All 30 days")
+levels(data$every_day_vape.factor)=c("Yes","No")
+levels(data$flavor_first.factor)=c("Flavorless","Tobacco flavored","Menthol","Mint","Sweet (fruit, candy, dessert, buttery, etc.)","Other","Not sure")
+levels(data$eliq_flavor2.factor)=c("Mostly Flavorless","Mostly Tobacco flavored","Mostly Menthol","Mostly Mint","Mostly Sweet (fruit, candy, dessert, buttery, etc.)","Mix of flavors")
+levels(data$flav_number.factor)=c("1","2-5","6-10","11+")
+levels(data$nic_form.factor)=c("Salt-based (nicotine salt, nic-salt)","Free-base (regular nicotine, unsalted)","Dont know")
+levels(data$nic_level___1.factor)=c("Unchecked","Checked")
+levels(data$nic_level___2.factor)=c("Unchecked","Checked")
+levels(data$nic_level___3.factor)=c("Unchecked","Checked")
+levels(data$nic_level___4.factor)=c("Unchecked","Checked")
+levels(data$nic_level___5.factor)=c("Unchecked","Checked")
+levels(data$nic_level___6.factor)=c("Unchecked","Checked")
+levels(data$nicotine_percent___1.factor)=c("Unchecked","Checked")
+levels(data$nicotine_percent___2.factor)=c("Unchecked","Checked")
+levels(data$nicotine_percent___3.factor)=c("Unchecked","Checked")
+levels(data$nicotine_percent___4.factor)=c("Unchecked","Checked")
+levels(data$nicotine_percent___5.factor)=c("Unchecked","Checked")
+levels(data$nicotine_percent___6.factor)=c("Unchecked","Checked")
+levels(data$nicotine_percent___7.factor)=c("Unchecked","Checked")
+levels(data$nicotine_percent___8.factor)=c("Unchecked","Checked")
+levels(data$nicotine_percent___9.factor)=c("Unchecked","Checked")
+levels(data$ecig_bout_times_last30.factor)=c("1 time per day","2 times per day","3 to 5 times per day","6 to 9 times per day","10 to 14 times per day","15 to 20 times per day","More than 20 times per day")
+levels(data$ecig_bout_puffs_last30.factor)=c("1 puff","2 puffs","3 to 5 puffs","6 to 9 puffs","10 to 14 puffs","15 to 20 puffs","More than 20 puffs")
+levels(data$att_check1___1.factor)=c("Unchecked","Checked")
+levels(data$att_check1___2.factor)=c("Unchecked","Checked")
+levels(data$att_check1___3.factor)=c("Unchecked","Checked")
+levels(data$att_check1___4.factor)=c("Unchecked","Checked")
+levels(data$att_check1___5.factor)=c("Unchecked","Checked")
+levels(data$ecig_1.factor)=c("Yes, in the last 6 months","Yes, but not in the last 6 months","No")
+levels(data$ecig_2.factor)=c("Yes","No")
+levels(data$ecigarettes_complete.factor)=c("Incomplete","Unverified","Complete")
+levels(data$product_attributes_complete.factor)=c("Incomplete","Unverified","Complete")
+levels(data$vape_addiction1.factor)=c("Yes","No")
+levels(data$vape_addiction2.factor)=c("Yes","No")
+levels(data$vape_addiction3.factor)=c("Yes","No")
+levels(data$vape_addiction4.factor)=c("Yes","No")
+levels(data$vape_addiction5.factor)=c("Yes","No")
+levels(data$vape_addiction6.factor)=c("Yes","No")
+levels(data$vape_quit_effects1.factor)=c("Yes","No")
+levels(data$vape_quit_effects2.factor)=c("Yes","No")
+levels(data$vape_quit_effects3.factor)=c("Yes","No")
+levels(data$vape_quit_effects4.factor)=c("Yes","No")
+levels(data$stop_ecig.factor)=c("Yes","No")
+levels(data$stop_ecig_depressed.factor)=c("Yes","No")
+levels(data$stop_ecig_sleep.factor)=c("Yes","No")
+levels(data$stop_ecig_concentrate.factor)=c("Yes","No")
+levels(data$stop_ecig_gain_weight.factor)=c("Yes","No")
+levels(data$stop_ecig_angry.factor)=c("Yes","No")
+levels(data$stop_ecig_anxious.factor)=c("Yes","No")
+levels(data$stop_ecig_heart.factor)=c("Yes","No")
+levels(data$stop_ecig_restless.factor)=c("Yes","No")
+levels(data$ecigarette_use_patterns_complete.factor)=c("Incomplete","Unverified","Complete")
+levels(data$social_media_fb.factor)=c("Several times a day","Daily","Weekly","Monthly or less","I do not use this form of social media","Dont know")
+levels(data$social_media_instagram.factor)=c("Several times a day","Daily","Weekly","Monthly or less","I do not use this form of social media","Dont know")
+levels(data$social_media_twitter.factor)=c("Several times a day","Daily","Weekly","Monthly or less","I do not use this form of social media","Dont know")
+levels(data$social_media_youtube.factor)=c("Several times a day","Daily","Weekly","Monthly or less","I do not use this form of social media","Dont know")
+levels(data$mediafollowbrands___5.factor)=c("Unchecked","Checked")
+levels(data$mediafollowbrands___6.factor)=c("Unchecked","Checked")
+levels(data$mediafollowbrands___7.factor)=c("Unchecked","Checked")
+levels(data$mediafollowbrands___8.factor)=c("Unchecked","Checked")
+levels(data$mediafollowbrands___9.factor)=c("Unchecked","Checked")
+levels(data$mediafollowbrands___10.factor)=c("Unchecked","Checked")
+levels(data$mediafollowbrands___98.factor)=c("Unchecked","Checked")
+levels(data$mediafollowbrands___99.factor)=c("Unchecked","Checked")
+levels(data$mediafollowbrands___100.factor)=c("Unchecked","Checked")
+levels(data$mediadonemonth_1.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_2.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_3.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_4.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_5.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_6.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_7.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_8a.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_8b.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_9.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_10.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_11.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_12.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_13.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_14.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_16.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_15.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_17.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_18.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_19.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_20.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_21.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_22.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_23.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_24.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_25.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$mediadonemonth_26.factor)=c("Several times a day","Daily","Weekly","Monthly or less","Dont know")
+levels(data$ad_image1.factor)=c("Yes","No")
+levels(data$ad_where1___1.factor)=c("Unchecked","Checked")
+levels(data$ad_where1___2.factor)=c("Unchecked","Checked")
+levels(data$ad_where1___3.factor)=c("Unchecked","Checked")
+levels(data$ad_where1___4.factor)=c("Unchecked","Checked")
+levels(data$ad_where1___5.factor)=c("Unchecked","Checked")
+levels(data$ad_where1___6.factor)=c("Unchecked","Checked")
+levels(data$ad_image6.factor)=c("Yes","No")
+levels(data$ad_where6___1.factor)=c("Unchecked","Checked")
+levels(data$ad_where6___2.factor)=c("Unchecked","Checked")
+levels(data$ad_where6___3.factor)=c("Unchecked","Checked")
+levels(data$ad_where6___4.factor)=c("Unchecked","Checked")
+levels(data$ad_where6___5.factor)=c("Unchecked","Checked")
+levels(data$ad_where6___6.factor)=c("Unchecked","Checked")
+levels(data$ad_image10.factor)=c("Yes","No")
+levels(data$ad_where10___1.factor)=c("Unchecked","Checked")
+levels(data$ad_where10___2.factor)=c("Unchecked","Checked")
+levels(data$ad_where10___3.factor)=c("Unchecked","Checked")
+levels(data$ad_where10___4.factor)=c("Unchecked","Checked")
+levels(data$ad_where10___5.factor)=c("Unchecked","Checked")
+levels(data$ad_where10___6.factor)=c("Unchecked","Checked")
+levels(data$ad_follow.factor)=c("Yes","No")
+levels(data$att_check3a.factor)=c("Leadership dynamics","Social approval","Emotions","Other (please specify):")
+levels(data$advertisements_complete.factor)=c("Incomplete","Unverified","Complete")
+
+```
+
+
+```{r}
+library(dplyr)
+# backup the data
+prolific <- data
+
+# explore the disposable
+cat(paste("\n * Have you ever used the disposable device?"))
+table(prolific$ever_disp.factor)
+
+cat(paste("\n * In the past 30 days, have you used disposable device?"))
+table(prolific$last_30_ecig_dispose.factor)
+
+cat(paste("\n * During the past 30 days, on how many days did you use the disposable device?"))
+table(prolific$disp_30_days.factor)
+
+```
+
+```{r}
+# merge variables
+MergeEcigaretteUse <- function(dataset){
+  # disposable 
+  dataset <- mutate(dataset, ever_disp_combined = ifelse(ever_disp == 1 | ever_disp == 2, 1, 0))
+  dataset$ever_disp_combined.factor <- factor(dataset$ever_disp_combined, levels = 0:1)
+  levels(dataset$ever_disp_combined.factor) <- c("never used disposable device", "ever used disposable device")
+
+  dataset <- mutate(dataset, disp_6_month_exclude_30_days = ifelse(ever_disp == 2 & last_30_ecig_dispose == 0 , 1, 0))
+  dataset$disp_6_month_exclude_30_days.factor <- factor(dataset$disp_6_month_exclude_30_days, levels = 0:1)
+  levels(dataset$disp_6_month_exclude_30_days.factor) <- c( "others", "used disposable device in the past 6 months but not past 30 days")
+
+  dataset <- mutate(dataset, disp_30_days_combined = ifelse(disp_30_days == 1, 0, ifelse(disp_30_days == 2, 1, ifelse(disp_30_days == 3 | disp_30_days == 4 | disp_30_days == 5, 2, ifelse(disp_30_days == 6 | disp_30_days == 7, 3, NA)))))
+  dataset$disp_30_days_combined.factor <- factor(dataset$disp_30_days_combined, levels = 0:3)
+  levels(dataset$disp_30_days_combined.factor) <- c("Used disposable device on 0 of the past 30 days", "Used disposable device on 1-2 of the past 30 days", "Used disposable device on 3-19 of the past 30 days", "Used disposable device on 20+ of the past 30 days")
+  
+  # vape pen
+  dataset <- mutate(dataset, ever_pen_combined = ifelse(ever_pen == 1 | ever_pen == 2, 1, 0))
+  dataset$ever_pen_combined.factor <- factor(dataset$ever_pen_combined, levels = 0:1)
+  levels(dataset$ever_pen_combined.factor) <- c("never used vape pen", "ever used vape pen")
+
+  dataset <- mutate(dataset, pen_6_month_exclude_30_days = ifelse(ever_pen == 2 & last_30_ecig_pen == 0 , 1, 0))
+  dataset$pen_6_month_exclude_30_days.factor <- factor(dataset$pen_6_month_exclude_30_days, levels = 0:1)
+  levels(dataset$pen_6_month_exclude_30_days.factor) <- c( "others", "used vape pen in the past 6 months but not past 30 days")
+
+  dataset <- mutate(dataset, pen_30_days_combined = ifelse(pen_30_days == 1, 0, ifelse(pen_30_days == 2, 1, ifelse(pen_30_days == 3 | pen_30_days == 4 | pen_30_days == 5, 2, ifelse(pen_30_days == 6 | pen_30_days == 7, 3, NA)))))
+  dataset$pen_30_days_combined.factor <- factor(dataset$pen_30_days_combined, levels = 0:3)
+  levels(dataset$pen_30_days_combined.factor) <- c("Used vape pen on 0 of the past 30 days", "Used vape pen on 1-2 of the past 30 days", "Used vape pen on 3-19 of the past 30 days", "Used vape pen on 20+ of the past 30 days")
+
+  # Mod or mech-mod
+  dataset <- mutate(dataset, ever_mod_combined = ifelse(ever_mod == 1 | ever_mod == 2, 1, 0))
+  dataset$ever_mod_combined.factor <- factor(dataset$ever_mod_combined, levels = 0:1)
+  levels(dataset$ever_mod_combined.factor) <- c("never used mod", "ever used mod")
+
+  dataset <- mutate(dataset, mod_6_month_exclude_30_days = ifelse(ever_mod == 2 & last_30_ecig_mod == 0 , 1, 0))
+  dataset$mod_6_month_exclude_30_days.factor <- factor(dataset$mod_6_month_exclude_30_days, levels = 0:1)
+  levels(dataset$mod_6_month_exclude_30_days.factor) <- c( "others", "used mod in the past 6 months but not past 30 days")
+
+  dataset <- mutate(dataset, mod_30_days_combined = ifelse(mod_30_days == 1, 0, ifelse(mod_30_days == 2, 1, ifelse(mod_30_days == 3 | mod_30_days == 4 | mod_30_days == 5, 2, ifelse(mod_30_days == 6 | mod_30_days == 7, 3, NA)))))
+  dataset$mod_30_days_combined.factor <- factor(dataset$mod_30_days_combined, levels = 0:3)
+  levels(dataset$mod_30_days_combined.factor) <- c("Used mod on 0 of the past 30 days", "Used mod on 1-2 of the past 30 days", "Used mod on 3-19 of the past 30 days", "Used mod on 20+ of the past 30 days")
+
+  # box mod
+  dataset <- mutate(dataset, ever_box_mod_combined = ifelse(ever_box_mod == 1 | ever_box_mod == 2, 1, 0))
+  dataset$ever_box_mod_combined.factor <- factor(dataset$ever_box_mod_combined, levels = 0:1)
+  levels(dataset$ever_box_mod_combined.factor) <- c("never used box_mod", "ever used box_mod")
+
+  dataset <- mutate(dataset, box_mod_6_month_exclude_30_days = ifelse(ever_box_mod == 2 & last_30_ecig_box_mod == 0 , 1, 0))
+  dataset$box_mod_6_month_exclude_30_days.factor <- factor(dataset$box_mod_6_month_exclude_30_days, levels = 0:1)
+  levels(dataset$box_mod_6_month_exclude_30_days.factor) <- c( "others", "used box_mod in the past 6 months but not past 30 days")
+
+  dataset <- mutate(dataset, box_30_days_combined = ifelse(box_30_days == 1, 0, ifelse(box_30_days == 2, 1, ifelse(box_30_days == 3 | box_30_days == 4 | box_30_days == 5, 2, ifelse(box_30_days == 6 | box_30_days == 7, 3, NA)))))
+  dataset$box_30_days_combined.factor <- factor(dataset$box_30_days_combined, levels = 0:3)
+  levels(dataset$box_30_days_combined.factor) <- c("Used box_mod on 0 of the past 30 days", "Used box_mod on 1-2 of the past 30 days", "Used box_mod on 3-19 of the past 30 days", "Used box_mod on 20+ of the past 30 days")
+
+  # JUUL
+  dataset <- mutate(dataset, ever_juul_combined = ifelse(ever_juul == 1 | ever_juul == 2, 1, 0))
+  dataset$ever_juul_combined.factor <- factor(dataset$ever_juul_combined, levels = 0:1)
+  levels(dataset$ever_juul_combined.factor) <- c("never used vape juul", "ever used vape juul")
+
+  dataset <- mutate(dataset, juul_6_month_exclude_30_days = ifelse(ever_juul == 2 & last_30_ecig_juul == 0 , 1, 0))
+  dataset$juul_6_month_exclude_30_days.factor <- factor(dataset$juul_6_month_exclude_30_days, levels = 0:1)
+  levels(dataset$juul_6_month_exclude_30_days.factor) <- c( "others", "used vape juul in the past 6 months but not past 30 days")
+
+  dataset <- mutate(dataset, juul_30_days_combined = ifelse(juul_30_days == 1, 0, ifelse(juul_30_days == 2, 1, ifelse(juul_30_days == 3 | juul_30_days == 4 | juul_30_days == 5, 2, ifelse(juul_30_days == 6 | juul_30_days == 7, 3, NA)))))
+  dataset$juul_30_days_combined.factor <- factor(dataset$juul_30_days_combined, levels = 0:3)
+  levels(dataset$juul_30_days_combined.factor) <- c("Used vape juul on 0 of the past 30 days", "Used vape juul on 1-2 of the past 30 days", "Used vape juul on 3-19 of the past 30 days", "Used vape juul on 20+ of the past 30 days")
+
+  # Other pod mod
+  dataset <- mutate(dataset, ever_pod_combined = ifelse(ever_pod == 1 | ever_pod == 2, 1, 0))
+  dataset$ever_pod_combined.factor <- factor(dataset$ever_pod_combined, levels = 0:1)
+  levels(dataset$ever_pod_combined.factor) <- c("never used other pod", "ever used other pod")
+
+  dataset <- mutate(dataset, pod_6_month_exclude_30_days = ifelse(ever_pod == 2 & last_30_ecig_pod == 0 , 1, 0))
+  dataset$pod_6_month_exclude_30_days.factor <- factor(dataset$pod_6_month_exclude_30_days, levels = 0:1)
+  levels(dataset$pod_6_month_exclude_30_days.factor) <- c( "others", "used other pod in the past 6 months but not past 30 days")
+
+  dataset <- mutate(dataset, pod_30_days_combined = ifelse(pod_30_days == 1, 0, ifelse(pod_30_days == 2, 1, ifelse(pod_30_days == 3 | pod_30_days == 4 | pod_30_days == 5, 2, ifelse(pod_30_days == 6 | pod_30_days == 7, 3, NA)))))
+  dataset$pod_30_days_combined.factor <- factor(dataset$pod_30_days_combined, levels = 0:3)
+  levels(dataset$pod_30_days_combined.factor) <- c("Used other pod on 0 of the past 30 days", "Used other pod on 1-2 of the past 30 days", "Used other pod on 3-19 of the past 30 days", "Used other pod on 20+ of the past 30 days")
+
+  dataset <- mutate(dataset, ever_other_combined = ifelse(ever_other == 1 | ever_other == 2, 1, 0))
+  dataset$ever_other_combined.factor <- factor(dataset$ever_other_combined, levels = 0:1)
+  levels(dataset$ever_other_combined.factor) <- c("never used other device", "ever used other device")
+  
+  return(dataset)
+}
+
+```
+
+
+```{r}
+# frequency and percentage for categorical variable (ignore NA)
+FrequencyPercentage <- function(var){
+  frequency <- table(var)
+  percentage <- round(frequency/sum(!is.na(var)) * 100, 1)
+  return( rbind(frequency, percentage))
+}
+
+# Frequency and percentage for dummy variables 
+FrequencyPercentageDummy <- function(numerator, denominator){
+  frequency <- sum(numerator, na.rm = T)
+  percentage <- round(sum(numerator, na.rm = T)/sum(denominator == 1, na.rm = T) * 100, 1)
+  result <- cbind(frequency, percentage)
+
+  return(result)
+}
+
+# Frequency and percentage for multilevel variables 
+FrequencyPercentageMultilevel <- function(numerator, denominator){
+  frequency <- table(numerator)
+  percentage <- round(frequency/sum(denominator == 1, na.rm = T) * 100, 1)
+  result <- cbind(frequency, percentage)
+
+  return(result)
+}
+```
+
+```{r}
+prolific <- MergeEcigaretteUse(prolific)
+```
+
+```{r}
+# E-cigarette use
+# disposable device
+FrequencyPercentage(prolific$ever_disp_combined.factor)
+FrequencyPercentage(prolific$disp_6_month_exclude_30_days.factor)
+FrequencyPercentage(prolific$disp_30_days_combined.factor)
+
+# vape pen
+FrequencyPercentage(prolific$ever_pen_combined.factor)
+FrequencyPercentage(prolific$pen_6_month_exclude_30_days.factor)
+FrequencyPercentage(prolific$pen_30_days_combined.factor)
+
+# Mod or mech-mod
+FrequencyPercentage(prolific$ever_mod_combined.factor)
+FrequencyPercentage(prolific$mod_6_month_exclude_30_days.factor)
+FrequencyPercentage(prolific$mod_30_days_combined.factor)
+
+# Box mod
+FrequencyPercentage(prolific$ever_box_mod_combined.factor)
+FrequencyPercentage(prolific$box_mod_6_month_exclude_30_days.factor)
+FrequencyPercentage(prolific$box_30_days_combined.factor)
+
+# JUUl
+FrequencyPercentage(prolific$ever_juul_combined.factor)
+FrequencyPercentage(prolific$juul_6_month_exclude_30_days.factor)
+FrequencyPercentage(prolific$juul_30_days_combined.factor)
+
+# other pod mod
+FrequencyPercentage(prolific$ever_pod_combined.factor)
+FrequencyPercentage(prolific$pod_6_month_exclude_30_days.factor)
+FrequencyPercentage(prolific$pod_30_days_combined.factor)
+
+
+
+```
+
+
+```{r}
+# First device used
+FrequencyPercentageDummy(prolific$first_disp, prolific$ever_disp_combined)
+
+FrequencyPercentageDummy(prolific$first_pen, prolific$ever_pen_combined)
+
+FrequencyPercentageDummy(prolific$first_mod, prolific$ever_mod_combined)
+
+FrequencyPercentageDummy(prolific$first_box, prolific$ever_box_mod_combined)
+
+FrequencyPercentageDummy(prolific$first_juul, prolific$ever_juul_combined)
+
+FrequencyPercentageDummy(prolific$first_otherpod, prolific$ever_pod_combined)
+
+FrequencyPercentageDummy(prolific$first_other, prolific$ever_other_combined)
+```
+
+```{r}
+# device used most often in the past 30 days
+FrequencyPercentageDummy(prolific$disp_most, prolific$last_30_ecig_dispose)
+
+FrequencyPercentageDummy(prolific$pen_most, prolific$last_30_ecig_pen)
+
+FrequencyPercentageDummy(prolific$mod_most, prolific$last_30_ecig_mod)
+
+FrequencyPercentageDummy(prolific$box_most, prolific$last_30_ecig_box_mod)
+
+FrequencyPercentageDummy(prolific$juul_most, prolific$last_30_ecig_juul)
+
+FrequencyPercentageDummy(prolific$pod_most, prolific$last_30_ecig_pod)
+
+FrequencyPercentageDummy(prolific$other_most, prolific$last_30_ecig_other)
+```
+
+```{r}
+# Which flavor did you use the first time you vaped?
+FrequencyPercentageMultilevel(prolific$flavor_first.factor, prolific$last_30_ecig_yn)
+```
+
+```{r}
+# How would you best describe the types of flavors you use most often?
+FrequencyPercentageMultilevel(prolific$eliq_flavor2.factor, prolific$last_30_ecig_yn)
+```
+
+```{r}
+# what type of nicotine formulation do yu usually use?
+FrequencyPercentageMultilevel(prolific$nic_form.factor, prolific$last_30_ecig_yn)
+```
+
+```{r}
+# nicotine level
+FrequencyPercentageDummy(prolific$nic_level___1, prolific$last_30_ecig_yn)
+FrequencyPercentageDummy(prolific$nic_level___2, prolific$last_30_ecig_yn)
+FrequencyPercentageDummy(prolific$nic_level___3, prolific$last_30_ecig_yn)
+FrequencyPercentageDummy(prolific$nic_level___4, prolific$last_30_ecig_yn)
+FrequencyPercentageDummy(prolific$nic_level___5, prolific$last_30_ecig_yn)
+FrequencyPercentageDummy(prolific$nicotine_percent___1, prolific$last_30_ecig_yn)
+FrequencyPercentageDummy(prolific$nicotine_percent___2, prolific$last_30_ecig_yn)
+FrequencyPercentageDummy(prolific$nicotine_percent___3, prolific$last_30_ecig_yn)
+FrequencyPercentageDummy(prolific$nicotine_percent___4, prolific$last_30_ecig_yn)
+FrequencyPercentageDummy(prolific$nicotine_percent___5, prolific$last_30_ecig_yn)
+FrequencyPercentageDummy(prolific$nicotine_percent___6, prolific$last_30_ecig_yn)
+FrequencyPercentageDummy(prolific$nicotine_percent___7, prolific$last_30_ecig_yn)
+FrequencyPercentageDummy(prolific$nicotine_percent___8, prolific$last_30_ecig_yn)
+FrequencyPercentageDummy(prolific$nicotine_percent___9, prolific$last_30_ecig_yn)
+```
+
+```{r}
+# Do you own, or have you ever owned, an e-cigarette device?
+FrequencyPercentage(prolific$ecig_2)
+```
+
+```{r}
+# Juul pods per day
+round(mean(prolific$juul_usage_day, na.rm = T), 1)
+round(sd(prolific$juul_usage_day, na.rm = T), 1)
+summary(prolific$juul_usage_day[!is.na(prolific$juul_usage_day)])
+
+
+# Juul pods per week
+round(mean(prolific$juul_usage_week, na.rm = T), 1)
+round(sd(prolific$juul_usage_week, na.rm = T), 1)
+summary(prolific$juul_usage_week[!is.na(prolific$juul_usage_week)])
+
+# Juul pods per month
+round(mean(prolific$juul_usage_month, na.rm = T), 1)
+round(sd(prolific$juul_usage_month, na.rm = T), 1)
+summary(prolific$juul_usage_month[!is.na(prolific$juul_usage_month)])
+
+```
+
+```{r}
+# E-cigarette dependence
+prolific$num.symptoms <- prolific$vape_addiction1 + prolific$vape_addiction2 + prolific$vape_addiction3 + prolific$vape_addiction4 + prolific$vape_addiction5 + prolific$vape_addiction6 + prolific$vape_quit_effects1 + prolific$vape_quit_effects2 + prolific$vape_quit_effects3 + prolific$vape_quit_effects4
+label(prolific$num.symptoms) <- "How many symptoms of E-cigarette dependence?"
+
+round(mean(prolific$num.symptoms, na.rm = T), 1)
+round(sd(prolific$num.symptoms, na.rm = T), 1)
+summary(prolific$num.symptoms[!is.na(prolific$num.symptoms)])
+
+range(prolific$num.symptoms, na.rm = T)
+round(NROW(which(prolific$num.symptoms >= 1))/ sum(!is.na(prolific$num.symptoms)) * 100, 1)
+```
+
+```{r}
+save(prolific, file = "/Users/zhan039/Desktop/USC HEAL/EVOC (CONJOINT)/09:30:2019 needs/difference/prolific.Rdata")
+```
+

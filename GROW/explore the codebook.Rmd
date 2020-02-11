@@ -1,0 +1,252 @@
+---
+title: "explore codebook"
+author: "Yi"
+date: "12/13/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(dplyr)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC HEAL/GROW/GROW DATA-20190920T175512Z-001/GROW DATA/REDCap_wTeleform_Merged (scored + sorted)_06212018 (No 2nd survey) with DIFF.sav")
+
+teleform.repeat <- read_sav("/Users/zhan039/Desktop/USC HEAL/GROW/GROW DATA-20190920T175512Z-001/Yi/teleform_repeat.sav")
+
+head(data)
+```
+
+```{r}
+# whether the variable names are changed for merging
+# BASELINE
+start <- data[is.na(data$redcap_id), c("cleaned_SID", "date", "FS_Date_T", "initials", "BASE_SID_Initials_T") ]
+"FALSE" %in% (c(start$date == start$FS_Date_T, start$initials == start$BASE_SID_Initials_T))
+
+assessment <- data[is.na(data$redcap_id), c("cleaned_SID", "family", "FS_Family_T", "sub", "FS_Other_Tobacco_T", "meds", "FS_Meds_T", "cycle", "FS_Menstrual_T", "birthcontrol", "FS_Birth_Control_T", "co", "FS_CO_T", "bac", "FS_Breathalyzer_T") ]
+"FALSE" %in% (c(assessment$family == assessment$FS_Family_T, assessment$sub == assessment$FS_Other_Tobacco_T, assessment$meds == assessment$FS_Meds_T, assessment$cycle == assessment$FS_Menstrual_T, assessment$birthcontrol == assessment$FS_Birth_Control_T, assessment$co == assessment$FS_CO_T, assessment$bac == assessment$FS_Breathalyzer_T))
+
+eligibility <- data[is.na(data$redcap_id), c("cleaned_SID", "s1_eligible", "FS_Eligible_T", "s2_dep_rand", "FS_S2_Randomization_T", "s3_dep_rand", "FS_S3_Randomization_T")]
+"FALSE" %in% (c(eligibility$s1_eligible == eligibility$FS_Eligible_T, eligibility$s2_dep_rand == eligibility$FS_S2_Randomization_T, eligibility$s3_dep_rand == eligibility$FS_S3_Randomization_T))
+
+physiological <- data[is.na(data$redcap_id), c("cleaned_SID", "sys_bp", "FS_BP_Systolic_T", "dia_bp", "FS_BP_Diastolic_T", "hr", "FS_HR_T")]
+"FALSE" %in% (c(physiological$sys_bp == physiological$FS_BP_Systolic_T, physiological$dia_bp == physiological$FS_BP_Diastolic_T, physiological$hr == physiological$FS_HR_T))
+
+piq <- data[is.na(data$redcap_id), c("cleaned_SID", "piq_9_T", "piq_7", "piq_10_T", "piq_8", "piq_11_T", "piq_9", "piq_12_T", "piq_11", "piq_13_T", "piq_12", "piq_14_T", "piq_13", "piq_15_T", "piq_14", "piq_16_T", "piq_15", "piq_7a_T", "piq_16a", "piq_7b_T", "piq_16b", "piq_7c_T", "piq_16c", "piq_7d_T", "piq_16d")]
+"FALSE" %in% (c(piq$piq_9_T == piq$piq_7, piq$piq_10_T == piq$piq_8, piq$piq_11_T == piq$piq_9, piq$piq_12_T == piq$piq_11, piq$piq_13_T == piq$piq_12, piq$piq_14_T == piq$piq_13, piq$piq_15_T == piq$piq_14, piq$piq_16_T == piq$piq_15, piq$piq_7a_T == piq$piq_16a, piq$piq_7b_T == piq$piq_16b, piq$piq_7c_T == piq$piq_16c, piq$piq_7d_T == piq$piq_16d))
+
+tet <- data[is.na(data$redcap_id), c("cleaned_SID", "TET_1_T", "tet")]
+"FALSE" %in% (tet$TET_1_T == tet$tet)
+
+shq <- data[is.na(data$redcap_id), c("cleaned_SID", "SHQ_8_T", "shq_8", "shq_9a_T", "shq_9___1", "shq_9b_T", "shq_9___2", "shq_9c_T", "shq_9___3", "shq_9d_T", "shq_9___4",  "shq_9f_T", "shq_9___5", "shq_9g_T", "shq_9___6", "shq_9h_T", "shq_9___7", "shq_9i_T", "shq_9___8", "shq_9j_T", "shq_9___9", "shq_9e_T", "shq_9___10", "SHQ_13_T", "shq_10", "shq_14_T", "shq_11", "shq_15_T", "shq_12", "shq_18a_T", "shq_15___1", "shq_18b_T", "shq_15___2", "shq_18c_T", "shq_15___3", "shq_18d_T", "shq_15___4", "shq_18e_T", "shq_15___5", "shq_18f_T", "shq_15___6", "shq_18g_T", "shq_15___7", "shq_18h_T", "shq_15___8", "shq_15__1", "shq_15__2", "shq_15__3", "shq_15__4", "shq_15__5", "shq_15__6", "shq_15__7", "shq_15__8","shq_19a_T", "shq_16", "shq_19b_T", "shq_17", "shq_19c_T", "shq_18", "shq_19d_T", "shq_19", "shq_19e_T", "shq_20", "shq_19f_T", "shq_21", "shq_19g_T", "shq_22", "shq_19h_T", "shq_23", "shq_19i_T", "shq_24", "shq_19j_T", "shq_25", "shq_19k_T", "shq_26", "shq_19l_T", "shq_27", "shq_10a_T", "shq_28", "shq_10c_T", "shq_29", "shq_10e_T", "shq_30", "shq_10b_T", "shq_31", "shq_10d_T", "shq_32", "shq_10f_T", "shq_33", "shq_11_T", "shq_34", "shq_12_T", "shq_35")]
+
+shq_redcap <- data[!is.na(data$redcap_id), c("cleaned_SID", "SHQ_8_T", "shq_8", "shq_9a_T", "shq_9___1", "shq_9b_T", "shq_9___2", "shq_9c_T", "shq_9___3", "shq_9d_T", "shq_9___4",  "shq_9f_T", "shq_9___5", "shq_9g_T", "shq_9___6", "shq_9h_T", "shq_9___7", "shq_9i_T", "shq_9___8", "shq_9j_T", "shq_9___9", "shq_9e_T", "shq_9___10", "SHQ_13_T", "shq_10", "shq_14_T", "shq_11", "shq_15_T", "shq_12", "shq_18a_T", "shq_15___1", "shq_18b_T", "shq_15___2", "shq_18c_T", "shq_15___3", "shq_18d_T", "shq_15___4", "shq_18e_T", "shq_15___5", "shq_18f_T", "shq_15___6", "shq_18g_T", "shq_15___7", "shq_18h_T", "shq_15___8", "shq_15__1", "shq_15__2", "shq_15__3", "shq_15__4", "shq_15__5", "shq_15__6", "shq_15__7", "shq_15__8","shq_19a_T", "shq_16", "shq_19b_T", "shq_17", "shq_19c_T", "shq_18", "shq_19d_T", "shq_19", "shq_19e_T", "shq_20", "shq_19f_T", "shq_21", "shq_19g_T", "shq_22", "shq_19h_T", "shq_23", "shq_19i_T", "shq_24", "shq_19j_T", "shq_25", "shq_19k_T", "shq_26", "shq_19l_T", "shq_27", "shq_10a_T", "shq_28", "shq_10c_T", "shq_29", "shq_10e_T", "shq_30", "shq_10b_T", "shq_31", "shq_10d_T", "shq_32", "shq_10f_T", "shq_33", "shq_11_T", "shq_34", "shq_12_T", "shq_35")]
+
+"FALSE" %in% (shq$SHQ_8_T == shq$shq_8) # not the same
+shq8test <- mutate(data, shq_8_test = ifelse(SHQ_8_T == 1, 1, ifelse(SHQ_8_T == 0, 2, NA)))
+"FALSE" %in% (shq8test$shq_8_test == shq8test$shq_8) # transformed correctly
+"FALSE" %in% c((shq$shq_9a_T == shq$shq_9___1), is.na(shq$shq_9a_T) == is.na(shq$shq_9___1))
+"FALSE" %in% c((shq$shq_9b_T == shq$shq_9___2), is.na(shq$shq_9b_T) == is.na(shq$shq_9___2))
+"FALSE" %in% c((shq$shq_9c_T == shq$shq_9___3), is.na(shq$shq_9c_T) == is.na(shq$shq_9___3))
+"FALSE" %in% c((shq$shq_9d_T == shq$shq_9___4), is.na(shq$shq_9d_T) == is.na(shq$shq_9___4))
+"FALSE" %in% c((shq$shq_9f_T == shq$shq_9___5), is.na(shq$shq_9f_T) == is.na(shq$shq_9___5))
+"FALSE" %in% c((shq$shq_9g_T == shq$shq_9___6), is.na(shq$shq_9g_T) == is.na(shq$shq_9___6))
+"FALSE" %in% c((shq$shq_9h_T == shq$shq_9___7), is.na(shq$shq_9h_T) == is.na(shq$shq_9___7))
+"FALSE" %in% c((shq$shq_9i_T == shq$shq_9___8), is.na(shq$shq_9i_T) == is.na(shq$shq_9___8))
+"FALSE" %in% c((shq$shq_9j_T == shq$shq_9___9), is.na(shq$shq_9j_T) == is.na(shq$shq_9___9))
+"FALSE" %in% c((shq$shq_9e_T == shq$shq_9___10), is.na(shq$shq_9e_T) == is.na(shq$shq_9___10))
+"FALSE" %in% c((shq$SHQ_13_T == shq$shq_10), is.na(shq$SHQ_13_T) == is.na(shq$shq_10))
+"FALSE" %in% c((shq$shq_14_T == shq$shq_11), is.na(shq$shq_14_T) == is.na(shq$shq_11))
+"FALSE" %in% c((shq$shq_15_T == shq$shq_12), is.na(shq$shq_15_T) == is.na(shq$shq_12))
+"FALSE" %in% c((shq$shq_18a_T == shq$shq_15___1), is.na(shq$shq_18a_T) == is.na(shq$shq_15___1))
+"FALSE" %in% c((shq$shq_18b_T == shq$shq_15___2), is.na(shq$shq_18b_T) == is.na(shq$shq_15___2))
+"FALSE" %in% c((shq$shq_18c_T == shq$shq_15___3), is.na(shq$shq_18c_T) == is.na(shq$shq_15___3))
+"FALSE" %in% c((shq$shq_18d_T == shq$shq_15___4), is.na(shq$shq_18d_T) == is.na(shq$shq_15___4))
+"FALSE" %in% c((shq$shq_18e_T == shq$shq_15___5), is.na(shq$shq_18e_T) == is.na(shq$shq_15___5))
+"FALSE" %in% c((shq$shq_18f_T == shq$shq_15___6), is.na(shq$shq_18f_T) == is.na(shq$shq_15___6))
+"FALSE" %in% c((shq$shq_18g_T == shq$shq_15___7), is.na(shq$shq_18g_T) == is.na(shq$shq_15___7))
+"FALSE" %in% c((shq$shq_18h_T == shq$shq_15___8), is.na(shq$shq_18h_T) == is.na(shq$shq_15___8))
+
+"FALSE" %in% c((shq$shq_18a_T == shq$shq_15__1), is.na(shq$shq_18a_T) == is.na(shq$shq_15__1))  # the valid values are the same, while NAs are not
+shq[which(!(is.na(shq$shq_18a_T) == is.na(shq$shq_15__1))), c("cleaned_SID", "shq_18a_T", "shq_15__1")]
+"FALSE" %in% (shq$shq_18b_T == shq$shq_15__2)  # the valid values are the same, while NAs are not
+shq[which(!(is.na(shq$shq_18b_T) == is.na(shq$shq_15__2))), c("cleaned_SID", "shq_18b_T", "shq_15__2")]
+"FALSE" %in% (shq$shq_18c_T == shq$shq_15__3)  # the valid values are the same, while NAs are not
+shq[which(!(is.na(shq$shq_18c_T) == is.na(shq$shq_15__3))), c("cleaned_SID", "shq_18c_T", "shq_15__3")]
+"FALSE" %in% (shq$shq_18d_T == shq$shq_15__4)  # the valid values are the same, while NAs are not
+shq[which(!(is.na(shq$shq_18d_T) == is.na(shq$shq_15__4))), c("cleaned_SID", "shq_18d_T", "shq_15__4")]
+"FALSE" %in% (shq$shq_18e_T == shq$shq_15__5)  # the valid values are the same, while NAs are not
+shq[which(!(is.na(shq$shq_18e_T) == is.na(shq$shq_15__5))), c("cleaned_SID", "shq_18e_T", "shq_15__5")]
+"FALSE" %in% (shq$shq_18f_T == shq$shq_15__6)  # the valid values are the same, while NAs are not
+shq[which(!(is.na(shq$shq_18f_T) == is.na(shq$shq_15__6))), c("cleaned_SID", "shq_18f_T", "shq_15__6")]
+"FALSE" %in% (shq$shq_18g_T == shq$shq_15__7)  # the valid values are the same, while NAs are not
+shq[which(!(is.na(shq$shq_18g_T) == is.na(shq$shq_15__7))), c("cleaned_SID", "shq_18g_T", "shq_15__7")]
+"FALSE" %in% (shq$shq_18h_T == shq$shq_15__8)  # the valid values are the same, while NAs are not
+shq[which(!(is.na(shq$shq_18h_T) == is.na(shq$shq_15__8))), c("cleaned_SID", "shq_18h_T", "shq_15__8")]
+
+shq[which(shq$shq_18a_T != shq$shq_15___1), c("cleaned_SID", "shq_18a_T", "shq_15___1")]  # shq_18a_T are correct, while merged wrong 
+shq[which(shq$shq_18b_T != shq$shq_15___2), c("cleaned_SID", "shq_18b_T", "shq_15__2","shq_15___2")]
+shq[which(shq$shq_18c_T != shq$shq_15___3), ]$cleaned_SID
+shq[which(shq$shq_18d_T != shq$shq_15___4), ]$cleaned_SID
+shq[which(shq$shq_18e_T != shq$shq_15___5), ]$cleaned_SID
+shq[which(shq$shq_18f_T != shq$shq_15___6), ]$cleaned_SID
+shq[which(shq$shq_18g_T != shq$shq_15___7), ]$cleaned_SID
+shq[which(shq$shq_18h_T != shq$shq_15___8), ]$cleaned_SID
+
+"FALSE" %in% c((shq$shq_19a_T == shq$shq_16), is.na(shq$shq_19a_T) == is.na(shq$shq_16))
+"FALSE" %in% c((shq$shq_19b_T == shq$shq_17), is.na(shq$shq_19b_T) == is.na(shq$shq_17))
+"FALSE" %in% c((shq$shq_19c_T == shq$shq_18), is.na(shq$shq_19c_T) == is.na(shq$shq_18))
+"FALSE" %in% c((shq$shq_19d_T == shq$shq_19), is.na(shq$shq_19d_T) == is.na(shq$shq_19))
+"FALSE" %in% c((shq$shq_19e_T == shq$shq_20), is.na(shq$shq_19e_T) == is.na(shq$shq_20))
+"FALSE" %in% c((shq$shq_19f_T == shq$shq_21), is.na(shq$shq_19f_T) == is.na(shq$shq_21))
+"FALSE" %in% c((shq$shq_19g_T == shq$shq_22), is.na(shq$shq_19g_T) == is.na(shq$shq_22))
+"FALSE" %in% c((shq$shq_19h_T == shq$shq_23), is.na(shq$shq_19h_T) == is.na(shq$shq_23))
+"FALSE" %in% c((shq$shq_19i_T == shq$shq_24), is.na(shq$shq_19i_T) == is.na(shq$shq_24))
+"FALSE" %in% c((shq$shq_19j_T == shq$shq_25), is.na(shq$shq_19j_T) == is.na(shq$shq_25))
+"FALSE" %in% c((shq$shq_19k_T == shq$shq_26), is.na(shq$shq_19k_T) == is.na(shq$shq_26))
+"FALSE" %in% c((shq$shq_19l_T == shq$shq_27), is.na(shq$shq_19l_T) == is.na(shq$shq_27))
+"FALSE" %in% c((shq$shq_10a_T == shq$shq_28), is.na(shq$shq_10a_T) == is.na(shq$shq_28))
+"FALSE" %in% c((shq$shq_10c_T == shq$shq_29), is.na(shq$shq_10c_T) == is.na(shq$shq_29))
+"FALSE" %in% c((shq$shq_10e_T == shq$shq_30), is.na(shq$shq_10e_T) == is.na(shq$shq_30))
+"FALSE" %in% c((shq$shq_10b_T == shq$shq_31), is.na(shq$shq_10b_T) == is.na(shq$shq_31))
+"FALSE" %in% c((shq$shq_10d_T == shq$shq_32), is.na(shq$shq_10d_T) == is.na(shq$shq_32))
+"FALSE" %in% c((shq$shq_10f_T == shq$shq_33), is.na(shq$shq_10f_T) == is.na(shq$shq_33))
+"FALSE" %in% c((shq$shq_11_T == shq$shq_34), is.na(shq$shq_11_T) == is.na(shq$shq_34))
+"FALSE" %in% c((shq$shq_12_T == shq$shq_35), is.na(shq$shq_12_T) == is.na(shq$shq_35))
+
+shqtest <- data[!is.na(data$redcap_id), c("cleaned_SID", "shq_8", "shq_15___1")]
+table(shqtest$shq_8)
+table(shqtest$shq_15___1)
+sum(is.na(shqtest$shq_15___1))
+sum(is.na(shq$shq_18a_T))
+
+
+ftnd <- data[is.na(data$redcap_id), c("cleaned_SID", "FTND_3_T", "ftnd_3")]
+"FALSE" %in% c((ftnd$FTND_3_T == ftnd$ftnd_3), is.na(ftnd$FTND_3_T) == is.na(ftnd$ftnd_3))
+
+uppsp <- data[is.na(data$redcap_id), c("cleaned_SID", "UPPSP_49_T", "uppsp_49", "UPPSP_50_T", "uppsp_50", "UPPSP_51_T", "uppsp_51", "UPPSP_52_T", "uppsp_52", "UPPSP_53_T", "uppsp_53", "UPPSP_54_T", "uppsp_54", "UPPSP_55_T", "uppsp_55")]
+"FALSE" %in% c((uppsp$UPPSP_49_T == uppsp$uppsp_55), is.na(uppsp$UPPSP_49_T) == is.na(uppsp$uppsp_55))
+"FALSE" %in% c((uppsp$UPPSP_50_T == uppsp$uppsp_49), is.na(uppsp$UPPSP_50_T) == is.na(uppsp$uppsp_49))
+"FALSE" %in% c((uppsp$UPPSP_51_T == uppsp$uppsp_50), is.na(uppsp$UPPSP_51_T) == is.na(uppsp$uppsp_50))
+"FALSE" %in% c((uppsp$UPPSP_52_T == uppsp$uppsp_51), is.na(uppsp$UPPSP_52_T) == is.na(uppsp$uppsp_51))
+"FALSE" %in% c((uppsp$UPPSP_53_T == uppsp$uppsp_52), is.na(uppsp$UPPSP_53_T) == is.na(uppsp$uppsp_52))
+"FALSE" %in% c((uppsp$UPPSP_54_T == uppsp$uppsp_53), is.na(uppsp$UPPSP_54_T) == is.na(uppsp$uppsp_53))
+"FALSE" %in% c((uppsp$UPPSP_55_T == uppsp$uppsp_54), is.na(uppsp$UPPSP_55_T) == is.na(uppsp$uppsp_54))
+
+
+
+# DEPRIVED
+"FALSE" %in% is.na(data[!is.na(data$redcap_id), "d_bac"]) # whether "d_bac" exist in the redcap
+"FALSE" %in% is.na(data[is.na(data$redcap_id), "d_bac"]) # whether "d_bac" exist in the teleform
+
+d.physiological.base <- data[is.na(data$redcap_id), c("cleaned_SID", "d_base_sys_bp", "D_FS_BP_Systolic_PostQ")]
+"FALSE" %in% (d.physiological.base$d_base_sys_bp == d.physiological.base$D_FS_BP_Systolic_PostQ) # they are not the same!!!
+
+pre.rest.panas <- data[is.na(data$redcap_id), c("cleaned_SID", "D_prer_panas_1_T", "D_prer_panas_2_T", "D_prer_panas_3_T", "D_prer_panas_4_T", "D_prer_panas_5_T", "D_prer_panas_6_T", "D_prer_panas_7_T", "D_prer_panas_8_T", "D_prer_panas_9_T", "D_prer_panas_10_T", "D_prer_panas_11_T", "D_prer_panas_12_T", "D_prer_panas_13_T", "D_prer_panas_14_T", "D_prer_panas_15_T", "D_prer_panas_16_T", "D_prer_panas_17_T", "D_prer_panas_18_T", "D_prer_panas_19_T", "D_prer_panas_20_T", "d_prer_panas_1", "d_prer_panas_2", "d_prer_panas_3", "d_prer_panas_4", "d_prer_panas_5", "d_prer_panas_6", "d_prer_panas_7", "d_prer_panas_8", "d_prer_panas_9", "d_prer_panas_10", "d_prer_panas_11", "d_prer_panas_12", "d_prer_panas_13", "d_prer_panas_14", "d_prer_panas_15", "d_prer_panas_16", "d_prer_panas_17", "d_prer_panas_18", "d_prer_panas_19", "d_prer_panas_20")]
+"FALSE" %in% (pre.rest.panas$D_prer_panas_1_T == pre.rest.panas$d_prer_panas_1)
+"FALSE" %in% (pre.rest.panas$D_prer_panas_2_T == pre.rest.panas$d_prer_panas_2)
+"FALSE" %in% (pre.rest.panas$D_prer_panas_3_T == pre.rest.panas$d_prer_panas_3)
+"FALSE" %in% (pre.rest.panas$D_prer_panas_4_T == pre.rest.panas$d_prer_panas_4)
+"FALSE" %in% (pre.rest.panas$D_prer_panas_5_T == pre.rest.panas$d_prer_panas_5)
+"FALSE" %in% (pre.rest.panas$D_prer_panas_6_T == pre.rest.panas$d_prer_panas_6)
+"FALSE" %in% (pre.rest.panas$D_prer_panas_7_T == pre.rest.panas$d_prer_panas_7)
+"FALSE" %in% (pre.rest.panas$D_prer_panas_8_T == pre.rest.panas$d_prer_panas_8)
+"FALSE" %in% (pre.rest.panas$D_prer_panas_9_T == pre.rest.panas$d_prer_panas_9)
+"FALSE" %in% (pre.rest.panas$D_prer_panas_10_T == pre.rest.panas$d_prer_panas_10)
+"FALSE" %in% (pre.rest.panas$D_prer_panas_11_T == pre.rest.panas$d_prer_panas_11)
+"FALSE" %in% (pre.rest.panas$D_prer_panas_12_T == pre.rest.panas$d_prer_panas_12)
+"FALSE" %in% (pre.rest.panas$D_prer_panas_13_T == pre.rest.panas$d_prer_panas_13)
+"FALSE" %in% (pre.rest.panas$D_prer_panas_14_T == pre.rest.panas$d_prer_panas_14)
+"FALSE" %in% (pre.rest.panas$D_prer_panas_15_T == pre.rest.panas$d_prer_panas_15)
+"FALSE" %in% (pre.rest.panas$D_prer_panas_16_T == pre.rest.panas$d_prer_panas_16)
+"FALSE" %in% (pre.rest.panas$D_prer_panas_17_T == pre.rest.panas$d_prer_panas_17)
+"FALSE" %in% (pre.rest.panas$D_prer_panas_18_T == pre.rest.panas$d_prer_panas_18)
+"FALSE" %in% (pre.rest.panas$D_prer_panas_19_T == pre.rest.panas$d_prer_panas_19)
+"FALSE" %in% (pre.rest.panas$D_prer_panas_20_T == pre.rest.panas$d_prer_panas_20)
+
+pre.rest.tcq <- data[is.na(data$redcap_id), c("cleaned_SID", "D_prer_tcq_1_T", "D_prer_tcq_2_T", "D_prer_tcq_3_T", "D_prer_tcq_4_T", "D_prer_tcq_5_T", "D_prer_tcq_6_T", "D_prer_tcq_7_T", "D_prer_tcq_8_T", "D_prer_tcq_9_T", "D_prer_tcq_10_T", "D_prer_tcq_11_T", "D_prer_tcq_12_T", "d_prer_tcq_1", "d_prer_tcq_2", "d_prer_tcq_3", "d_prer_tcq_4", "d_prer_tcq_5", "d_prer_tcq_6", "d_prer_tcq_7", "d_prer_tcq_8", "d_prer_tcq_9", "d_prer_tcq_10", "d_prer_tcq_11", "d_prer_tcq_12")]
+"FALSE" %in% (pre.rest.tcq$D_prer_tcq_1_T == pre.rest.tcq$d_prer_tcq_1)
+"FALSE" %in% (pre.rest.tcq$D_prer_tcq_2_T == pre.rest.tcq$d_prer_tcq_2)
+"FALSE" %in% (pre.rest.tcq$D_prer_tcq_3_T == pre.rest.tcq$d_prer_tcq_3)
+"FALSE" %in% (pre.rest.tcq$D_prer_tcq_4_T == pre.rest.tcq$d_prer_tcq_4)
+"FALSE" %in% (pre.rest.tcq$D_prer_tcq_5_T == pre.rest.tcq$d_prer_tcq_5)
+"FALSE" %in% (pre.rest.tcq$D_prer_tcq_6_T == pre.rest.tcq$d_prer_tcq_6)
+"FALSE" %in% (pre.rest.tcq$D_prer_tcq_7_T == pre.rest.tcq$d_prer_tcq_7)
+"FALSE" %in% (pre.rest.tcq$D_prer_tcq_8_T == pre.rest.tcq$d_prer_tcq_8)
+"FALSE" %in% (pre.rest.tcq$D_prer_tcq_9_T == pre.rest.tcq$d_prer_tcq_9)
+"FALSE" %in% (pre.rest.tcq$D_prer_tcq_10_T == pre.rest.tcq$d_prer_tcq_10)
+"FALSE" %in% (pre.rest.tcq$D_prer_tcq_11_T == pre.rest.tcq$d_prer_tcq_11)
+"FALSE" %in% (pre.rest.tcq$D_prer_tcq_12_T == pre.rest.tcq$d_prer_tcq_12)
+
+post.rest.panas <- data[is.na(data$redcap_id), c("cleaned_SID", "D_postr_panas_1_T", "D_postr_panas_2_T", "D_postr_panas_3_T", "D_postr_panas_4_T", "D_postr_panas_5_T", "D_postr_panas_6_T", "D_postr_panas_7_T", "D_postr_panas_8_T", "D_postr_panas_9_T", "D_postr_panas_10_T", "D_postr_panas_11_T", "D_postr_panas_12_T", "D_postr_panas_13_T", "D_postr_panas_14_T", "D_postr_panas_15_T", "D_postr_panas_16_T", "D_postr_panas_17_T", "D_postr_panas_18_T", "D_postr_panas_19_T", "D_postr_panas_20_T", "d_postr_panas_1", "d_postr_panas_2", "d_postr_panas_3", "d_postr_panas_4", "d_postr_panas_5", "d_postr_panas_6", "d_postr_panas_7", "d_postr_panas_8", "d_postr_panas_9", "d_postr_panas_10", "d_postr_panas_11", "d_postr_panas_12", "d_postr_panas_13", "d_postr_panas_14", "d_postr_panas_15", "d_postr_panas_16", "d_postr_panas_17", "d_postr_panas_18", "d_postr_panas_19", "d_postr_panas_20")]
+"FALSE" %in% (post.rest.panas$D_postr_panas_1_T == post.rest.panas$d_postr_panas_1)
+"FALSE" %in% (post.rest.panas$D_postr_panas_2_T == post.rest.panas$d_postr_panas_2)
+"FALSE" %in% (post.rest.panas$D_postr_panas_3_T == post.rest.panas$d_postr_panas_3)
+"FALSE" %in% (post.rest.panas$D_postr_panas_4_T == post.rest.panas$d_postr_panas_4)
+"FALSE" %in% (post.rest.panas$D_postr_panas_5_T == post.rest.panas$d_postr_panas_5)
+"FALSE" %in% (post.rest.panas$D_postr_panas_6_T == post.rest.panas$d_postr_panas_6)
+"FALSE" %in% (post.rest.panas$D_postr_panas_7_T == post.rest.panas$d_postr_panas_7)
+"FALSE" %in% (post.rest.panas$D_postr_panas_8_T == post.rest.panas$d_postr_panas_8)
+"FALSE" %in% (post.rest.panas$D_postr_panas_9_T == post.rest.panas$d_postr_panas_9)
+"FALSE" %in% (post.rest.panas$D_postr_panas_10_T == post.rest.panas$d_postr_panas_10)
+"FALSE" %in% (post.rest.panas$D_postr_panas_11_T == post.rest.panas$d_postr_panas_11)
+"FALSE" %in% (post.rest.panas$D_postr_panas_12_T == post.rest.panas$d_postr_panas_12)
+"FALSE" %in% (post.rest.panas$D_postr_panas_13_T == post.rest.panas$d_postr_panas_13)
+"FALSE" %in% (post.rest.panas$D_postr_panas_14_T == post.rest.panas$d_postr_panas_14)
+"FALSE" %in% (post.rest.panas$D_postr_panas_15_T == post.rest.panas$d_postr_panas_15)
+"FALSE" %in% (post.rest.panas$D_postr_panas_16_T == post.rest.panas$d_postr_panas_16)
+"FALSE" %in% (post.rest.panas$D_postr_panas_17_T == post.rest.panas$d_postr_panas_17)
+"FALSE" %in% (post.rest.panas$D_postr_panas_18_T == post.rest.panas$d_postr_panas_18)
+"FALSE" %in% (post.rest.panas$D_postr_panas_19_T == post.rest.panas$d_postr_panas_19)
+"FALSE" %in% (post.rest.panas$D_postr_panas_20_T == post.rest.panas$d_postr_panas_20)
+
+post.rest.tcq <- data[is.na(data$redcap_id), c("cleaned_SID", "D_postr_tcq_1_T", "D_postr_tcq_2_T", "D_postr_tcq_3_T", "D_postr_tcq_4_T", "D_postr_tcq_5_T", "D_postr_tcq_6_T", "D_postr_tcq_7_T", "D_postr_tcq_8_T", "D_postr_tcq_9_T", "D_postr_tcq_10_T", "D_postr_tcq_11_T", "D_postr_tcq_12_T", "d_postr_tcq_1", "d_postr_tcq_2", "d_postr_tcq_3", "d_postr_tcq_4", "d_postr_tcq_5", "d_postr_tcq_6", "d_postr_tcq_7", "d_postr_tcq_8", "d_postr_tcq_9", "d_postr_tcq_10", "d_postr_tcq_11", "d_postr_tcq_12")]
+"FALSE" %in% c((post.rest.tcq$D_postr_tcq_1_T == post.rest.tcq$d_postr_tcq_1), is.na(post.rest.tcq$D_postr_tcq_1_T) == is.na(post.rest.tcq$d_postr_tcq_1))
+"FALSE" %in% c((post.rest.tcq$D_postr_tcq_2_T == post.rest.tcq$d_postr_tcq_2), is.na(post.rest.tcq$D_postr_tcq_2_T) == is.na(post.rest.tcq$d_postr_tcq_2))
+"FALSE" %in% c((post.rest.tcq$D_postr_tcq_3_T == post.rest.tcq$d_postr_tcq_3), is.na(post.rest.tcq$D_postr_tcq_3_T) == is.na(post.rest.tcq$d_postr_tcq_3))
+"FALSE" %in% c((post.rest.tcq$D_postr_tcq_4_T == post.rest.tcq$d_postr_tcq_4), is.na(post.rest.tcq$D_postr_tcq_4_T) == is.na(post.rest.tcq$d_postr_tcq_4))
+"FALSE" %in% c((post.rest.tcq$D_postr_tcq_5_T == post.rest.tcq$d_postr_tcq_5), is.na(post.rest.tcq$D_postr_tcq_5_T) == is.na(post.rest.tcq$d_postr_tcq_5))
+"FALSE" %in% c((post.rest.tcq$D_postr_tcq_6_T == post.rest.tcq$d_postr_tcq_6), is.na(post.rest.tcq$D_postr_tcq_6_T) == is.na(post.rest.tcq$d_postr_tcq_6))
+"FALSE" %in% c((post.rest.tcq$D_postr_tcq_7_T == post.rest.tcq$d_postr_tcq_7), is.na(post.rest.tcq$D_postr_tcq_7_T) == is.na(post.rest.tcq$d_postr_tcq_7))
+"FALSE" %in% c((post.rest.tcq$D_postr_tcq_8_T == post.rest.tcq$d_postr_tcq_8), is.na(post.rest.tcq$D_postr_tcq_8_T) == is.na(post.rest.tcq$d_postr_tcq_8))
+"FALSE" %in% c((post.rest.tcq$D_postr_tcq_9_T == post.rest.tcq$d_postr_tcq_9), is.na(post.rest.tcq$D_postr_tcq_9_T) == is.na(post.rest.tcq$d_postr_tcq_9))
+"FALSE" %in% c((post.rest.tcq$D_postr_tcq_10_T == post.rest.tcq$d_postr_tcq_10), is.na(post.rest.tcq$D_postr_tcq_10_T) == is.na(post.rest.tcq$d_postr_tcq_10))
+"FALSE" %in% c((post.rest.tcq$D_postr_tcq_11_T == post.rest.tcq$d_postr_tcq_11), is.na(post.rest.tcq$D_postr_tcq_11_T) == is.na(post.rest.tcq$d_postr_tcq_11))
+"FALSE" %in% c((post.rest.tcq$D_postr_tcq_12_T == post.rest.tcq$d_postr_tcq_12), is.na(post.rest.tcq$D_postr_tcq_12_T) == is.na(post.rest.tcq$d_postr_tcq_12))
+
+
+
+# NON DEPRIVED
+sum(!is.na(data[is.na(data$redcap_id), "nd_cycle"])) # it also exists in the teleform
+
+sum(!is.na(data[is.na(data$redcap_id), "nd_birthcontrol"])) # it also exists in the teleform
+
+nd.physiological.pre.rest <- data[is.na(data$redcap_id), c("cleaned_SID", "nd_prer_co", "ND_FS_CO_PreR")]
+"FALSE" %in% (nd.physiological.pre.rest$nd_prer_co == nd.physiological.pre.rest$ND_FS_CO_PreR)  # they are not the same
+
+sum(!is.na(data[is.na(data$redcap_id), "nd_tet"])) # it also exists in the teleform
+
+sum(!is.na(data[is.na(data$redcap_id), "nd_rest_start"])) # it also exists in the teleform
+
+sum(!is.na(data[is.na(data$redcap_id), "nd_rest_end"])) # it also exists in the teleform
+
+
+
+```
+
+```{r}
+# fix the dataset
+# fix the wrong merged shq_15___
+fix.data <- mutate(data, shq_15___1 = ifelse(is.na(redcap_id), shq_18a_T, shq_15___1), shq_15___2 = ifelse(is.na(redcap_id), shq_18b_T, shq_15___2), shq_15___3 = ifelse(is.na(redcap_id), shq_18c_T, shq_15___3), shq_15___4 = ifelse(is.na(redcap_id), shq_18d_T, shq_15___4), shq_15___5 = ifelse(is.na(redcap_id), shq_18e_T, shq_15___5), shq_15___6 = ifelse(is.na(redcap_id), shq_18f_T, shq_15___6), shq_15___7 = ifelse(is.na(redcap_id), shq_18g_T, shq_15___7), shq_15___8 = ifelse(is.na(redcap_id), shq_18h_T, shq_15___8))
+
+# fix the shaps_7
+fix.data <- mutate(data, shaps_7 = ifelse(shaps_7 == 0, 1, shaps_7))
+
+write_sav(data = fix.data, path = "/Users/zhan039/Desktop/USC HEAL/Menthol/fix_grow_data.sav")
+```
+

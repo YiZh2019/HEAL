@@ -1,0 +1,37 @@
+---
+title: "YRBS_merge"
+author: "Yi"
+date: "10/9/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+YRBS09 <- read.csv("/Users/zhan039/Desktop/USC HEAL/YRBSS/test in R/CSV file of selected variables/Selected_09.csv", header = T)
+YRBS11 <- read.csv("/Users/zhan039/Desktop/USC HEAL/YRBSS/test in R/CSV file of selected variables/Selected_11.csv", header = T)
+YRBS13 <- read.csv("/Users/zhan039/Desktop/USC HEAL/YRBSS/test in R/CSV file of selected variables/Selected_13.csv", header = T)
+YRBS15 <- read.csv("/Users/zhan039/Desktop/USC HEAL/YRBSS/test in R/CSV file of selected variables/Selected_15.csv", header = T)
+YRBS17 <- read.csv("/Users/zhan039/Desktop/USC HEAL/YRBSS/test in R/CSV file of selected variables/Selected_17.csv", header = T)
+
+```
+
+```{r}
+length(unique(c(colnames(YRBS09), colnames(YRBS11), colnames(YRBS13), colnames(YRBS15), colnames(YRBS17))))
+```
+
+```{r}
+library(plyr)
+length(unique(c(colnames(YRBS09), colnames(YRBS11))))
+MERGED <- rbind.fill(data.frame(YRBS09), data.frame(YRBS11), data.frame(YRBS13), data.frame(YRBS15), data.frame(YRBS17))
+head(MERGED)
+
+
+```
+
+```{r}
+write.csv(MERGED, file = "/Users/zhan039/Desktop/USC HEAL/YRBSS/test in R/CSV file of selected variables/MERGED_SPSS.csv", na = "")
+```
+

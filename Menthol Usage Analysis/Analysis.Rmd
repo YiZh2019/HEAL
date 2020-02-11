@@ -1,0 +1,446 @@
+---
+title: "menthol analysis"
+author: "Yi"
+date: "11/18/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(dplyr)
+library(car)
+```
+
+```{r}
+# functions
+# Valid N
+ValidN <- function(var) {
+  return(sum(!is.na(var)))
+}
+
+# mean SD N
+Mean.SD.N <- function(var){
+ return(c(mean(var, na.rm = T),
+  sd(var, na.rm = T),
+  sum(!is.na(var))))
+}
+
+# t test
+Ttest <- function(var){
+  LeveneTest <- leveneTest(var, group = as.factor(filter.data$shq_8), center = mean)
+  LeveneTest$result[1] <- ifelse(LeveneTest$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
+  LeveneTest$result[2] <- !LeveneTest$result[1]
+  return(t.test(var[filter.data$shq_8 == 1], var[filter.data$shq_8 == 2], var.equal = LeveneTest$result[1]))
+}
+
+# frequency and percentage
+FreqPercent <- function(var){
+  frequency <- table(var)
+  percentage <- frequency/sum(!is.na(var)) * 100
+  return(rbind(frequency, percentage))
+}
+
+# chi-square or fisher test
+ChiSqFisher <- function(var){
+  chi.sq <- chisq.test(rbind(table(var[filter.data$shq_8 == 1]), table(var[filter.data$shq_8 == 2])))
+  fisher <- fisher.test(rbind(table(var[filter.data$shq_8 == 1]), table(var[filter.data$shq_8 == 2])))
+  print(c("Chi-square:",chi.sq, "Fisher:",fisher))
+}
+```
+
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC HEAL/Menthol/fix_grow_data.sav")
+
+teleform.repeat <- read_sav("/Users/zhan039/Desktop/USC HEAL/GROW/GROW DATA-20190920T175512Z-001/Yi/teleform_repeat.sav")
+
+head(data)
+```
+
+
+```{r}
+# filter observations by race 
+filter.data <- filter(data, piq_5 == 0 & PIQ_6c_T == 1 | piq_5 == 0 & piq_6___3 == 1)
+```
+
+```{r}
+# split data to menthol and unmenthol
+table(filter.data$shq_8)
+filter.data <- filter.data[!is.na(filter.data$shq_8), ]
+menthol.data <- filter(filter.data, shq_8 == 1)
+unmenthol.data <- filter(filter.data, shq_8 == 2)
+nrow(menthol.data)
+nrow(unmenthol.data)
+```
+
+```{r}
+# Smoking History Questionnaire (shq)
+menthol.shq <- select(menthol.data, c("cleaned_SID", starts_with("shq")))
+unmenthol.shq <- select(unmenthol.data, c("cleaned_SID", starts_with("shq")))
+colnames(menthol.shq)
+shq.use <- c("shq_1","shq_2","shq_3","shq_4","shq_5","shq_6","shq_7","shq_8","shq_9___1","shq_9___2","shq_9___3","shq_9___4","shq_9___5","shq_9___6","shq_9___7","shq_9___8","shq_9___9","shq_9___10","shq_10","shq_11","shq_12","shq_13","shq_14","shq_15___1","shq_15___2","shq_15___3","shq_15___4","shq_15___5","shq_15___6","shq_15___7","shq_15___8","shq_16","shq_17","shq_18","shq_19","shq_20","shq_21","shq_22","shq_23","shq_24","shq_25","shq_26","shq_27","shq_28","shq_29","shq_30","shq_31","shq_32","shq_33","shq_34","shq_35")
+
+menthol.shq.use <- menthol.shq[, c("cleaned_SID", shq.use)]
+unmenthol.shq.use <- unmenthol.shq[, c("cleaned_SID", shq.use)]
+
+shq.continuous <- c("shq_1","shq_2","shq_3","shq_4", "shq_5", "shq_11","shq_12", "shq_16", "shq_17", "shq_18", "shq_19", "shq_20", "shq_21", "shq_22", "shq_23", "shq_24", "shq_25", "shq_26", "shq_27", "shq_34","shq_35")
+
+# continuous variables
+apply(menthol.shq.use[, shq.continuous], 2, Mean.SD.N)
+apply(unmenthol.shq.use[, shq.continuous], 2, Mean.SD.N)
+apply(filter.data[, shq.continuous], 2, ValidN)
+  # var.test(menthol.shq.use$shq_1, unmenthol.shq.use$shq_1)
+  # Ftest <- var.test(menthol.shq.use$shq_1, unmenthol.shq.use$shq_1)
+  # Ftest$result <- ifelse(Ftest$p.value < 0.05, FALSE, TRUE)
+  # t.test(menthol.shq.use$shq_1, unmenthol.shq.use$shq_1, var.equal = Ftest$result)
+
+apply(filter.data[, shq.continuous], 2, Ttest)
+
+# combine shq_9___ to calculate the count of products
+test <- filter(filter.data, is.na(shq_9___1) & is.na(shq_9___2) & is.na(shq_9___3) & is.na(shq_9___4) & is.na(shq_9___5) & is.na(shq_9___6) & is.na(shq_9___7) & is.na(shq_9___8) & is.na(shq_9___9) & is.na(shq_9___10)) # the participant who has missing values in all questions about ever use of products: cleaned_SID = 50392
+
+filter.data.combineshq9 <- filter(filter.data, !(is.na(shq_9___1) & is.na(shq_9___2) & is.na(shq_9___3) & is.na(shq_9___4) & is.na(shq_9___5) & is.na(shq_9___6) & is.na(shq_9___7) & is.na(shq_9___8) & is.na(shq_9___9) & is.na(shq_9___10))) # filter out the participant who doesn't have valid information on ever use of products
+
+filter.data.combineshq9 <- mutate(filter.data.combineshq9, shq_9___1 = ifelse(is.na(shq_9___1), 0, shq_9___1), shq_9___2 = ifelse(is.na(shq_9___2), 0, shq_9___2), shq_9___3 = ifelse(is.na(shq_9___3), 0, shq_9___3), shq_9___4 = ifelse(is.na(shq_9___4), 0, shq_9___4), shq_9___5 = ifelse(is.na(shq_9___5), 0, shq_9___5), shq_9___6 = ifelse(is.na(shq_9___6), 0, shq_9___6), shq_9___7 = ifelse(is.na(shq_9___7), 0, shq_9___7), shq_9___8 = ifelse(is.na(shq_9___8), 0, shq_9___8), shq_9___9 = ifelse(is.na(shq_9___9), 0, shq_9___9), shq_9___10 = ifelse(is.na(shq_9___10), 0, shq_9___10))
+
+filter.data.combineshq9$shq_9 <- filter.data.combineshq9$shq_9___1 + filter.data.combineshq9$shq_9___2 + filter.data.combineshq9$shq_9___3 + filter.data.combineshq9$shq_9___4 + filter.data.combineshq9$shq_9___5 + filter.data.combineshq9$shq_9___6 + filter.data.combineshq9$shq_9___7 + filter.data.combineshq9$shq_9___8 + filter.data.combineshq9$shq_9___9 + filter.data.combineshq9$shq_9___10  
+
+apply(filter.data.combineshq9[filter.data.combineshq9$shq_8 == 1, "shq_9"], 2, Mean.SD.N)
+apply(filter.data.combineshq9[filter.data.combineshq9$shq_8 == 2, "shq_9"], 2, Mean.SD.N)
+
+apply(filter.data.combineshq9[, "shq_9"], 2, ValidN)
+
+shq_9.levene <- leveneTest(filter.data.combineshq9$shq_9, group = as.factor(filter.data.combineshq9$shq_8), center = mean)
+
+shq_9.levene$result[1] <- ifelse(shq_9.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
+t.test(filter.data.combineshq9[filter.data.combineshq9$shq_8 == 1, ]$shq_9, filter.data.combineshq9[filter.data.combineshq9$shq_8 == 2, ]$shq_9, var.equal = shq_9.levene$result[1])
+
+# filter.data.combineshq9 <- mutate(filter.data.combineshq9, shq_9 = ifelse(shq_9 >= 5, 11, shq_9)) 
+
+# table(filter.data.combineshq9[filter.data.combineshq9$shq_8 == 1, "shq_9"])
+# apply(filter.data.combineshq9[filter.data.combineshq9$shq_8 == 1, "shq_9"], 2, FreqPercent)
+# table(filter.data.combineshq9[filter.data.combineshq9$shq_8 == 2, "shq_9"])
+# apply(filter.data.combineshq9[filter.data.combineshq9$shq_8 == 2, "shq_9"], 2, FreqPercent)
+# apply(filter.data.combineshq9[, "shq_9"], 2, ValidN)
+# chisq.test(matrix(c(207, 91, 47, 45, 20, 11, 117, 60, 32, 16, 15, 14), ncol = 2))
+
+
+# categorical variables
+apply(menthol.shq.use[, shq.use[!shq.use %in% shq.continuous]], 2, FreqPercent)
+apply(unmenthol.shq.use[, shq.use[!shq.use %in% shq.continuous]], 2, FreqPercent)
+apply(filter.data[, shq.use[!shq.use %in% shq.continuous]], 2, table)
+
+# apply(filter.data[, shq.use[!shq.use %in% c(shq.continuous, "shq_8")]], 2, ChiSqFisher)
+# ChiSqFisher(filter.data$shq_5)
+# fisher.test(rbind(table(filter.data$shq_5[filter.data$shq_8 == 1]), table(filter.data$shq_5[filter.data$shq_8 == 2])))
+ChiSqFisher(filter.data$shq_6)
+ChiSqFisher(filter.data$shq_7)
+# ChiSqFisher(filter.data$shq_9___1)
+# ChiSqFisher(filter.data$shq_9___2)
+# ChiSqFisher(filter.data$shq_9___3)
+# ChiSqFisher(filter.data$shq_9___4)
+# ChiSqFisher(filter.data$shq_9___5)
+# ChiSqFisher(filter.data$shq_9___6)
+# ChiSqFisher(filter.data$shq_9___7) can't use it because the cell of 0 is filled with 415
+# chisq.test(matrix(c(415, 0, 249, 1), nrow = 2))
+# fisher.test(matrix(c(415, 0, 249, 1), nrow = 2))
+# ChiSqFisher(filter.data$shq_9___8)
+# ChiSqFisher(filter.data$shq_9___9)
+# ChiSqFisher(filter.data$shq_9___10)
+ChiSqFisher(filter.data$shq_10)
+ChiSqFisher(filter.data$shq_13)
+chisq.test(rbind(table(filter.data$shq_13[filter.data$shq_8 == 1]), table(filter.data$shq_13[filter.data$shq_8 == 2])))
+ChiSqFisher(filter.data$shq_14)
+ChiSqFisher(filter.data$shq_15___1)
+ChiSqFisher(filter.data$shq_15___2)
+ChiSqFisher(filter.data$shq_15___3)
+ChiSqFisher(filter.data$shq_15___4)
+ChiSqFisher(filter.data$shq_15___5)
+ChiSqFisher(filter.data$shq_15___6)
+ChiSqFisher(filter.data$shq_15___7)
+ChiSqFisher(filter.data$shq_15___8)
+ChiSqFisher(filter.data$shq_16)
+ChiSqFisher(filter.data$shq_17)
+ChiSqFisher(filter.data$shq_18)
+ChiSqFisher(filter.data$shq_19)
+ChiSqFisher(filter.data$shq_20)
+ChiSqFisher(filter.data$shq_21)
+ChiSqFisher(filter.data$shq_22)
+ChiSqFisher(filter.data$shq_23)
+ChiSqFisher(filter.data$shq_24)
+ChiSqFisher(filter.data$shq_25)
+ChiSqFisher(filter.data$shq_26)
+ChiSqFisher(filter.data$shq_27)
+ChiSqFisher(filter.data$shq_28)
+ChiSqFisher(filter.data$shq_29)
+ChiSqFisher(filter.data$shq_30)
+ChiSqFisher(filter.data$shq_31)
+ChiSqFisher(filter.data$shq_32)
+ChiSqFisher(filter.data$shq_33)
+
+```
+
+```{r}
+# FTND
+apply(menthol.data[, "FTND_SUM"], 2, Mean.SD.N)
+apply(unmenthol.data[, "FTND_SUM"], 2, Mean.SD.N)
+sum(!is.na(filter.data$FTND_SUM))
+apply(filter.data[, "FTND_SUM"], 2, Ttest)
+
+# BCS
+apply(menthol.data[, c("BCS_Addiction_Mean", "BCS_External_Mean", "BCS_Internal_Mean", "BCS_Mean")], 2, Mean.SD.N)
+apply(unmenthol.data[, c("BCS_Addiction_Mean", "BCS_External_Mean", "BCS_Internal_Mean", "BCS_Mean")], 2, Mean.SD.N)
+apply(filter.data[, c("BCS_Addiction_Mean", "BCS_External_Mean", "BCS_Internal_Mean", "BCS_Mean")], 2, ValidN)
+apply(filter.data[, c("BCS_Addiction_Mean", "BCS_External_Mean", "BCS_Internal_Mean", "BCS_Mean")], 2, Ttest)
+
+# WISDM
+apply(menthol.data[, c("WISDM_AA_Mean", "WISDM_A_Mean", "WISDM_LC_Mean", "WISDM_CE_Mean", "WISDM_C_Mean", "WISDM_CEAP_Mean", "WISDM_S_Mean", "WISDM_TSP_Mean", "WISDM_Tol_Mean", "WISDM_WC_Mean", "WISDM_AE_Mean", "WISDM_TOT_Mean")], 2, Mean.SD.N)
+apply(unmenthol.data[, c("WISDM_AA_Mean", "WISDM_A_Mean", "WISDM_LC_Mean", "WISDM_CE_Mean", "WISDM_C_Mean", "WISDM_CEAP_Mean", "WISDM_S_Mean", "WISDM_TSP_Mean", "WISDM_Tol_Mean", "WISDM_WC_Mean", "WISDM_AE_Mean", "WISDM_TOT_Mean")], 2, Mean.SD.N)
+apply(filter.data[, c("WISDM_AA_Mean", "WISDM_A_Mean", "WISDM_LC_Mean", "WISDM_CE_Mean", "WISDM_C_Mean", "WISDM_CEAP_Mean", "WISDM_S_Mean", "WISDM_TSP_Mean", "WISDM_Tol_Mean", "WISDM_WC_Mean", "WISDM_AE_Mean", "WISDM_TOT_Mean")], 2, ValidN)
+apply(filter.data[, c("WISDM_AA_Mean", "WISDM_A_Mean", "WISDM_LC_Mean", "WISDM_CE_Mean", "WISDM_C_Mean", "WISDM_CEAP_Mean", "WISDM_S_Mean", "WISDM_TSP_Mean", "WISDM_Tol_Mean", "WISDM_WC_Mean", "WISDM_AE_Mean", "WISDM_TOT_Mean")], 2, Ttest)
+
+
+# DAST
+apply(menthol.data[, c("DAST_Sum", "DAST_Classification")], 2, Mean.SD.N)
+apply(unmenthol.data[, c("DAST_Sum", "DAST_Classification")], 2, Mean.SD.N)
+apply(filter.data[, c("DAST_Sum", "DAST_Classification")], 2, ValidN)
+apply(filter.data[, c("DAST_Sum", "DAST_Classification")], 2, Ttest)
+
+# AUDIT
+apply(menthol.data[, c("AUDIT_Sum", "AUDIT_Risk_Level")], 2, Mean.SD.N)
+apply(unmenthol.data[, c("AUDIT_Sum", "AUDIT_Risk_Level")], 2, Mean.SD.N)
+apply(filter.data[, c("AUDIT_Sum", "AUDIT_Risk_Level")], 2, ValidN)
+apply(filter.data[, c("AUDIT_Sum", "AUDIT_Risk_Level")], 2, Ttest)
+
+# SHS
+apply(menthol.data[, "SHS_Mean"], 2, Mean.SD.N)
+apply(unmenthol.data[, "SHS_Mean"], 2, Mean.SD.N)
+apply(filter.data[, "SHS_Mean"], 2, ValidN)
+apply(filter.data[, "SHS_Mean"], 2, Ttest)
+
+# MIBI
+apply(menthol.data[, "MIBI_Mean"], 2, Mean.SD.N)
+apply(unmenthol.data[, "MIBI_Mean"], 2, Mean.SD.N)
+apply(filter.data[, "MIBI_Mean"], 2, ValidN)
+apply(filter.data[, "MIBI_Mean"], 2, Ttest)
+
+# NPS
+apply(menthol.data[, "NPS_Mean"], 2, Mean.SD.N)
+apply(unmenthol.data[, "NPS_Mean"], 2, Mean.SD.N)
+apply(filter.data[, "NPS_Mean"], 2, ValidN)
+apply(filter.data[, "NPS_Mean"], 2, Ttest)
+
+# EDDS
+apply(menthol.data[, "EDDS_Mean"], 2, Mean.SD.N)
+apply(unmenthol.data[, "EDDS_Mean"], 2, Mean.SD.N)
+apply(filter.data[, "EDDS_Mean"], 2, ValidN)
+apply(filter.data[, "EDDS_Mean"], 2, Ttest)
+
+# SSS
+apply(menthol.data[, "sss_1"], 2, Mean.SD.N)
+apply(unmenthol.data[, "sss_1"], 2, Mean.SD.N)
+apply(filter.data[, "sss_1"], 2, ValidN)
+apply(filter.data[, "sss_1"], 2, Ttest)
+
+# base_co
+apply(menthol.data[, "co"], 2, Mean.SD.N)
+apply(unmenthol.data[, "co"], 2, Mean.SD.N)
+apply(filter.data[, "co"], 2, ValidN)
+apply(filter.data[, "co"], 2, Ttest)
+
+```
+
+```{r}
+# CESD 
+apply(menthol.data[, "CESD_TOT_SUM"], 2, Mean.SD.N)
+apply(unmenthol.data[, "CESD_TOT_SUM"], 2, Mean.SD.N)
+apply(filter.data[, "CESD_TOT_SUM"], 2, ValidN)
+filter.data.cutoff <- mutate(filter.data, CESD_TOT_SUM_CAT = ifelse(CESD_TOT_SUM > 16, 1, 0))
+ChiSqFisher(filter.data.cutoff$CESD_TOT_SUM_CAT)
+
+# RAQ
+apply(menthol.data[, "RAQ_Mean"], 2, Mean.SD.N)
+apply(unmenthol.data[, "RAQ_Mean"], 2, Mean.SD.N)
+apply(filter.data[, "RAQ_Mean"], 2, ValidN)
+apply(filter.data[, "RAQ_Mean"], 2, Ttest)
+
+# IDAS
+apply(menthol.data[, "IDAS_gd_MEAN"], 2, Mean.SD.N)
+apply(unmenthol.data[, "IDAS_gd_MEAN"], 2, Mean.SD.N)
+apply(filter.data[, "IDAS_gd_MEAN"], 2, ValidN)
+apply(filter.data[, "IDAS_gd_MEAN"], 2, Ttest)
+
+apply(menthol.data[, "IDAS_dy_MEAN"], 2, Mean.SD.N)
+apply(unmenthol.data[, "IDAS_dy_MEAN"], 2, Mean.SD.N)
+apply(filter.data[, "IDAS_dy_MEAN"], 2, ValidN)
+apply(filter.data[, "IDAS_dy_MEAN"], 2, Ttest)
+
+apply(menthol.data[, "IDAS_lass_MEAN"], 2, Mean.SD.N)
+apply(unmenthol.data[, "IDAS_lass_MEAN"], 2, Mean.SD.N)
+apply(filter.data[, "IDAS_lass_MEAN"], 2, ValidN)
+apply(filter.data[, "IDAS_lass_MEAN"], 2, Ttest)
+
+apply(menthol.data[, "IDAS_insom_MEAN"], 2, Mean.SD.N)
+apply(unmenthol.data[, "IDAS_insom_MEAN"], 2, Mean.SD.N)
+apply(filter.data[, "IDAS_insom_MEAN"], 2, ValidN)
+apply(filter.data[, "IDAS_insom_MEAN"], 2, Ttest)
+
+apply(menthol.data[, "IDAS_al_MEAN"], 2, Mean.SD.N)
+apply(unmenthol.data[, "IDAS_al_MEAN"], 2, Mean.SD.N)
+apply(filter.data[, "IDAS_al_MEAN"], 2, ValidN)
+apply(filter.data[, "IDAS_al_MEAN"], 2, Ttest)
+
+apply(menthol.data[, "IDAS_ag_MEAN"], 2, Mean.SD.N)
+apply(unmenthol.data[, "IDAS_ag_MEAN"], 2, Mean.SD.N)
+apply(filter.data[, "IDAS_ag_MEAN"], 2, ValidN)
+apply(filter.data[, "IDAS_ag_MEAN"], 2, Ttest)
+
+apply(menthol.data[, "IDAS_temp_MEAN"], 2, Mean.SD.N)
+apply(unmenthol.data[, "IDAS_temp_MEAN"], 2, Mean.SD.N)
+apply(filter.data[, "IDAS_temp_MEAN"], 2, ValidN)
+apply(filter.data[, "IDAS_temp_MEAN"], 2, Ttest)
+
+apply(menthol.data[, "IDAS_wb_MEAN"], 2, Mean.SD.N)
+apply(unmenthol.data[, "IDAS_wb_MEAN"], 2, Mean.SD.N)
+apply(filter.data[, "IDAS_wb_MEAN"], 2, ValidN)
+apply(filter.data[, "IDAS_wb_MEAN"], 2, Ttest)
+
+apply(menthol.data[, "IDAS_sa_MEAN"], 2, Mean.SD.N)
+apply(unmenthol.data[, "IDAS_sa_MEAN"], 2, Mean.SD.N)
+apply(filter.data[, "IDAS_sa_MEAN"], 2, ValidN)
+apply(filter.data[, "IDAS_sa_MEAN"], 2, Ttest)
+
+apply(menthol.data[, "IDAS_panic_MEAN"], 2, Mean.SD.N)
+apply(unmenthol.data[, "IDAS_panic_MEAN"], 2, Mean.SD.N)
+apply(filter.data[, "IDAS_panic_MEAN"], 2, ValidN)
+apply(filter.data[, "IDAS_panic_MEAN"], 2, Ttest)
+
+apply(menthol.data[, "IDAS_truma_MEAN"], 2, Mean.SD.N)
+apply(unmenthol.data[, "IDAS_truma_MEAN"], 2, Mean.SD.N)
+apply(filter.data[, "IDAS_truma_MEAN"], 2, ValidN)
+apply(filter.data[, "IDAS_truma_MEAN"], 2, Ttest)
+
+apply(menthol.data[, "IDAS_su_MEAN"], 2, Mean.SD.N)
+apply(unmenthol.data[, "IDAS_su_MEAN"], 2, Mean.SD.N)
+apply(filter.data[, "IDAS_su_MEAN"], 2, ValidN)
+apply(filter.data[, "IDAS_su_MEAN"], 2, Ttest)
+
+# SHAPS
+apply(menthol.data[, "SHAPS_Mean"], 2, Mean.SD.N)
+apply(unmenthol.data[, "SHAPS_Mean"], 2, Mean.SD.N)
+apply(filter.data[, "SHAPS_Mean"], 2, ValidN)
+apply(filter.data[, "SHAPS_Mean"], 2, Ttest)
+
+# ASI
+apply(menthol.data[, "ASI_Mean"], 2, Mean.SD.N)
+apply(unmenthol.data[, "ASI_Mean"], 2, Mean.SD.N)
+apply(filter.data[, "ASI_Mean"], 2, ValidN)
+apply(filter.data[, "ASI_Mean"], 2, Ttest)
+
+# OCIR
+apply(menthol.data[, "OCIR_Washing_Sum"], 2, Mean.SD.N)
+apply(unmenthol.data[, "OCIR_Washing_Sum"], 2, Mean.SD.N)
+apply(filter.data[, "OCIR_Washing_Sum"], 2, ValidN)
+apply(filter.data[, "OCIR_Washing_Sum"], 2, Ttest)
+
+
+apply(menthol.data[, "OCIR_Obsessing_Sum"], 2, Mean.SD.N)
+apply(unmenthol.data[, "OCIR_Obsessing_Sum"], 2, Mean.SD.N)
+apply(filter.data[, "OCIR_Obsessing_Sum"], 2, ValidN)
+apply(filter.data[, "OCIR_Obsessing_Sum"], 2, Ttest)
+
+apply(menthol.data[, "OCIR_Hoarding_Sum"], 2, Mean.SD.N)
+apply(unmenthol.data[, "OCIR_Hoarding_Sum"], 2, Mean.SD.N)
+apply(filter.data[, "OCIR_Hoarding_Sum"], 2, ValidN)
+apply(filter.data[, "OCIR_Hoarding_Sum"], 2, Ttest)
+
+apply(menthol.data[, "OCIR_Ordering_Sum"], 2, Mean.SD.N)
+apply(unmenthol.data[, "OCIR_Ordering_Sum"], 2, Mean.SD.N)
+apply(filter.data[, "OCIR_Ordering_Sum"], 2, ValidN)
+apply(filter.data[, "OCIR_Ordering_Sum"], 2, Ttest)
+
+apply(menthol.data[, "OCIR_Checking_Sum"], 2, Mean.SD.N)
+apply(unmenthol.data[, "OCIR_Checking_Sum"], 2, Mean.SD.N)
+apply(filter.data[, "OCIR_Checking_Sum"], 2, ValidN)
+apply(filter.data[, "OCIR_Checking_Sum"], 2, Ttest)
+
+apply(menthol.data[, "OCIR_Neutralizing_Sum"], 2, Mean.SD.N)
+apply(unmenthol.data[, "OCIR_Neutralizing_Sum"], 2, Mean.SD.N)
+apply(filter.data[, "OCIR_Neutralizing_Sum"], 2, ValidN)
+apply(filter.data[, "OCIR_Neutralizing_Sum"], 2, Ttest)
+
+apply(menthol.data[, "OCIR_Total_Sum"], 2, Mean.SD.N)
+apply(unmenthol.data[, "OCIR_Total_Sum"], 2, Mean.SD.N)
+apply(filter.data[, "OCIR_Total_Sum"], 2, ValidN)
+filter.data.cutoff <- mutate(filter.data.cutoff, OCIR_Total_Sum_CAT = ifelse(OCIR_Total_Sum > 36, 1, 0))
+ChiSqFisher(filter.data.cutoff$OCIR_Total_Sum_CAT)
+
+# TPI
+apply(menthol.data[, "TPI_a_MEAN"], 2, Mean.SD.N)
+apply(unmenthol.data[, "TPI_a_MEAN"], 2, Mean.SD.N)
+apply(filter.data[, "TPI_a_MEAN"], 2, ValidN)
+apply(filter.data[, "TPI_a_MEAN"], 2, Ttest)
+
+apply(menthol.data[, "TPI_b_MEAN"], 2, Mean.SD.N)
+apply(unmenthol.data[, "TPI_b_MEAN"], 2, Mean.SD.N)
+apply(filter.data[, "TPI_b_MEAN"], 2, ValidN)
+apply(filter.data[, "TPI_b_MEAN"], 2, Ttest)
+
+apply(menthol.data[, "TPI_c_MEAN"], 2, Mean.SD.N)
+apply(unmenthol.data[, "TPI_c_MEAN"], 2, Mean.SD.N)
+apply(filter.data[, "TPI_c_MEAN"], 2, ValidN)
+apply(filter.data[, "TPI_c_MEAN"], 2, Ttest)
+
+# UPPSP-P
+apply(menthol.data[, "UPPSP_NegUrge_Mean"], 2, Mean.SD.N)
+apply(unmenthol.data[, "UPPSP_NegUrge_Mean"], 2, Mean.SD.N)
+apply(filter.data[, "UPPSP_NegUrge_Mean"], 2, ValidN)
+apply(filter.data[, "UPPSP_NegUrge_Mean"], 2, Ttest)
+
+apply(menthol.data[, "UPPSP_PosUrge_Mean"], 2, Mean.SD.N)
+apply(unmenthol.data[, "UPPSP_PosUrge_Mean"], 2, Mean.SD.N)
+apply(filter.data[, "UPPSP_PosUrge_Mean"], 2, ValidN)
+apply(filter.data[, "UPPSP_PosUrge_Mean"], 2, Ttest)
+
+apply(menthol.data[, "UPPSP_Premed_Mean"], 2, Mean.SD.N)
+apply(unmenthol.data[, "UPPSP_Premed_Mean"], 2, Mean.SD.N)
+apply(filter.data[, "UPPSP_Premed_Mean"], 2, ValidN)
+apply(filter.data[, "UPPSP_Premed_Mean"], 2, Ttest)
+
+apply(menthol.data[, "UPPSP_Preserv_Mean"], 2, Mean.SD.N)
+apply(unmenthol.data[, "UPPSP_Preserv_Mean"], 2, Mean.SD.N)
+apply(filter.data[, "UPPSP_Preserv_Mean"], 2, ValidN)
+apply(filter.data[, "UPPSP_Preserv_Mean"], 2, Ttest)
+
+apply(menthol.data[, "UPPSP_Sen_Mean"], 2, Mean.SD.N)
+apply(unmenthol.data[, "UPPSP_Sen_Mean"], 2, Mean.SD.N)
+apply(filter.data[, "UPPSP_Sen_Mean"], 2, ValidN)
+apply(filter.data[, "UPPSP_Sen_Mean"], 2, Ttest)
+
+# GCPS/GPCS
+apply(menthol.data[, "GPCS_CPI"], 2, Mean.SD.N)
+apply(unmenthol.data[, "GPCS_CPI"], 2, Mean.SD.N)
+apply(filter.data[, "GPCS_CPI"], 2, ValidN)
+apply(filter.data[, "GPCS_CPI"], 2, Ttest)
+
+apply(menthol.data[, "GPCS_DS"], 2, Mean.SD.N)
+apply(unmenthol.data[, "GPCS_DS"], 2, Mean.SD.N)
+apply(filter.data[, "GPCS_DS"], 2, ValidN)
+apply(filter.data[, "GPCS_DS"], 2, Ttest)
+
+apply(menthol.data[, "GPCS_Grade"], 2, Mean.SD.N)
+apply(unmenthol.data[, "GPCS_Grade"], 2, Mean.SD.N)
+apply(filter.data[, "GPCS_Grade"], 2, ValidN)
+apply(filter.data[, "GPCS_Grade"], 2, Ttest)
+
+apply(menthol.data[, "GPCS_Persistence"], 2, Mean.SD.N)
+apply(unmenthol.data[, "GPCS_Persistence"], 2, Mean.SD.N)
+apply(filter.data[, "GPCS_Persistence"], 2, ValidN)
+apply(filter.data[, "GPCS_Persistence"], 2, Ttest)
+
+```
+

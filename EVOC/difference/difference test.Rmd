@@ -1,0 +1,218 @@
+---
+title: "difference test"
+author: "Yi"
+date: "10/10/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+gender <- matrix(c(89, 61, 1, 7, 0, 75, 85, 1, 1, 0, 76, 76, 1, 3, 0, 107, 71, 0, 2, 0, 77, 114, 1, 2, 0), nrow = 5, ncol = 5)
+rownames(gender) <- c("male", "female", "transgender", "gender variant", "other")
+colnames(gender) <- c("prolific", "M.selflaunch", "T.selflaunch", "M.concierge", "PP.concierge")
+gender
+fisher.test(gender, simulate.p.value = T)
+```
+
+```{r}
+ethnicity <- matrix(c(37, 121, 21, 139, 18, 138, 23, 157, 44, 150), nrow = 2, ncol = 5)
+ethnicity
+chisq.test(ethnicity)
+```
+
+```{r}
+race <- matrix(c(18, 8, 13, 1, 115, 13, 3, 11, 6, 18, 3, 129, 8, 1, 9, 14, 14, 0, 122, 8, 2, 15, 18, 18, 1, 143, 8, 2, 56, 10, 24, 2, 140, 5, 14), nrow = 7, ncol = 5)
+race
+chisq.test(race, simulate.p.value = T)
+```
+
+```{r}
+highest.education <- matrix(c(0, 1, 2, 21, 59, 15, 52, 3, 2, 3, 0, 0, 0, 6, 13, 55, 20, 56, 8, 2, 0, 0, 0, 1, 5, 18, 47, 22, 49, 11, 2, 0, 0, 0, 1, 2, 22, 55, 31, 59, 5, 3, 2, 0, 4, 3, 9, 37, 54, 18, 54, 12, 3, 0, 0), nrow = 11, ncol = 5)
+highest.education
+fisher.test(highest.education, simulate.p.value = T)
+```
+
+```{r}
+current.degree <- matrix(c(2, 6, 28, 5, 0, 0, 4, 7, 22, 13, 1, 0, 5, 7, 28, 14, 0, 0, 1, 5, 32, 7, 0, 0, 1, 7, 43, 16, 3, 1), nrow = 6, ncol = 5)
+current.degree
+chisq.test(current.degree, simulate.p.value = T)
+```
+
+```{r}
+own.rent <- matrix(c(45, 91, 22, 0, 55, 90, 15, 0, 48, 89, 18, 0, 47, 115, 18, 0, 83, 83, 28, 0), nrow = 4, ncol = 5)
+own.rent
+fisher.test(own.rent, simulate.p.value = T)
+```
+
+```{r}
+current.living <- matrix(c(30, 3, 1, 23, 61, 22, 10, 8, 0, 42, 2, 1, 24, 59, 18, 9, 5, 0, 37, 2, 1, 23, 62, 18, 8, 4, 0, 39, 4, 2, 34, 67, 22, 9 , 3, 0, 57, 11, 1, 22, 63, 17, 12, 11, 0), nrow = 9, ncol = 5)
+current.living
+fisher.test(current.living, simulate.p.value = T)
+```
+
+```{r}
+current.financial <- matrix(c(45, 57, 49, 7, 36, 76, 42, 6, 39, 77, 32, 7, 37, 84, 48, 11, 73, 56, 56, 9), nrow = 4, ncol = 5)
+current.financial
+chisq.test(current.financial)
+```
+
+```{r}
+childhood.financial <- matrix(c(34, 83, 31, 10, 37, 84, 33, 6, 31, 80, 31, 13, 45, 97, 25, 13, 46, 97, 33, 18), nrow = 4, ncol = 5)
+childhood.financial
+chisq.test(childhood.financial)
+```
+
+```{r}
+country.residence <- matrix(c(158, 0, 0, 158, 0, 0, 153, 1, 0, 178, 0, 0, 193, 1, 0), nrow = 3, ncol = 5)
+country.residence
+fisher.test(country.residence)
+```
+
+```{r}
+att.check.fail <- matrix(c(127, 25, 6, 0, 117, 31, 14, 4, 124, 21, 12, 2, 137, 31, 56, 3, 104, 58, 18, 14), nrow = 4, ncol = 5)
+att.check.fail
+chisq.test(att.check.fail, simulate.p.value = T)
+```
+
+```{r}
+disp.use <- matrix(c(57, 99, 21, 6, 16, 2, 50, 105, 17, 10, 18, 3, 52, 102, 19, 6, 19, 3, 62, 116, 22, 5, 24, 5, 54, 140, 19, 15, 40, 15), nrow = 6, ncol = 5)
+disp.use
+chisq.test(disp.use)
+```
+
+```{r}
+vape.use <- matrix(c(24, 132, 23, 6, 28, 18, 17, 138, 26, 11, 38, 23, 17, 137, 31, 12, 34, 14, 33, 145, 22, 4, 37, 28, 25, 169, 29, 17, 48, 29), nrow = 6, ncol = 5)
+vape.use
+chisq.test(vape.use)
+```
+
+```{r}
+mod.use <- matrix(c(62, 94, 21, 5, 16, 14, 56, 99, 22, 9, 23, 8, 64, 90, 14, 13, 11, 6, 74, 103, 18, 4, 19, 20, 138, 56, 22, 12, 30, 18), nrow = 6, ncol = 5)
+mod.use
+chisq.test(mod.use)
+```
+
+```{r}
+boxmod.use <- matrix(c(84, 72, 8, 1, 11, 16, 68, 87, 11, 10, 14, 20, 78, 76, 10, 5, 7, 12, 89, 88, 14, 3, 12, 16, 88, 106, 16, 10, 22, 7), nrow = 6, ncol = 5)
+boxmod.use
+chisq.test(boxmod.use)
+```
+
+```{r}
+juul.use <- matrix(c(57, 99, 13, 4, 30, 22, 34, 121, 18, 12, 26, 25, 28, 126, 14, 9, 40, 28, 59, 118, 17, 10, 33, 31, 41, 153, 14, 14, 43, 41), nrow = 6, ncol = 5)
+juul.use
+chisq.test(juul.use)
+```
+
+```{r}
+otherpod.use <- matrix(c(93, 63, 11, 8, 11, 9, 99, 56, 11, 9, 8, 5, 97, 57, 10, 5, 5, 8, 116, 61, 9, 3, 11, 6, 99, 95, 18, 6, 11, 13), nrow = 6, ncol = 5)
+otherpod.use
+chisq.test(otherpod.use)
+```
+
+```{r}
+firstdevice <- matrix(c(34, 50, 16, 13, 36, 1, 2, 39, 52, 13, 14, 32, 2, 3, 32, 52, 9, 8, 45, 3, 4, 43, 64, 8, 11, 34, 2, 2, 41, 66, 16, 9, 49, 6, 3), nrow = 7, ncol = 5)
+firstdevice
+chisq.test(firstdevice, simulate.p.value = T)
+```
+
+```{r}
+device.mostoften <- matrix(c(4, 32, 18, 16, 44, 10, 0, 8, 40, 13, 25, 46, 6, 2, 8, 34, 10, 12, 55, 7, 3, 7, 40, 26, 11, 45, 8, 4, 18, 50, 25, 8, 61, 9, 4), nrow = 7, ncol = 5)
+device.mostoften
+chisq.test(device.mostoften, simulate.p.value = T)
+```
+
+```{r}
+firstflavor <- matrix(c(2, 22, 13, 26, 57, 0, 5, 4, 12, 24, 21, 78, 2, 1, 4, 19, 20, 22, 66, 0, 3, 4, 18, 22, 20, 74, 0, 3, 9, 20, 31, 28, 86, 0, 2), nrow = 7, ncol = 5)
+firstflavor
+chisq.test(firstflavor, simulate.p.value = T)
+```
+
+```{r}
+nicotine.type <- matrix(c(33, 52, 40, 29, 75, 38, 26, 72, 36, 39, 71, 30, 45, 86, 45), nrow = 3, ncol = 5)
+nicotine.type
+chisq.test(nicotine.type)
+```
+
+```{r}
+nicotine.level <- matrix(c(6, 37, 46, 13, 13, 3, 4, 8, 15, 8, 35, 9, 5, 42, 5, 49, 62, 19, 8, 5, 9, 14, 28, 16, 30, 11, 4, 42, 1, 50, 53, 17, 7, 1, 6, 17, 32, 8, 30, 5, 7, 32, 2, 47, 69, 21, 14, 1, 6, 19, 27, 8, 28, 13, 7, 47, 12, 46, 69, 30, 24, 7, 9, 17, 32, 23, 36, 11, 14, 26), nrow = 14, ncol = 5)
+nicotine.level
+chisq.test(nicotine.level, simulate.p.value = T)
+```
+
+```{r}
+otherdevice <- matrix(c(7, 147, 12, 142, 10, 142, 20, 154, 13, 180), nrow = 2, ncol = 5)
+otherdevice
+chisq.test(otherdevice)
+```
+
+```{r}
+load("/Users/zhan039/Desktop/USC HEAL/EVOC (CONJOINT)/09:30:2019 needs/difference/ecig data/prolific.Rdata")
+load("/Users/zhan039/Desktop/USC HEAL/EVOC (CONJOINT)/09:30:2019 needs/difference/ecig data/M.sellflaunch.Rdata")
+load("/Users/zhan039/Desktop/USC HEAL/EVOC (CONJOINT)/09:30:2019 needs/difference/ecig data/T.selflaunch.RData")
+load("/Users/zhan039/Desktop/USC HEAL/EVOC (CONJOINT)/09:30:2019 needs/difference/ecig data/M.concierge.RData")
+load("/Users/zhan039/Desktop/USC HEAL/EVOC (CONJOINT)/09:30:2019 needs/difference/ecig data/PP.concierge.RData")
+```
+
+```{r}
+juul.per.day <- c(prolific$juul_usage_day, M.selflauch$juul_usage_day, T.selflaunch$juul_usage_day, M.concierge$juul_usage_day, PP.concierge$juul_usage_day)
+survey <- factor(rep(1:5, c(158, 166, 159, 227, 194)), levels = 1:5)
+levels(survey) <- c("prolific", "M.selflaunch", "T.selflaunch", "M.concierge", "PP.concierge")
+day.dataframe <- data.frame(juul.per.day, survey)
+
+dayaov <- aov(juul.per.day~survey)
+dayaov
+summary(dayaov)
+with(day.dataframe, tapply(juul.per.day, survey, shapiro.test))
+bartlett.test(juul.per.day~survey, data = day.dataframe)
+kruskal.test(juul.per.day~survey, data = day.dataframe)
+```
+
+```{r}
+juul.per.week <- c(prolific$juul_usage_week, M.selflauch$juul_usage_week, T.selflaunch$juul_usage_week, M.concierge$juul_usage_week, PP.concierge$juul_usage_week)
+week.dataframe <- data.frame(juul.per.week, survey)
+
+weekaov <- aov(juul.per.week~survey, data = week.dataframe)
+weekaov
+with(week.dataframe, tapply(juul.per.week, survey, shapiro.test))
+bartlett.test(juul.per.week~survey, data = week.dataframe)
+kruskal.test(juul.per.week~survey, data = week.dataframe)
+```
+
+```{r}
+juul.per.month <- c(prolific$juul_usage_month, M.selflauch$juul_usage_month, T.selflaunch$juul_usage_month, M.concierge$juul_usage_month, PP.concierge$juul_usage_month)
+month.dataframe <- data.frame(juul.per.month, survey)
+
+monthaov <- aov(juul.per.month~survey, data = month.dataframe)
+monthaov
+with(month.dataframe, tapply(juul.per.month, survey, shapiro.test))
+bartlett.test(juul.per.month~survey, data = month.dataframe)
+kruskal.test(juul.per.month~survey, data = month.dataframe)
+```
+
+```{r}
+dependence.symptoms <- c(prolific$num.symptoms, M.selflauch$num.symptoms, T.selflaunch$num.symptoms, M.concierge$num.symptoms, PP.concierge$num.symptoms)
+symptoms.dataframe <- data.frame(dependence.symptoms, survey)
+
+symptomsaov <- aov(dependence.symptoms~survey, data = symptoms.dataframe)
+symptomsaov
+with(symptoms.dataframe, tapply(dependence.symptoms, survey, shapiro.test))
+bartlett.test(dependence.symptoms~survey, data = symptoms.dataframe)
+kruskal.test(dependence.symptoms~survey, data = symptoms.dataframe)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+

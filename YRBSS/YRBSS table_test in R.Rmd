@@ -1,0 +1,83 @@
+---
+title: "YRBSS table"
+author: "Yi"
+date: "10/30/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(dplyr)
+library(survey)
+```
+
+```{r}
+YRBSStable <- read_sav("/Users/zhan039/Desktop/USC HEAL/YRBSS/10:30/YRBSS DATA for TABLE/YRBSS2009-2017Merged_B.sav")
+head(YRBSStable)
+```
+
+```{r}
+# sample selection
+sample72942 <- YRBSStable[YRBSStable$Sample72942 == 1, ]
+head(sample72942)
+```
+
+```{r}
+# select variables
+tablevar <- select(sample72942, age, sex_r, RaceA, grade_r, comp_time_r, SuicideSumA_Any, depression_r, unsafe_cov, obesity_cov, Y2009, Y2011, Y2013, Y2015, Y2017, weight)
+head(tablevar)
+
+# range of valid values
+rangeyear <- function(x) {
+  return(sum(!is.na(x)))
+}
+range(apply(tablevar[,-(10:15)], MARGIN = 2, rangeyear))
+range(apply(tablevar[tablevar$Y2009 == 1,-(10:15)], MARGIN = 2, rangeyear))
+range(apply(tablevar[tablevar$Y2011 == 1,-(10:15)], MARGIN = 2, rangeyear))
+range(apply(tablevar[tablevar$Y2013 == 1,-(10:15)], MARGIN = 2, rangeyear))
+range(apply(tablevar[tablevar$Y2015 == 1,-(10:15)], MARGIN = 2, rangeyear))
+range(apply(tablevar[tablevar$Y2017 == 1,-(10:15)], MARGIN = 2, rangeyear))
+
+```
+
+```{r}
+# unweighted frequency from 2009 to 2017
+apply(tablevar[,-15], MARGIN = 2, table)
+
+# unweighted frequency for each year
+apply(tablevar[tablevar$Y2009 == 1, -15], 2, table)
+apply(tablevar[tablevar$Y2011 == 1, -15], 2, table)
+apply(tablevar[tablevar$Y2013 == 1, -15], 2, table)
+apply(tablevar[tablevar$Y2015 == 1, -15], 2, table)
+apply(tablevar[tablevar$Y2017 == 1, -15], 2, table)
+```
+
+```{r}
+# weighted percentages
+PercentFunction <- function( dataset) {
+  weightdesign <- svydesign(~1, data = dataset, weights = ~ weight)
+  age <- round(prop.table(svytable(~ age, weightdesign)) * 100, 1)
+  sex <- round(prop.table(svytable(~ sex_r, weightdesign)) * 100, 1)
+  race <- round(prop.table(svytable(~ RaceA, weightdesign)) * 100, 1)
+  grade <- round(prop.table(svytable(~ grade_r, weightdesign)) * 100, 1)
+  comptime <- round(prop.table(svytable(~ comp_time_r, weightdesign)) * 100, 1)
+  suicide <- round(prop.table(svytable(~ SuicideSumA_Any, weightdesign)) * 100, 1)
+  depression <- round(prop.table(svytable(~ depression_r, weightdesign)) * 100, 1)
+  unsafe <- round(prop.table(svytable(~ unsafe_cov, weightdesign)) * 100, 1)
+  obesity <- round(prop.table(svytable(~ obesity_cov, weightdesign)) * 100, 1)
+  cat(age, "\n",sex, "\n",race, "\n",grade, "\n",comptime, "\n",suicide, "\n",depression, "\n",unsafe, "\n",obesity)
+}
+
+PercentFunction(tablevar)
+PercentFunction(tablevar[tablevar$Y2009 == 1,])
+PercentFunction(tablevar[tablevar$Y2011 == 1,])
+PercentFunction(tablevar[tablevar$Y2013 == 1,])
+PercentFunction(tablevar[tablevar$Y2015 == 1,])
+PercentFunction(tablevar[tablevar$Y2017 == 1,])
+
+```
+
