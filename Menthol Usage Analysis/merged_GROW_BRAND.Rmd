@@ -1,0 +1,41 @@
+---
+title: "merged_GROW_BRAND"
+author: "Yi"
+date: "2/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(tidyverse)
+```
+
+```{r}
+grow <- read_sav("/Users/zhan039/Desktop/USC HEAL/Menthol/fix_grow_data.sav")
+brand <- read_sav("/Users/zhan039/Desktop/USC HEAL/Menthol/Nausheen/1.30.20 re-merged data sets- correct version NW.sav")
+```
+
+```{r}
+length(intersect(grow$cleaned_SID, brand$SID))
+```
+
+```{r}
+brand.subset <- brand[, c("SID", "BRAND")]
+merged.data <- merge(grow, brand.subset, by.x = "cleaned_SID", by.y = "SID", all.x = TRUE)
+brand %>% group_by(SID) %>% filter(n() > 1) 
+```
+
+```{r test eval = FALSE}
+library(data.table)
+A<-data.table(X1=c("a","b","c","d","e"),Y1=c(1,2,3,4,5),Z1=c("num1","num2","num3","num4","num5"))
+A
+B<-data.table(X2=c("c","d","e","f"),Y2=c(4.4,5.5,6.6,7.7))
+B
+left_join(A,B,c("X1" = "X2"))
+merge(A,B, by.x = "X1", by.y = "X2",all.x=TRUE)
+```
+
