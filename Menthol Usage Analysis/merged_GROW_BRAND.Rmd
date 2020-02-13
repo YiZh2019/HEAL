@@ -15,8 +15,8 @@ library(tidyverse)
 ```
 
 ```{r}
-grow <- read_sav("/Users/zhan039/Desktop/USC HEAL/Menthol/fix_grow_data.sav")
-brand <- read_sav("/Users/zhan039/Desktop/USC HEAL/Menthol/Nausheen/1.30.20 re-merged data sets- correct version NW.sav")
+grow <- read_sav("C:/Users/Yi/USC HEAL/USC HEAL/Menthol/fix_grow_data.sav")
+brand <- read_sav("C:/Users/Yi/USC HEAL/USC HEAL/Menthol/Nausheen/2.10.20 updated data set with CTSI.sav")
 ```
 
 ```{r}
@@ -26,7 +26,6 @@ length(intersect(grow$cleaned_SID, brand$SID))
 ```{r}
 brand.subset <- brand[, c("SID", "BRAND")]
 merged.data <- merge(grow, brand.subset, by.x = "cleaned_SID", by.y = "SID", all.x = TRUE)
-brand %>% group_by(SID) %>% filter(n() > 1) 
 ```
 
 ```{r test eval = FALSE}
@@ -37,5 +36,10 @@ B<-data.table(X2=c("c","d","e","f"),Y2=c(4.4,5.5,6.6,7.7))
 B
 left_join(A,B,c("X1" = "X2"))
 merge(A,B, by.x = "X1", by.y = "X2",all.x=TRUE)
+```
+
+```{r}
+# save(merged.data, file = "C:/Users/Yi/USC HEAL/USC HEAL/Menthol/Merged_GROW_BRAND.Rdata")
+write_sav(data = merged.data, path = "C:/Users/Yi/USC HEAL/USC HEAL/Menthol/Merged_GROW_BRAND.sav")
 ```
 
