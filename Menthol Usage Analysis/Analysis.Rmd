@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(haven)
-library(dplyr)
+library(tidyverse)
 library(car)
 ```
 
@@ -56,9 +56,9 @@ ChiSqFisher <- function(var){
 
 
 ```{r}
-data <- read_sav("/Users/zhan039/Desktop/USC HEAL/Menthol/fix_grow_data.sav")
+data <- read_sav("C:/Users/Yi/USC HEAL/USC HEAL/Menthol/Merged_GROW_BRAND.sav")
 
-teleform.repeat <- read_sav("/Users/zhan039/Desktop/USC HEAL/GROW/GROW DATA-20190920T175512Z-001/Yi/teleform_repeat.sav")
+# teleform.repeat <- read_sav("/Users/zhan039/Desktop/USC HEAL/GROW/GROW DATA-20190920T175512Z-001/Yi/teleform_repeat.sav")
 
 head(data)
 ```
@@ -77,6 +77,15 @@ menthol.data <- filter(filter.data, shq_8 == 1)
 unmenthol.data <- filter(filter.data, shq_8 == 2)
 nrow(menthol.data)
 nrow(unmenthol.data)
+```
+
+```{r}
+# table of brand
+table(tolower(filter.data$BRAND)) 
+
+as_tibble(FreqPercent(tolower(menthol.data$BRAND)))
+as_tibble(FreqPercent(tolower(unmenthol.data$BRAND)))
+ValidN(filter.data$BRAND)
 ```
 
 ```{r}
