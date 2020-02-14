@@ -1,0 +1,38 @@
+---
+title: "GROW JAMES"
+author: "Yi"
+date: "2/10/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(tidyverse)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC HEAL/GROW JAMES/GROW-JAMES/REDCap_wTeleform_Merged (scored + sorted)_06212018 (No 2nd survey) with DIFF_03082019.sav")
+
+head(data)
+```
+
+```{r}
+table(data$piq_5, useNA = "always")  # 1: Hispanic or Latino; 0: Not Hispanic or Latino
+table(data$piq_6___3, useNA = "always")  # Black or African American in Redcap
+table(data$PIQ_6c_T, useNA = "always")  # Black or African American in Teleform
+filter.data <- filter(data, piq_5 == 0 & PIQ_6c_T == 1 | piq_5 == 0 & piq_6___3 == 1)
+table(data$shq_2, useNA = "always")  # shq_2: Onset of smoking regularly everyday
+table(data$piq_2, useNA = "always")  # piq_2: Age
+
+new.data <- mutate(filter.data, daily_cig_year = piq_2 - shq_2)
+summary(new.data$daily_cig_year >= 2 & new.data$shq_3 >= 10)
+new.data <- filter(new.data, daily_cig_year >= 2 & shq_3 >= 10)
+exclusion_1 <- filter(new.data, (scid_alcdep_c_dx == 1 | SCID_AlcDep_P_Dx == 1 | scid_drugdep_c_dx == 1 | SCID_DrugDep_P_Dx == 1))
+exclusion_2 <- filter(new.data, co < 10)
+exclusion_3 <- 
+```
+
