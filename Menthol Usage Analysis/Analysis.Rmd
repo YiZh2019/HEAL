@@ -56,7 +56,7 @@ ChiSqFisher <- function(var){
 
 
 ```{r}
-data <- read_sav("C:/Users/Yi/USC HEAL/USC HEAL/Menthol/Merged_GROW_BRAND.sav")
+data <- read_sav("/Users/zhan039/Desktop/USC HEAL/Menthol/Merged_GROW_BRAND.sav")
 
 # teleform.repeat <- read_sav("/Users/zhan039/Desktop/USC HEAL/GROW/GROW DATA-20190920T175512Z-001/Yi/teleform_repeat.sav")
 
@@ -111,6 +111,20 @@ apply(filter.data[, shq.continuous], 2, ValidN)
   # t.test(menthol.shq.use$shq_1, unmenthol.shq.use$shq_1, var.equal = Ftest$result)
 
 apply(filter.data[, shq.continuous], 2, Ttest)
+
+# fix shq_1: remove impossible values
+menthol.shq_1.outliers <- boxplot(menthol.shq.use$shq_1)$out
+unmenthol.shq_1.outliers <- boxplot(unmenthol.shq.use$shq_1)$out
+
+filter.data.cleanshq1 <- filter(filter.data, (shq_8 == 1 & !shq_1 %in% menthol.shq_1.outliers) | (shq_8 == 2 & !shq_1 %in% unmenthol.shq_1.outliers))
+
+Mean.SD.N(filter.data.cleanshq1[filter.data.cleanshq1$shq_8 == 1, ]$shq_1)
+Mean.SD.N(filter.data.cleanshq1[filter.data.cleanshq1$shq_8 == 2, ]$shq_1)
+ValidN(filter.data.cleanshq1$shq_1)
+
+shq_1.levene <- leveneTest(filter.data.cleanshq1$shq_1, group = as.factor(filter.data.cleanshq1$shq_8), center = mean)
+shq_1.levene$result[1] <- ifelse(shq_1.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
+t.test(filter.data.cleanshq1[filter.data.cleanshq1$shq_8 == 1, ]$shq_1, filter.data.cleanshq1[filter.data.cleanshq1$shq_8 == 2, ]$shq_1, var.equal = shq_1.levene$result[1])
 
 # combine shq_9___ to calculate the count of products
 test <- filter(filter.data, is.na(shq_9___1) & is.na(shq_9___2) & is.na(shq_9___3) & is.na(shq_9___4) & is.na(shq_9___5) & is.na(shq_9___6) & is.na(shq_9___7) & is.na(shq_9___8) & is.na(shq_9___9) & is.na(shq_9___10)) # the participant who has missing values in all questions about ever use of products: cleaned_SID = 50392
