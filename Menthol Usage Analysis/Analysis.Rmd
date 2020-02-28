@@ -98,7 +98,7 @@ shq.use <- c("shq_1","shq_2","shq_3","shq_4","shq_5","shq_6","shq_7","shq_8","sh
 menthol.shq.use <- menthol.shq[, c("cleaned_SID", shq.use)]
 unmenthol.shq.use <- unmenthol.shq[, c("cleaned_SID", shq.use)]
 
-shq.continuous <- c("shq_1","shq_2","shq_3","shq_4", "shq_5", "shq_11","shq_12", "shq_16", "shq_17", "shq_18", "shq_19", "shq_20", "shq_21", "shq_22", "shq_23", "shq_24", "shq_25", "shq_26", "shq_27", "shq_34","shq_35")
+shq.continuous <- c("shq_1","shq_2","shq_3","shq_4", "shq_5", "shq_11","shq_12", "shq_13", "shq_16", "shq_17", "shq_18", "shq_19", "shq_20", "shq_21", "shq_22", "shq_23", "shq_24", "shq_25", "shq_26", "shq_27", "shq_34","shq_35")
 
 # continuous variables
 #  knitr:: kable(apply(menthol.shq.use[, shq.continuous], 2, Mean.SD.N))
@@ -154,7 +154,33 @@ t.test(filter.data.combineshq9[filter.data.combineshq9$shq_8 == 1, ]$shq_9, filt
 # apply(filter.data.combineshq9[, "shq_9"], 2, ValidN)
 # chisq.test(matrix(c(207, 91, 47, 45, 20, 11, 117, 60, 32, 16, 15, 14), ncol = 2))
 
+# combine shq_16 to shq_27 to calculate the count of withdraw symptoms
+filter.data.withdraw <- filter(filter.data, !(is.na(shq_16) & is.na(shq_17) & is.na(shq_18) & is.na(shq_19) & is.na(shq_20) & is.na(shq_21) & is.na(shq_22) & is.na(shq_23) & is.na(shq_24) & is.na(shq_25) & is.na(shq_26) & is.na(shq_27)))
 
+filter.data.withdraw <- mutate(filter.data.withdraw, shq_16d = ifelse(is.na(shq_16), 0, ifelse(shq_16 == 1, 0, 1)), shq_17d = ifelse(is.na(shq_17), 0, ifelse(shq_17 == 1, 0, 1)), shq_18d = ifelse(is.na(shq_18), 0, ifelse(shq_18 == 1, 0, 1)), shq_19d = ifelse(is.na(shq_19), 0, ifelse(shq_19 == 1, 0, 1)), shq_20d = ifelse(is.na(shq_20), 0, ifelse(shq_20 == 1, 0, 1)), shq_21d = ifelse(is.na(shq_21), 0, ifelse(shq_21 == 1, 0, 1)), shq_22d = ifelse(is.na(shq_22), 0, ifelse(shq_22 == 1, 0, 1)), shq_23d = ifelse(is.na(shq_23), 0, ifelse(shq_23 == 1, 0, 1)), shq_24d = ifelse(is.na(shq_24), 0, ifelse(shq_24 == 1, 0, 1)), shq_25d = ifelse(is.na(shq_25), 0, ifelse(shq_25 == 1, 0, 1)), shq_26d = ifelse(is.na(shq_26), 0, ifelse(shq_26 == 1, 0, 1)), shq_27d = ifelse(is.na(shq_27), 0, ifelse(shq_27 == 1, 0, 1)))
+
+filter.data.withdraw <- mutate(filter.data.withdraw, withdraw.count = shq_16d + shq_17d +shq_18d + shq_19d + shq_20d + shq_21d + shq_22d + shq_23d + shq_24d + shq_25d + shq_26d + shq_27d)
+
+Mean.SD.N(filter.data.withdraw[filter.data.withdraw$shq_8 == 1, ]$withdraw.count)
+Mean.SD.N(filter.data.withdraw[filter.data.withdraw$shq_8 == 2, ]$withdraw.count)
+ValidN(filter.data.withdraw$withdraw.count)
+
+withdraw.levene <- leveneTest(filter.data.withdraw$withdraw.count, group = as.factor(filter.data.withdraw$shq_8), center = mean)
+
+withdraw.levene$result[1] <- ifelse(withdraw.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
+t.test(filter.data.withdraw[filter.data.withdraw$shq_8 == 1, ]$withdraw.count, filter.data.withdraw[filter.data.withdraw$shq_8 == 2, ]$withdraw.count, var.equal = withdraw.levene$result[1])
+
+# categorize the count of withdraw symptoms to 2 levels
+filter.data.withdraw <- mutate(filter.data.withdraw, withdraw.di = ifelse(withdraw.count == 0, 0, 1))
+FreqPercent(filter.data.withdraw[filter.data.withdraw$shq_8 == 1, ]$withdraw.di)
+FreqPercent(filter.data.withdraw[filter.data.withdraw$shq_8 == 2, ]$withdraw.di)
+ValidN(filter.data.withdraw$withdraw.di)
+
+withdraw.chisq <- chisq.test(rbind(table(filter.data.withdraw[filter.data.withdraw$shq_8 == 1, ]$withdraw.di), table(filter.data.withdraw[filter.data.withdraw$shq_8 == 2, ]$withdraw.di)))
+withdraw.fisher <- fisher.test(rbind(table(filter.data.withdraw[filter.data.withdraw$shq_8 == 1, ]$withdraw.di), table(filter.data.withdraw[filter.data.withdraw$shq_8 == 2, ]$withdraw.di)))
+withdraw.chisq
+withdraw.fisher
+  
 # categorical variables
 apply(menthol.shq.use[, shq.use[!shq.use %in% shq.continuous]], 2, FreqPercent)
 apply(unmenthol.shq.use[, shq.use[!shq.use %in% shq.continuous]], 2, FreqPercent)
@@ -208,7 +234,42 @@ ChiSqFisher(filter.data$shq_31)
 ChiSqFisher(filter.data$shq_32)
 ChiSqFisher(filter.data$shq_33)
 
+# collapse shq_28 ~ shq_33 to mother's family and father's family
+filter.data.family <- mutate(filter.data, father.family = ifelse(shq_28 ==  1 | shq_28 == 2 | shq_29 == 1 | shq_29 == 2 | shq_30 == 1 | shq_30 == 2, 1, ifelse(shq_28 == 3 & shq_29 == 3 & shq_30 == 3, 0, NA)), mother.family = ifelse(shq_31 == 1 | shq_31 == 2 | shq_32 == 1 | shq_32 == 2 | shq_33 == 1 | shq_33 == 2, 1, ifelse(shq_31 == 3 & shq_32 == 3 & shq_33 == 3, 0, NA)))
+
+FreqPercent(filter.data.family[filter.data.family$shq_8 == 1, ]$father.family)
+FreqPercent(filter.data.family[filter.data.family$shq_8 == 2, ]$father.family)
+ValidN(filter.data.family$father.family)
+
+father.chisq <- chisq.test(rbind(table(filter.data.family[filter.data.family$shq_8 == 1, ]$father.family), table(filter.data.family[filter.data.family$shq_8 == 2, ]$father.family)))
+father.fisher <- fisher.test(rbind(table(filter.data.family[filter.data.family$shq_8 == 1, ]$father.family), table(filter.data.family[filter.data.family$shq_8 == 2, ]$father.family)))
+father.chisq
+father.fisher
+
+FreqPercent(filter.data.family[filter.data.family$shq_8 == 1, ]$mother.family)
+FreqPercent(filter.data.family[filter.data.family$shq_8 == 2, ]$mother.family)
+ValidN(filter.data.family$mother.family)
+
+mother.chisq <- chisq.test(rbind(table(filter.data.family[filter.data.family$shq_8 == 1, ]$mother.family), table(filter.data.family[filter.data.family$shq_8 == 2, ]$mother.family)))
+mother.fisher <- fisher.test(rbind(table(filter.data.family[filter.data.family$shq_8 == 1, ]$mother.family), table(filter.data.family[filter.data.family$shq_8 == 2, ]$mother.family)))
+mother.chisq
+mother.fisher
+
+# collapse brothers and sisters variables
+filter.data.siblings <- mutate(filter.data, sibling.prop = shq_35/shq_34 * 100)
+filter.data.siblings <- filter(filter.data.siblings, 0 <= sibling.prop & sibling.prop <= 100)
+Mean.SD.N(filter.data.siblings[filter.data.siblings$shq_8 == 1, ]$sibling.prop)
+Mean.SD.N(filter.data.siblings[filter.data.siblings$shq_8 == 2, ]$sibling.prop)
+ValidN(filter.data.siblings$sibling.prop)
+
+sibling.levene <- leveneTest(filter.data.siblings$sibling.prop, group = as.factor(filter.data.siblings$shq_8), center = mean)
+
+sibling.levene$result[1] <- ifelse(sibling.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
+t.test(filter.data.siblings[filter.data.siblings$shq_8 == 1, ]$sibling.prop, filter.data.siblings[filter.data.siblings$shq_8 == 2, ]$sibling.prop, var.equal = sibling.levene$result[1])
+
 ```
+
+
 
 ```{r}
 # FTND
