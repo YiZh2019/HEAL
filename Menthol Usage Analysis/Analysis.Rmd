@@ -185,6 +185,7 @@ withdraw.fisher
 apply(menthol.shq.use[, shq.use[!shq.use %in% shq.continuous]], 2, FreqPercent)
 apply(unmenthol.shq.use[, shq.use[!shq.use %in% shq.continuous]], 2, FreqPercent)
 apply(filter.data[, shq.use[!shq.use %in% shq.continuous]], 2, table)
+apply(filter.data[, c("shq_6", "shq_7", "shq_10", "shq_14")], 2, ValidN)
 
 # apply(filter.data[, shq.use[!shq.use %in% c(shq.continuous, "shq_8")]], 2, ChiSqFisher)
 # ChiSqFisher(filter.data$shq_5)

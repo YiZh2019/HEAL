@@ -15,8 +15,9 @@ library(tidyverse)
 ```
 
 ```{r}
-grow <- read_sav("C:/Users/Yi/USC HEAL/USC HEAL/Menthol/fix_grow_data.sav")
-brand <- read_sav("C:/Users/Yi/USC HEAL/USC HEAL/Menthol/Nausheen/2.10.20 updated data set with CTSI.sav")
+grow <- read_sav("/Users/zhan039/Desktop/USC HEAL/Menthol/fix_grow_data.sav")
+
+brand <- read_sav("/Users/zhan039/Desktop/USC HEAL/Menthol/Nausheen/2.10.20 updated data set with CTSI.sav")
 ```
 
 ```{r}
@@ -40,6 +41,6 @@ merge(A,B, by.x = "X1", by.y = "X2",all.x=TRUE)
 
 ```{r}
 # save(merged.data, file = "C:/Users/Yi/USC HEAL/USC HEAL/Menthol/Merged_GROW_BRAND.Rdata")
-write_sav(data = merged.data, path = "C:/Users/Yi/USC HEAL/USC HEAL/Menthol/Merged_GROW_BRAND.sav")
+write_sav(data = merged.data, path = "/Users/zhan039/Desktop/USC HEAL/Menthol/Merged_GROW_BRAND.sav")
 ```
 
