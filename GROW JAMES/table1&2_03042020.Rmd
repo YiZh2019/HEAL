@@ -1,0 +1,71 @@
+---
+title: "table1&2_03042020"
+author: "Yi"
+date: "3/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(tidyverse)
+library(psych)
+```
+
+```{r}
+Mean.sd.n <- function(var){
+    a <- cbind(mean(var, na.rm = T), 
+               sd(var, na.rm = T),
+               sum(!is.na(var)))
+    rownames(a) <- attr(var, which = "label")
+    colnames(a) <- c("Mean", "SD", "Valid N")
+    return(a)
+}
+
+Freq.Perc.n <- function(var){
+  b <- rbind(table(var),
+             table(var)/sum(!is.na(var)))
+  rownames(b) <- c("Freq", "Perc")
+  return(list(variable = attr(var, which = "label"),b, ValidN = sum(!is.na(var))))
+}
+```
+
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC HEAL/GROW JAMES/GROW Manuscript _ Data_03032020/REDCap_wTeleform_Merged (scored + sorted)_06212018 (No 2nd survey) with DIFF_03082019.sav")
+```
+
+```{r}
+# sample selection: 528
+analysis.data <- filter(data, sample528 == 1)
+```
+
+```{r}
+######### table 1 - Demographics ##############
+# age
+Mean.sd.n(analysis.data$piq_2)
+
+# gender
+Freq.Perc.n(analysis.data$piq_1)
+
+# age started smoking
+Mean.sd.n(analysis.data$shq_2)
+
+# number of cigarettes per day
+Mean.sd.n(analysis.data$shq_3)
+
+# menthol cigarette use
+Freq.Perc.n(analysis.data$shq_8)
+
+# FTND
+Mean.sd.n(analysis.data$FTND_SUM)
+```
+
+```{r}
+
+alpha(analysis.data[, c("d_wsws_7", "d_wsws_9", "d_wsws_17", "d_wsws_21")])
+```
+
