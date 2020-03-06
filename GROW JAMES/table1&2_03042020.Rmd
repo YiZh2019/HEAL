@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(haven)
 library(tidyverse)
-library(psych)
+library(psy)
 ```
 
 ```{r}
@@ -31,6 +31,7 @@ Freq.Perc.n <- function(var){
   rownames(b) <- c("Freq", "Perc")
   return(list(variable = attr(var, which = "label"),b, ValidN = sum(!is.na(var))))
 }
+
 ```
 
 
@@ -44,7 +45,7 @@ analysis.data <- filter(data, sample528 == 1)
 ```
 
 ```{r}
-######### table 1 - Demographics ##############
+######### table 1 - Sample Characteristics ##############
 # age
 Mean.sd.n(analysis.data$piq_2)
 
@@ -65,7 +66,115 @@ Mean.sd.n(analysis.data$FTND_SUM)
 ```
 
 ```{r}
+# TABLE 2 - Tobacco Withdraw Symptoms
+# WSWS craving
+Mean.sd.n(analysis.data$D_WSWS_Craving_Mean)
+Mean.sd.n(analysis.data$ND_WSWS_Craving_Mean)
+cronbach(analysis.data[, c("d_wsws_7", "d_wsws_9", "d_wsws_17", "d_wsws_21")])
+cronbach(analysis.data[, c("nd_wsws_7", "nd_wsws_9", "nd_wsws_17", "nd_wsws_21")])
+t.test(analysis.data$D_WSWS_Craving_Mean, analysis.data$ND_WSWS_Craving_Mean, paired = T)
+20.559/sqrt(517)
+0.922953/1.020766
 
-alpha(analysis.data[, c("d_wsws_7", "d_wsws_9", "d_wsws_17", "d_wsws_21")])
+# QSU Total
+Mean.sd.n(analysis.data$D_QSU_Mean)
+Mean.sd.n(analysis.data$ND_QSU_Mean)
+cronbach(analysis.data[, c("d_qsu_1", "d_qsu_2", "d_qsu_3", "d_qsu_4", "d_qsu_5", "d_qsu_6", "d_qsu_7", "d_qsu_8", "d_qsu_9", "d_qsu_10")])
+cronbach(analysis.data[, c("nd_qsu_1", "nd_qsu_2", "nd_qsu_3", "nd_qsu_4", "nd_qsu_5", "nd_qsu_6", "nd_qsu_7", "nd_qsu_8", "nd_qsu_9", "nd_qsu_10")])
+t.test(analysis.data$D_QSU_Mean, analysis.data$ND_QSU_Mean, paired = T)
+30.621629/sqrt(520)
+1.844049/1.373238
+
+# QSU Factor 1
+Mean.sd.n(analysis.data$D_QSU_Factor1_Mean)
+Mean.sd.n(analysis.data$ND_QSU_Factor1_Mean)
+cronbach(analysis.data[, c("d_qsu_1", "d_qsu_3", "d_qsu_6", "d_qsu_7", "d_qsu_10")])
+cronbach(analysis.data[, c("nd_qsu_1", "nd_qsu_3", "nd_qsu_6", "nd_qsu_7", "nd_qsu_10")])
+t.test(analysis.data$D_QSU_Factor1_Mean, analysis.data$ND_QSU_Factor1_Mean, paired = T)
+31.726126/sqrt(517)
+2.316925/1.660505
+
+#QSU Fctor 2
+Mean.sd.n(analysis.data$D_QSU_Factor2_Mean)
+Mean.sd.n(analysis.data$ND_QSU_Factor2_Mean)
+cronbach(analysis.data[, c("d_qsu_2", "d_qsu_4", "d_qsu_5", "d_qsu_8", "d_qsu_9")])
+cronbach(analysis.data[, c("nd_qsu_2", "nd_qsu_4", "nd_qsu_5", "nd_qsu_8", "nd_qsu_9")])
+t.test(analysis.data$D_QSU_Factor2_Mean, analysis.data$ND_QSU_Factor2_Mean, paired = T)
+22.536197/sqrt(520)
+1.364519/1.380704
+
+# POMS - Negative Affect
+Mean.sd.n(analysis.data$D_POMS_NM_Mean)
+Mean.sd.n(analysis.data$ND_POMS_NM_Mean)
+cronbach(analysis.data[, c("D_POMS_Anger_Mean", "D_POMS_Anxiety_Mean", "D_POMS_Confusion_Mean", "D_POMS_Depression_Mean", "D_POMS_Fatigue_Mean")])
+cronbach(analysis.data[, c("ND_POMS_Anger_Mean", "ND_POMS_Anxiety_Mean", "ND_POMS_Confusion_Mean", "ND_POMS_Depression_Mean", "ND_POMS_Fatigue_Mean")])
+t.test(analysis.data$D_POMS_NM_Mean, analysis.data$ND_POMS_NM_Mean, paired = T)
+6.804124/sqrt(516)
+0.155663/0.519683
+
+# WSWS Anger
+Mean.sd.n(analysis.data$D_WSWS_Anger_Mean)
+Mean.sd.n(analysis.data$ND_WSWS_Anger_Mean)
+cronbach(analysis.data[, c("d_wsws_11", "d_wsws_13", "d_wsws_15")])
+cronbach(analysis.data[, c("nd_wsws_11", "nd_wsws_13", "nd_wsws_15")])
+t.test(analysis.data$D_WSWS_Anger_Mean, analysis.data$ND_WSWS_Anger_Mean, paired = T)
+14.122264/sqrt(517)
+0.709865/1.142922
+
+
+# POMS Anger
+Mean.sd.n(analysis.data$D_POMS_Anger_Mean)
+Mean.sd.n(analysis.data$ND_POMS_Anger_Mean)
+cronbach(analysis.data[, c("d_poms_4", "d_poms_14", "d_poms_19", "d_poms_24", "d_poms_30", "d_poms_33", "d_poms_39", "d_poms_42", "d_poms_47", "d_poms_53", "d_poms_57", "d_poms_71")])
+cronbach(analysis.data[, c("nd_poms_4", "nd_poms_14", "nd_poms_19", "nd_poms_24", "nd_poms_30", "nd_poms_33", "nd_poms_39", "nd_poms_42", "nd_poms_47", "nd_poms_53", "nd_poms_57", "nd_poms_71")])
+t.test(analysis.data$D_POMS_Anger_Mean, analysis.data$ND_POMS_Anger_Mean, paired = T)
+7.168788/sqrt(516)
+0.188989/0.598846
+
+# WSWS Anxiety
+Mean.sd.n(analysis.data$D_WSWS_Anxiety_Mean)
+Mean.sd.n(analysis.data$ND_WSWS_Anxiety_Mean)
+cronbach(analysis.data[, c("d_wsws_2", "d_wsws_4", "d_wsws_6", "d_wsws_8")])
+cronbach(analysis.data[, c("nd_wsws_2", "nd_wsws_4", "nd_wsws_6", "nd_wsws_8")])
+t.test(analysis.data$D_WSWS_Anxiety_Mean, analysis.data$ND_WSWS_Anxiety_Mean, paired = T)
+11.882547/sqrt(516)
+0.484496/0.926202
+
+# POMS Anxiety
+Mean.sd.n(analysis.data$D_POMS_Anxiety_Mean)
+Mean.sd.n(analysis.data$ND_POMS_Anxiety_Mean)
+cronbach(analysis.data[, c("d_poms_2", "d_poms_11", "d_poms_18", "d_poms_66", "d_poms_69", "d_poms_43", "d_poms_48", "d_poms_60", "d_poms_27")])
+cronbach(analysis.data[, c("nd_poms_2", "nd_poms_11", "nd_poms_18", "nd_poms_66", "nd_poms_69", "nd_poms_43", "nd_poms_48", "nd_poms_60", "nd_poms_27")])
+t.test(analysis.data$D_POMS_Anxiety_Mean, analysis.data$ND_POMS_Anxiety_Mean, paired = T)
+9.593654/sqrt(516)
+0.294874/0.698195
+
+# WSWS Sadness
+Mean.sd.n(analysis.data$D_WSWS_Sadness_Mean)
+Mean.sd.n(analysis.data$ND_WSWS_Sadness_Mean)
+cronbach(analysis.data[, c("d_wsws_5", "d_wsws_10", "d_wsws_16", "d_wsws_20")])
+cronbach(analysis.data[, c("nd_wsws_5", "nd_wsws_10", "nd_wsws_16", "nd_wsws_20")])
+t.test(analysis.data$D_WSWS_Sadness_Mean, analysis.data$ND_WSWS_Sadness_Mean, paired = T)
+10.055768/sqrt(517)
+0.339942/0.768661
+
+# POMS Depression
+Mean.sd.n(analysis.data$D_POMS_Depression_Mean)
+Mean.sd.n(analysis.data$ND_POMS_Depression_Mean)
+cronbach(analysis.data[, c("d_poms_6", "d_poms_10", "d_poms_16", "d_poms_22", "d_poms_25", "d_poms_29", "d_poms_35", "d_poms_36", "d_poms_37", "d_poms_45", "d_poms_46", "d_poms_49", "d_poms_59", "d_poms_62", "d_poms_64")])
+cronbach(analysis.data[, c("nd_poms_6", "nd_poms_10", "nd_poms_16", "nd_poms_22", "nd_poms_25", "nd_poms_29", "nd_poms_35", "nd_poms_36", "nd_poms_37", "nd_poms_45", "nd_poms_46", "nd_poms_49", "nd_poms_59", "nd_poms_62", "nd_poms_64")])
+t.test(analysis.data$D_POMS_Depression_Mean, analysis.data$ND_POMS_Depression_Mean, paired = T)
+3.708016/sqrt(516)
+0.087052/0.533289
+
+
+# POMS Positive Affect
+Mean.sd.n(analysis.data$D_POMS_PM_Mean)
+Mean.sd.n(analysis.data$ND_POMS_PM_Mean)
+cronbach(analysis.data[, c("D_POMS_Elation_Mean", "D_POMS_Vigor_Mean", "D_POMS_Friendliness_Mean")])
+cronbach(analysis.data[, c("ND_POMS_Elation_Mean", "ND_POMS_Vigor_Mean", "ND_POMS_Friendliness_Mean")])
+t.test(analysis.data$D_POMS_PM_Mean, analysis.data$ND_POMS_PM_Mean, paired = T)
+-13.319955/sqrt(515)
+-0.443648/0.755857
 ```
 
