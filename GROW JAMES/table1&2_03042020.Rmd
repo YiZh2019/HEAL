@@ -134,8 +134,9 @@ t.test(analysis.data$D_POMS_Anger_Mean, analysis.data$ND_POMS_Anger_Mean, paired
 # WSWS Anxiety
 Mean.sd.n(analysis.data$D_WSWS_Anxiety_Mean)
 Mean.sd.n(analysis.data$ND_WSWS_Anxiety_Mean)
-cronbach(analysis.data[, c("d_wsws_2", "d_wsws_4", "d_wsws_6", "d_wsws_8")])
-cronbach(analysis.data[, c("nd_wsws_2", "nd_wsws_4", "nd_wsws_6", "nd_wsws_8")])
+analysis.data <- mutate(analysis.data, d_wsws_8_reverse = 4 - d_wsws_8, nd_wsws_8_reverse = 4 - nd_wsws_8)
+cronbach(analysis.data[, c("d_wsws_2", "d_wsws_4", "d_wsws_6", "d_wsws_8_reverse")])
+cronbach(analysis.data[, c("nd_wsws_2", "nd_wsws_4", "nd_wsws_6", "nd_wsws_8_reverse")])
 t.test(analysis.data$D_WSWS_Anxiety_Mean, analysis.data$ND_WSWS_Anxiety_Mean, paired = T)
 11.882547/sqrt(516)
 0.484496/0.926202
@@ -143,8 +144,9 @@ t.test(analysis.data$D_WSWS_Anxiety_Mean, analysis.data$ND_WSWS_Anxiety_Mean, pa
 # POMS Anxiety
 Mean.sd.n(analysis.data$D_POMS_Anxiety_Mean)
 Mean.sd.n(analysis.data$ND_POMS_Anxiety_Mean)
-cronbach(analysis.data[, c("d_poms_2", "d_poms_11", "d_poms_18", "d_poms_66", "d_poms_69", "d_poms_43", "d_poms_48", "d_poms_60", "d_poms_27")])
-cronbach(analysis.data[, c("nd_poms_2", "nd_poms_11", "nd_poms_18", "nd_poms_66", "nd_poms_69", "nd_poms_43", "nd_poms_48", "nd_poms_60", "nd_poms_27")])
+analysis.data <- mutate(analysis.data, d_poms_66_reverse = 4 - d_poms_66, nd_poms_66_reverse = 4 - nd_poms_66)
+cronbach(analysis.data[, c("d_poms_2", "d_poms_11", "d_poms_18", "d_poms_66_reverse", "d_poms_69", "d_poms_43", "d_poms_48", "d_poms_60", "d_poms_27")])
+cronbach(analysis.data[, c("nd_poms_2", "nd_poms_11", "nd_poms_18", "nd_poms_66_reverse", "nd_poms_69", "nd_poms_43", "nd_poms_48", "nd_poms_60", "nd_poms_27")])
 t.test(analysis.data$D_POMS_Anxiety_Mean, analysis.data$ND_POMS_Anxiety_Mean, paired = T)
 9.593654/sqrt(516)
 0.294874/0.698195
@@ -152,8 +154,9 @@ t.test(analysis.data$D_POMS_Anxiety_Mean, analysis.data$ND_POMS_Anxiety_Mean, pa
 # WSWS Sadness
 Mean.sd.n(analysis.data$D_WSWS_Sadness_Mean)
 Mean.sd.n(analysis.data$ND_WSWS_Sadness_Mean)
-cronbach(analysis.data[, c("d_wsws_5", "d_wsws_10", "d_wsws_16", "d_wsws_20")])
-cronbach(analysis.data[, c("nd_wsws_5", "nd_wsws_10", "nd_wsws_16", "nd_wsws_20")])
+analysis.data <- mutate(analysis.data, d_wsws_5_reverse = 4 - d_wsws_5, nd_wsws_5_reverse = 4 - nd_wsws_5, d_wsws_20_reverse = 4 - d_wsws_20, nd_wsws_20_reverse = 4 - nd_wsws_20)
+cronbach(analysis.data[, c("d_wsws_5_reverse", "d_wsws_10", "d_wsws_16", "d_wsws_20_reverse")])
+cronbach(analysis.data[, c("nd_wsws_5_reverse", "nd_wsws_10", "nd_wsws_16", "nd_wsws_20_reverse")])
 t.test(analysis.data$D_WSWS_Sadness_Mean, analysis.data$ND_WSWS_Sadness_Mean, paired = T)
 10.055768/sqrt(517)
 0.339942/0.768661
@@ -198,7 +201,57 @@ t.test(analysis.data$D_POMS_Friendliness_Mean, analysis.data$ND_POMS_Friendlines
 # POMS Vigor
 Mean.sd.n(analysis.data$D_POMS_Vigor_Mean)
 Mean.sd.n(analysis.data$ND_POMS_Vigor_Mean)
+cronbach(analysis.data[, c("d_poms_8", "d_poms_17", "d_poms_23", "d_poms_31", "d_poms_41", "d_poms_54", "d_poms_56", "d_poms_61")])
+cronbach(analysis.data[, c("nd_poms_8", "nd_poms_17", "nd_poms_23", "nd_poms_31", "nd_poms_41", "nd_poms_54", "nd_poms_56", "nd_poms_61")])
+t.test(analysis.data$D_POMS_Vigor_Mean, analysis.data$ND_POMS_Vigor_Mean, paired = T)
+-10.468316/sqrt(516)
+-0.376534/0.817057
 
+# SHAPS Anhedonia
+Mean.sd.n(analysis.data$D_SHAPS_Mean)
+Mean.sd.n(analysis.data$ND_SHAPS_Mean)
+cronbach(analysis.data[, c("d_shaps_1", "d_shaps_2", "d_shaps_3", "d_shaps_4", "d_shaps_5", "d_shaps_6", "d_shaps_7", "d_shaps_8", "d_shaps_9", "d_shaps_10", "d_shaps_11", "d_shaps_12", "d_shaps_13", "d_shaps_14")])
+cronbach(analysis.data[, c("nd_shaps_1", "nd_shaps_2", "nd_shaps_3", "nd_shaps_4", "nd_shaps_5", "nd_shaps_6", "nd_shaps_7", "nd_shaps_8", "nd_shaps_9", "nd_shaps_10", "nd_shaps_11", "nd_shaps_12", "nd_shaps_13", "nd_shaps_14")])
+t.test(analysis.data$D_SHAPS_Mean, analysis.data$ND_SHAPS_Mean, paired = T)
+-7.332597/sqrt(521)
+-0.167407/0.521115
 
+# POMS Confusion
+Mean.sd.n(analysis.data$D_POMS_Confusion_Mean)
+Mean.sd.n(analysis.data$ND_POMS_Confusion_Mean)
+analysis.data <- mutate(analysis.data, d_poms_38_reverse = 4 - d_poms_38, nd_poms_38_reverse = 4 - nd_poms_38)
+cronbach(analysis.data[, c("d_poms_7", "d_poms_9", "d_poms_21", "d_poms_67", "d_poms_38_reverse", "d_poms_52", "d_poms_58")])
+cronbach(analysis.data[, c("nd_poms_7", "nd_poms_9", "nd_poms_21", "nd_poms_67", "nd_poms_38_reverse", "nd_poms_52", "nd_poms_58")])
+t.test(analysis.data$D_POMS_Confusion_Mean, analysis.data$ND_POMS_Confusion_Mean, paired = T)
+5.999629/sqrt(516)
+0.149631/0.566528
+
+# WSWS Concentration
+Mean.sd.n(analysis.data$D_WSWS_Concentration_Mean)
+Mean.sd.n(analysis.data$ND_WSWS_Concentration_Mean)
+analysis.data <- mutate(analysis.data, d_wsws_3_reverse = 4 - d_wsws_3, nd_wsws_3_reverse = 4 - nd_wsws_3)
+cronbach(analysis.data[, c("d_wsws_3_reverse", "d_wsws_19", "d_wsws_22")])
+cronbach(analysis.data[, c("nd_wsws_3_reverse", "nd_wsws_19", "nd_wsws_22")])
+t.test(analysis.data$D_WSWS_Concentration_Mean, analysis.data$ND_WSWS_Concentration_Mean, paired = T)
+12.748854/sqrt(517)
+0.499678/0.891177
+
+# CIS Impulsivity
+Mean.sd.n(analysis.data$D_CIS_Mean)
+Mean.sd.n(analysis.data$ND_CIS_Mean)
+analysis.data <- mutate(analysis.data, d_cis_4_reverse = 4 - d_cis_4, d_cis_5_reverse = 4 - d_cis_5, d_cis_6_reverse = 4 - d_cis_6, d_cis_8_reverse = 4 - d_cis_8, d_cis_10_reverse = 4 - d_cis_10, d_cis_12_reverse = 4 - d_cis_12, d_cis_15_reverse = 4 - d_cis_15, d_cis_18_reverse = 4 - d_cis_18, d_cis_19_reverse = 4 - d_cis_19, nd_cis_4_reverse = 4 - nd_cis_4, nd_cis_5_reverse = 4 - nd_cis_5, nd_cis_6_reverse = 4 - nd_cis_6, nd_cis_8_reverse = 4 - nd_cis_8, nd_cis_10_reverse = 4 - nd_cis_10, nd_cis_12_reverse = 4 - nd_cis_12, nd_cis_15_reverse = 4 - nd_cis_15, nd_cis_18_reverse = 4 - nd_cis_18, nd_cis_19_reverse = 4 -nd_cis_19)
+cronbach(analysis.data[, c("d_cis_1", "d_cis_2", "d_cis_3", "d_cis_4_reverse", "d_cis_5_reverse", "d_cis_6_reverse", "d_cis_7", "d_cis_8_reverse", "d_cis_9", 
+  "d_cis_10_reverse", "d_cis_11", "d_cis_12_reverse", "d_cis_13", "d_cis_14", "d_cis_15_reverse", "d_cis_16", "d_cis_17", "d_cis_18_reverse", "d_cis_19_reverse")])
+cronbach(analysis.data[, c("nd_cis_1", "nd_cis_2", "nd_cis_3", "nd_cis_4_reverse", "nd_cis_5_reverse", "nd_cis_6_reverse", "nd_cis_7", "nd_cis_8_reverse", "nd_cis_9", 
+  "nd_cis_10_reverse", "nd_cis_11", "nd_cis_12_reverse", "nd_cis_13", "nd_cis_14", "nd_cis_15_reverse", "nd_cis_16", "nd_cis_17", "nd_cis_18_reverse", "nd_cis_19_reverse")])
+t.test(analysis.data$D_CIS_Mean, analysis.data$ND_CIS_Mean, paired = T)
+11.124267/sqrt(519)
+0.205127/0.420083
+
+# WSWS Hunger
+Mean.sd.n(analysis.data$D_WSWS_Hunger_Mean)
+Mean.sd.n(analysis.data$ND_WSWS_Hunger_Mean)
+
+(4-ND_WSWS_1), ND_WSWS_12, ND_WSWS_14, ND_WSWS_18, ND_WSWS_23
 ```
 
