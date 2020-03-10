@@ -176,5 +176,29 @@ cronbach(analysis.data[, c("ND_POMS_Elation_Mean", "ND_POMS_Vigor_Mean", "ND_POM
 t.test(analysis.data$D_POMS_PM_Mean, analysis.data$ND_POMS_PM_Mean, paired = T)
 -13.319955/sqrt(515)
 -0.443648/0.755857
+
+# POMS Elation
+Mean.sd.n(analysis.data$D_POMS_Elation_Mean)
+Mean.sd.n(analysis.data$ND_POMS_Elation_Mean)
+cronbach(analysis.data[, c("d_poms_3", "d_poms_13", "d_poms_26", "d_poms_40", "d_poms_51", "d_poms_72")])
+cronbach(analysis.data[, c("nd_poms_3", "nd_poms_13", "nd_poms_26", "nd_poms_40", "nd_poms_51", "nd_poms_72")])
+t.test(analysis.data$D_POMS_Elation_Mean, analysis.data$ND_POMS_Elation_Mean, paired = T)
+-11.987361/sqrt(516)
+-0.443669/0.840738
+
+# POMS Friendliness
+Mean.sd.n(analysis.data$D_POMS_Friendliness_Mean)
+Mean.sd.n(analysis.data$ND_POMS_Friendliness_Mean)
+cronbach(analysis.data[, c("d_poms_1", "d_poms_15", "d_poms_28", "d_poms_34", "d_poms_44", "d_poms_55", "d_poms_63", "d_poms_70")])
+cronbach(analysis.data[, c("nd_poms_1", "nd_poms_15", "nd_poms_28", "nd_poms_34", "nd_poms_44", "nd_poms_55", "nd_poms_63", "nd_poms_70")])
+t.test(analysis.data$D_POMS_Friendliness_Mean, analysis.data$ND_POMS_Friendliness_Mean, paired = T)
+-13.878571/sqrt(515)
+-0.512725/0.838385
+
+# POMS Vigor
+Mean.sd.n(analysis.data$D_POMS_Vigor_Mean)
+Mean.sd.n(analysis.data$ND_POMS_Vigor_Mean)
+
+
 ```
 
