@@ -239,7 +239,7 @@ t.test(analysis.data$D_WSWS_Concentration_Mean, analysis.data$ND_WSWS_Concentrat
 # CIS Impulsivity
 Mean.sd.n(analysis.data$D_CIS_Mean)
 Mean.sd.n(analysis.data$ND_CIS_Mean)
-analysis.data <- mutate(analysis.data, d_cis_4_reverse = 4 - d_cis_4, d_cis_5_reverse = 4 - d_cis_5, d_cis_6_reverse = 4 - d_cis_6, d_cis_8_reverse = 4 - d_cis_8, d_cis_10_reverse = 4 - d_cis_10, d_cis_12_reverse = 4 - d_cis_12, d_cis_15_reverse = 4 - d_cis_15, d_cis_18_reverse = 4 - d_cis_18, d_cis_19_reverse = 4 - d_cis_19, nd_cis_4_reverse = 4 - nd_cis_4, nd_cis_5_reverse = 4 - nd_cis_5, nd_cis_6_reverse = 4 - nd_cis_6, nd_cis_8_reverse = 4 - nd_cis_8, nd_cis_10_reverse = 4 - nd_cis_10, nd_cis_12_reverse = 4 - nd_cis_12, nd_cis_15_reverse = 4 - nd_cis_15, nd_cis_18_reverse = 4 - nd_cis_18, nd_cis_19_reverse = 4 -nd_cis_19)
+analysis.data <- mutate(analysis.data, d_cis_4_reverse = 4 - d_cis_4, d_cis_5_reverse = 4 - d_cis_5, d_cis_6_reverse = 4 - d_cis_6, d_cis_8_reverse = 4 - d_cis_8, d_cis_10_reverse = 4 - d_cis_10, d_cis_12_reverse = 4 - d_cis_12, d_cis_15_reverse = 4 - d_cis_15, d_cis_18_reverse = 4 - d_cis_18, d_cis_19_reverse = 4 - d_cis_19, nd_cis_4_reverse = 4 - nd_cis_4, nd_cis_5_reverse = 4 - nd_cis_5, nd_cis_6_reverse = 4 - nd_cis_6, nd_cis_8_reverse = 4 - nd_cis_8, nd_cis_10_reverse = 4 - nd_cis_10, nd_cis_12_reverse = 4 - nd_cis_12, nd_cis_15_reverse = 4 - nd_cis_15, nd_cis_18_reverse = 4 - nd_cis_18, nd_cis_19_reverse = 4 - nd_cis_19)
 cronbach(analysis.data[, c("d_cis_1", "d_cis_2", "d_cis_3", "d_cis_4_reverse", "d_cis_5_reverse", "d_cis_6_reverse", "d_cis_7", "d_cis_8_reverse", "d_cis_9", 
   "d_cis_10_reverse", "d_cis_11", "d_cis_12_reverse", "d_cis_13", "d_cis_14", "d_cis_15_reverse", "d_cis_16", "d_cis_17", "d_cis_18_reverse", "d_cis_19_reverse")])
 cronbach(analysis.data[, c("nd_cis_1", "nd_cis_2", "nd_cis_3", "nd_cis_4_reverse", "nd_cis_5_reverse", "nd_cis_6_reverse", "nd_cis_7", "nd_cis_8_reverse", "nd_cis_9", 
@@ -251,7 +251,21 @@ t.test(analysis.data$D_CIS_Mean, analysis.data$ND_CIS_Mean, paired = T)
 # WSWS Hunger
 Mean.sd.n(analysis.data$D_WSWS_Hunger_Mean)
 Mean.sd.n(analysis.data$ND_WSWS_Hunger_Mean)
+analysis.data <- mutate(analysis.data, d_wsws_1_reverse = 4 - d_wsws_1, nd_wsws_1_reverse = 4 - nd_wsws_1)
+cronbach(analysis.data[, c("d_wsws_1_reverse", "d_wsws_12", "d_wsws_14", "d_wsws_18", "d_wsws_23")])
+cronbach(analysis.data[, c("nd_wsws_1_reverse", "nd_wsws_12", "nd_wsws_14", "nd_wsws_18", "nd_wsws_23")])
+t.test(analysis.data$D_WSWS_Hunger_Mean, analysis.data$ND_WSWS_Hunger_Mean, paired = T)
+8.965797/sqrt(516)
+0.348547/0.883073
 
-(4-ND_WSWS_1), ND_WSWS_12, ND_WSWS_14, ND_WSWS_18, ND_WSWS_23
+# Time Delayed
+analysis.data <- mutate(analysis.data, d_rat_delay_time_fixed = ifelse(is.na(redcap_id), D_RAT_time_delayed, d_rat_delay_time))  # not correct, needs to be corrected
+
+sum(!is.na(analysis.data$d_rat_delay_time_fixed))
+
+
+
+
 ```
+
 
