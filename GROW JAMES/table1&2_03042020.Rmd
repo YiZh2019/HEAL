@@ -47,21 +47,27 @@ analysis.data <- filter(data, sample528 == 1)
 ```{r}
 ######### table 1 - Sample Characteristics ##############
 # age
+range(analysis.data$piq_2, na.rm = T)
 Mean.sd.n(analysis.data$piq_2)
 
 # gender
+range(analysis.data$piq_1, na.rm = T)
 Freq.Perc.n(analysis.data$piq_1)
 
 # age started smoking
+range(analysis.data$shq_2, na.rm = T)
 Mean.sd.n(analysis.data$shq_2)
 
 # number of cigarettes per day
+range(analysis.data$shq_3, na.rm = T)
 Mean.sd.n(analysis.data$shq_3)
 
 # menthol cigarette use
+range(analysis.data$shq_8, na.rm = T)
 Freq.Perc.n(analysis.data$shq_8)
 
 # FTND
+range(analysis.data$FTND_SUM, na.rm = T)
 Mean.sd.n(analysis.data$FTND_SUM)
 ```
 
@@ -259,13 +265,23 @@ t.test(analysis.data$D_WSWS_Hunger_Mean, analysis.data$ND_WSWS_Hunger_Mean, pair
 0.348547/0.883073
 
 # Time Delayed
-analysis.data <- mutate(analysis.data, d_rat_delay_time_fixed = ifelse(is.na(redcap_id), D_RAT_time_delayed, d_rat_delay_time))  # not correct, needs to be corrected
+analysis.data <- mutate(analysis.data, d_rat_delay_time_fixed = ifelse(is.na(redcap_id), D_RAT_time_delayed, d_rat_delay_time)) # merge variables from redcap and from teleform
 
-sum(!is.na(analysis.data$d_rat_delay_time_fixed))
+Mean.sd.n(analysis.data$d_rat_delay_time_fixed)
+Mean.sd.n(analysis.data$nd_rat_delay_time)
+t.test(analysis.data$d_rat_delay_time_fixed, analysis.data$nd_rat_delay_time, paired = T)
+-17.264016/sqrt(522)
+-17.704981/23.430895
 
+# Cigarettes Smoked
+analysis.data <- mutate(analysis.data, d_rat_num_cigs = d_rat_num_cigs_start - d_rat_num_cigs_end, nd_rat_num_cigs = nd_rat_num_cigs_start - nd_rat_num_cigs_end, D_RAT_num_cigs_T = D_RAT_cigs_in_box - D_RAT_cigs_in_box_end, d_rat_num_cigs_fixed = ifelse(is.na(redcap_id), D_RAT_num_cigs_T, d_rat_num_cigs))
 
-
-
+analysis.data <- mutate(analysis.data, d_rat_num_cigs_fixed = ifelse(d_rat_num_cigs_fixed >= 0, d_rat_num_cigs_fixed, NA), nd_rat_num_cigs_fixed = ifelse(nd_rat_num_cigs >= 0, nd_rat_num_cigs, NA))
+Mean.sd.n(analysis.data$d_rat_num_cigs_fixed)
+Mean.sd.n(analysis.data$nd_rat_num_cigs_fixed)
+t.test(analysis.data$d_rat_num_cigs_fixed, analysis.data$nd_rat_num_cigs, paired = T)
+5.403900/sqrt(504)
+0.246032/1.022113
 ```
 
 
