@@ -1,0 +1,74 @@
+---
+title: "explore the dataset and ANOVA models"
+author: "Yi"
+date: "4/1/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggpubr)
+library(rstatix)
+library(ez)
+```
+
+```{r}
+data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/PRISM/03_18_2020/PRISM_Study_Completers_Clean_18Mar2020_noNAs.csv", header = T)
+```
+
+```{r}
+# summary statistics
+data$rat_delay_time_n <- as.numeric(data$rat_delay_time)
+data$blind_cond_f <- as.factor(data$blinding_condn)
+data$blind_cond_f <- as.factor(data$blinding_condn)
+data %>% group_by(blinding_condn) %>%
+  get_summary_stats(rat_delay_time, type = "mean_sd")
+```
+
+```{r}
+# Visualization
+bxp <- ggboxplot(data, x = "blinding_condn", y = "rat_delay_time", add = "point")
+bxp
+```
+
+```{r}
+# Outliers
+data %>% 
+  group_by(blinding_condn) %>%
+  identify_outliers(rat_delay_time)
+```
+
+```{r}
+# normality assumption
+data %>%
+  group_by(blinding_condn) %>%
+  shapiro_test(rat_delay_time)
+
+ggqqplot(data, "rat_delay_time", facet.by = "blinding_condn")
+```
+
+```{r}
+# assumption of sphericity
+test.anova <- anova_test(data = data, dv = rat_delay_time_n, wid = sid, within = blind_cond_f)
+```
+
+```{r}
+#data$sid
+#data$rat_delay_time_n
+data$blind_cond_f
+
+```
+
+```{r}
+table(data$axt1_mnws_1)
+data %>% 
+  group_by(sid) %>%
+  group_by(blinding_condn) %>%
+  get_summary_stats(axt1_mnws_1)
+  
+```
+
