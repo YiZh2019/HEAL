@@ -1,0 +1,114 @@
+---
+title: "0mg_outliers"
+author: "Yi"
+date: "3/31/2020"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r include=FALSE}
+library(haven)
+library(tidyverse)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/P4/03242020/0mg_with scoring added_3.23.2020.sav")
+```
+
+```{r}
+Outliers <- function(varvec){
+  upper <- mean(varvec, na.rm = T) + 2 * sd(varvec, na.rm = T)
+  lower <- mean(varvec, na.rm = T) - 2 * sd(varvec, na.rm = T)
+  
+  ind <- (varvec > upper) | (varvec < lower) | is.na(varvec)
+  return(ind)
+}
+
+Table.Print <- function(table, title) {
+  if (nrow(table) > 0) {
+    knitr::kable(table, caption = title)
+  }
+}
+```
+
+### PANAS
+```{r}
+# PANAS
+PANAS <- select(data, redcap_id, PANAS_PreE_PA, PANAS_PreE_NA, PANAS_PostE_PA, PANAS_PostE_NA, PANAS_PostR_PA, PANAS_PostR_NA)
+
+outliers.PANAS <- apply(PANAS[, -1], 2, Outliers)
+num.outliers.PANAS <- apply(outliers.PANAS, 2, sum)
+knitr::kable(num.outliers.PANAS, caption = "Number of Ouliers in PANAS variables", col.names = "# of outliers")
+
+# PANAS PreE PA
+Table.Print(PANAS[Outliers(PANAS$PANAS_PreE_PA), c("redcap_id", "PANAS_PreE_PA")], "PANAS_PreE_PA")
+
+# PANAS PreE NA
+Table.Print(PANAS[Outliers(PANAS$PANAS_PreE_NA), c("redcap_id", "PANAS_PreE_NA")], "PANAS_PreE_NA")
+
+# PANAS PostE PA
+Table.Print(PANAS[Outliers(PANAS$PANAS_PostE_PA), c("redcap_id", "PANAS_PostE_PA")], "PANAS_PostE_PA")
+
+# PANAS PostE NA
+Table.Print(PANAS[Outliers(PANAS$PANAS_PostE_NA), c("redcap_id", "PANAS_PostE_NA")], "PANAS_PostE_NA")
+
+# PANAS PostR PA
+Table.Print(PANAS[Outliers(PANAS$PANAS_PostR_PA), c("redcap_id", "PANAS_PostR_PA")], "PANAS_PostR_PA")
+
+# PANAS PostR NA
+Table.Print(PANAS[Outliers(PANAS$PANAS_PostR_NA), c("redcap_id", "PANAS_PostR_NA")], "PANAS_PostR_NA")
+```
+
+### MNWS
+```{r}
+MNWS <- select(data, redcap_id, MNWS_PreE_Mean, MNWS_PostE_Mean, MNWS_PostR_Mean)
+
+outliers.MNWS <- apply(MNWS[, -1], 2, Outliers)
+num.outliers.MNWS <- apply(outliers.MNWS, 2, sum)
+knitr::kable(num.outliers.MNWS, caption = "Number of Ouliers in MNWS variables", col.names = "# of outliers")
+
+# MNWS_PreE_Mean
+Table.Print(MNWS[Outliers(MNWS$MNWS_PreE_Mean), c("redcap_id", "MNWS_PreE_Mean")], "MNWS_PreE_Mean")
+
+# MNWS_PostE_Mean
+Table.Print(MNWS[Outliers(MNWS$MNWS_PostE_Mean), c("redcap_id", "MNWS_PostE_Mean")], "MNWS_PostE_Mean")
+
+# MNWS_PostR_Mean
+Table.Print(MNWS[Outliers(MNWS$MNWS_PostR_Mean), c("redcap_id", "MNWS_PostR_Mean")], "MNWS_PostR_Mean")
+```
+
+### QSU
+```{r}
+QSU <- select(data, redcap_id, QSU_PreE_Mean, QSU_PostE_Mean, QSU_PostR_Mean)
+
+outliers.QSU <- apply(QSU[, -1], 2, Outliers)
+num.outliers.QSU <- apply(outliers.QSU, 2, sum)
+knitr::kable(num.outliers.QSU, caption = "Number of Ouliers in QSU variables", col.names = "# of outliers")
+
+# QSU_PreE_Mean
+Table.Print(QSU[Outliers(QSU$QSU_PreE_Mean), c("redcap_id", "QSU_PreE_Mean")], "QSU_PreE_Mean")
+
+# QSU_PostE_Mean
+Table.Print(QSU[Outliers(QSU$QSU_PostE_Mean), c("redcap_id", "QSU_PostE_Mean")], "QSU_PostE_Mean")
+
+# QSU_PostR_Mean
+Table.Print(QSU[Outliers(QSU$QSU_PostR_Mean), c("redcap_id", "QSU_PostR_Mean")], "QSU_PostR_Mean")
+```
+
+### SHAPS
+```{r}
+SHAPS <- select(data, redcap_id, SHAPS_PreE_Sum, SHAPS_PostE_Sum, SHAPS_PreE_Mean, SHAPS_PostE_Mean)
+
+outliers.SHAPS <- apply(SHAPS[, -1], 2, Outliers)
+num.outliers.SHAPS <- apply(outliers.SHAPS, 2, sum)
+knitr::kable(num.outliers.SHAPS, caption = "Number of Ouliers in SHAPS variables", col.names = "# of outliers")
+
+
+```
+
