@@ -1,0 +1,65 @@
+---
+title: "0 mg_inconsistency"
+author: "Yi"
+date: "3/30/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r include=FALSE}
+library(haven)
+library(tidyverse)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/P4/03242020/0mg_with scoring added_3.23.2020.sav")
+```
+
+```{r}
+Table.Print <- function(table, title) {
+  if (nrow(table) > 0) {
+    knitr::kable(table, caption = title)
+  }
+}
+```
+
+### PANAS_PreE
+- check whether all responses are the same
+```{r}
+# check whether all responses to PANAS Pre E are the same
+index.preec_panas <- data %>% select(., starts_with("preec_panas")) %>% apply(., 1, unique) %>% lapply(., length) == 1
+PANAS_PreE <- data[index.preec_panas, c("redcap_id", colnames(data)[startsWith(colnames(data), "preec_panas")])]
+Table.Print(PANAS_PreE, "PANAS_PreE")
+```
+There are `r nrow(PANAS_PreE)` participant(s) responded the same value to all PANAS_PreE questions.
+
+- check whether difference of PA sum and NA sum <= 5
+```{r}
+# check whether difference of PA and NA <= 5
+PANAS.PreE.difference <- data[abs(data$PANAS_PreE_PA - data$PANAS_PreE_NA) <= 5, c("redcap_id", "PANAS_PreE_PA", "PANAS_PreE_NA")]
+Table.Print(PANAS.PreE.difference, "Inconsistency of PANAS_PreE Variables")
+```
+
+There are `r nrow(PANAS.PreE.difference)` participant(s) have similar sum scores of PA and NA (differences <= 5). 
+
+### PANAS_PostE
+- check whether all responses are the same
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
