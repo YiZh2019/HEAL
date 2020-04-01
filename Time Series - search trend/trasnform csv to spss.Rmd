@@ -1,0 +1,30 @@
+---
+title: "transform datasets"
+author: "Yi"
+date: "4/1/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(stringr)
+```
+
+```{r}
+file.names <- list.files(path = "/Users/zhan039/Desktop/USC_HEAL/Search for Drugs/04012020")
+
+for (i in file.names) {
+  path <- paste("/Users/zhan039/Desktop/USC_HEAL/Search for Drugs/04012020/", i, sep = "")
+  data <- read.csv(path, skip = 2, header = T)
+  data$Day <- as.Date(data$Day)
+  newpath <- paste(str_sub(path, 1, -4), "sav", sep = "")
+  write_sav(data, path = newpath)
+}
+```
+
+
+
