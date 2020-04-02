@@ -1,0 +1,243 @@
+---
+title: "4.5percent_inconsistency"
+author: "Yi"
+date: "3/30/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r include=FALSE}
+library(haven)
+library(tidyverse)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/P4/03242020/4.5%_with scoring added_3.23.2020.sav")
+```
+
+```{r}
+Table.Print <- function(table, title) {
+  if (nrow(table) > 0) {
+    knitr::kable(table, caption = title)
+  }
+}
+```
+
+## preec_panas
+- check whether all responses are same.
+```{r}
+# check whether all responses to PANAS Pre E are the same
+index.preec_panas <- data %>% select(., starts_with("preec_panas")) %>% apply(., 1, unique) %>% lapply(., length) == 1
+PANAS_PreE <- data[index.preec_panas, c("redcap_id", colnames(data)[startsWith(colnames(data), "preec_panas")])]
+PANAS_PreE_result <- PANAS_PreE %>% mutate(., SameValue = preec_panas_1) %>% select(., redcap_id, SameValue)
+Table.Print(PANAS_PreE_result, "preec_panas")
+```
+
+There are `r nrow(PANAS_PreE_result)` participant(s) responded the same value to all preec_panas questions.
+
+- check whether any PA >= 3 and any NA >= 3 / any PA < 3 and andy NA < 3
+```{r}
+preec_panas <- select(data, starts_with("preec_panas"))
+
+# compare each item with 3
+preec_panas_bi <- as.data.frame(ifelse(preec_panas >= 3, 1, 0))
+
+# sum the results for PA and NA
+preec_panas_bi_sum <- mutate(preec_panas_bi, PA_sum = preec_panas_1 + preec_panas_3 + preec_panas_5 + preec_panas_9 + preec_panas_10 + preec_panas_12 + preec_panas_14 + preec_panas_16 + preec_panas_17 +  preec_panas_19, NA_sum = preec_panas_2 + preec_panas_4 + preec_panas_6 + preec_panas_7 + preec_panas_8 + preec_panas_11 + preec_panas_13 + preec_panas_15 + preec_panas_18 + preec_panas_20)
+
+# find the inconsistency
+preec_panas_compare <- mutate(preec_panas_bi_sum, preec_panas_inconsist = ifelse((PA_sum > 0) == (NA_sum > 0), 1, 0))
+
+# cbind the information
+preec_panas_inconsis <- cbind(data, preec_panas_compare$preec_panas_inconsist)
+colnames(preec_panas_inconsis)[length(colnames(preec_panas_inconsis))] <- "preec_panas_inconsistency"
+
+# get the redcap id
+preec_panas_result <- preec_panas_inconsis %>% filter(., preec_panas_inconsistency > 0) %>% select(., redcap_id)
+Table.Print(preec_panas_result, "Inconsistency of preec_panas Variables")
+```
+
+There are `r nrow(preec_panas_result)` participant(s) have same directions of PA and NA (both >= 3 or < 3). 
+
+- check whether difference of PA sum and NA sum <= 5
+```{r}
+# check whether difference of PA and NA <= 5
+PANAS.PreE.difference <- data[abs(data$PANAS_PreE_PA - data$PANAS_PreE_NA) <= 5, c("redcap_id", "PANAS_PreE_PA", "PANAS_PreE_NA")]
+Table.Print(PANAS.PreE.difference, "Inconsistency of preec_panas Variables")
+```
+
+There are `r nrow(PANAS.PreE.difference)` participant(s) have similar sum scores of PA and NA (differences <= 5). 
+
+## postec_panas
+- check whether all responses are same
+```{r}
+index.postec_panas <- data %>% select(., starts_with("postec_panas")) %>% apply(., 1, unique) %>% lapply(., length) == 1
+PANAS_PostE <- data[index.postec_panas, c("redcap_id", colnames(data)[startsWith(colnames(data), "postec_panas")])]
+PANAS_PostE_result <- PANAS_PostE %>% mutate(., SameValue = postec_panas_1) %>% select(., redcap_id, SameValue)
+Table.Print(PANAS_PostE_result, "postec_panas")
+```
+
+There are `r nrow(PANAS_PostE_result)` participant(s) responded the same value to all postec_panas questions.
+
+- check whether any PA >= 3 and any NA >= 3 / any PA < 3 and andy NA < 3
+```{r}
+postec_panas <- select(data, starts_with("postec_panas"))
+
+# compare each item with 3
+postec_panas_bi <- as.data.frame(ifelse(postec_panas >= 3, 1, 0))
+
+# sum the results for PA and NA
+postec_panas_bi_sum <- mutate(postec_panas_bi, PA_sum = postec_panas_1 + postec_panas_3 + postec_panas_5 + postec_panas_9 + postec_panas_10 + postec_panas_12 + postec_panas_14 + postec_panas_16 + postec_panas_17 +  postec_panas_19, NA_sum = postec_panas_2 + postec_panas_4 + postec_panas_6 + postec_panas_7 + postec_panas_8 + postec_panas_11 + postec_panas_13 + postec_panas_15 + postec_panas_18 + postec_panas_20)
+
+# find the inconsistency
+postec_panas_compare <- mutate(postec_panas_bi_sum, postec_panas_inconsist = ifelse((PA_sum > 0) == (NA_sum > 0), 1, 0))
+
+# cbind the information
+postec_panas_inconsis <- cbind(data, postec_panas_compare$postec_panas_inconsist)
+colnames(postec_panas_inconsis)[length(colnames(postec_panas_inconsis))] <- "postec_panas_inconsistency"
+
+# get the redcap id
+postec_panas_result <- postec_panas_inconsis %>% filter(., postec_panas_inconsistency > 0) %>% select(., redcap_id)
+Table.Print(postec_panas_result, "Inconsistency of postec_panas Variables")
+```
+
+There are `r nrow(postec_panas_result)` participant(s) have same directions of PA and NA (both >= 3 or < 3). 
+
+- check whether difference of PA sum and NA sum <= 5
+```{r}
+# check whether difference of PA and NA <= 5
+PANAS.PostE.difference <- data[abs(data$PANAS_PostE_PA - data$PANAS_PostE_NA) <= 5, c("redcap_id", "PANAS_PostE_PA", "PANAS_PostE_NA")]
+Table.Print(PANAS.PostE.difference, "Inconsistency of postec_panas Variables")
+```
+
+There are `r nrow(PANAS.PostE.difference)` participant(s) have similar sum scores of PA and NA (differences <= 5). 
+
+
+## prer_panas
+- check whether all responses are same
+```{r}
+index.prer_panas <- data %>% select(., starts_with("prer_panas")) %>% apply(., 1, unique) %>% lapply(., length) == 1
+PANAS_PostR <- data[index.prer_panas, c("redcap_id", colnames(data)[startsWith(colnames(data), "prer_panas")])]
+PANAS_PostR_result <- PANAS_PostR %>% mutate(., SameValue = prer_panas_1) %>% select(., redcap_id, SameValue)
+Table.Print(PANAS_PostR_result, "prer_panas")
+```
+
+There are `r nrow(PANAS_PostR_result)` participant(s) responded the same value to all prer_panas questions.
+
+- check whether any PA >= 3 and any NA >= 3 / any PA < 3 and andy NA < 3
+```{r}
+prer_panas <- select(data, starts_with("prer_panas"))
+
+# compare each item with 3
+prer_panas_bi <- as.data.frame(ifelse(prer_panas >= 3, 1, 0))
+
+# sum the results for PA and NA
+prer_panas_bi_sum <- mutate(prer_panas_bi, PA_sum = prer_panas_1 + prer_panas_3 + prer_panas_5 + prer_panas_9 + prer_panas_10 + prer_panas_12 + prer_panas_14 + prer_panas_16 + prer_panas_17 +  prer_panas_19, NA_sum = prer_panas_2 + prer_panas_4 + prer_panas_6 + prer_panas_7 + prer_panas_8 + prer_panas_11 + prer_panas_13 + prer_panas_15 + prer_panas_18 + prer_panas_20)
+
+# find the inconsistency
+prer_panas_compare <- mutate(prer_panas_bi_sum, prer_panas_inconsist = ifelse((PA_sum > 0) == (NA_sum > 0), 1, 0))
+
+# cbind the information
+prer_panas_inconsis <- cbind(data, prer_panas_compare$prer_panas_inconsist)
+colnames(prer_panas_inconsis)[length(colnames(prer_panas_inconsis))] <- "prer_panas_inconsistency"
+
+# get the redcap id
+prer_panas_result <- prer_panas_inconsis %>% filter(., prer_panas_inconsistency > 0) %>% select(., redcap_id)
+Table.Print(prer_panas_result, "Inconsistency of prer_panas Variables")
+```
+
+There are `r nrow(prer_panas_result)` participant(s) have same directions of PA and NA (both >= 3 or < 3). 
+
+- check whether difference of PA sum and NA sum <= 5
+```{r}
+# check whether difference of PA and NA <= 5
+PANAS.PostR.difference <- data[abs(data$PANAS_PostR_PA - data$PANAS_PostR_NA) <= 5, c("redcap_id", "PANAS_PostR_PA", "PANAS_PostR_NA")]
+Table.Print(PANAS.PostR.difference, "Inconsistency of prer_panas Variables")
+```
+
+There are `r nrow(PANAS.PostR.difference)` participant(s) have similar sum scores of PA and NA (differences <= 5). 
+
+## prec_cis
+- check whether all responses are same
+```{r}
+index.prec_cis <- data %>% select(., starts_with("prec_cis")) %>% apply(., 1, unique) %>% lapply(., length) == 1
+PreE_CIS <- data[index.prec_cis, c("redcap_id", colnames(data)[startsWith(colnames(data), "prec_cis")])]
+PreE_CIS_result <- PreE_CIS %>% mutate(., SameValue = prec_cis_1) %>% select(., redcap_id, SameValue)
+Table.Print(PreE_CIS_result, "prec_cis")
+```
+
+There are `r nrow(PreE_CIS_result)` participant(s) responded the same value to all prec_cis questions.
+
+- check whether any PA >= 3 and any NA >= 3 / any PA <= 3 and andy NA <= 3
+```{r}
+prec_cis <- select(data, starts_with("prec_cis"))
+
+# compare each item with 3
+prec_cis_bi <- as.data.frame(ifelse(prec_cis >= 3, 1, 0))
+
+# sum the results for PA and NA
+prec_cis_bi_sum <- mutate(prec_cis_bi, PA_sum = prec_cis_4 + prec_cis_5 + prec_cis_6 + prec_cis_8 + prec_cis_10 + prec_cis_12 + prec_cis_15 + prec_cis_18 + prec_cis_19, NA_sum = prec_cis_1 + prec_cis_2 + prec_cis_3 + prec_cis_7 + prec_cis_9 + prec_cis_11 + prec_cis_13 + prec_cis_14 + prec_cis_16 + prec_cis_17)
+
+# find the inconsistency
+prec_cis_compare <- mutate(prec_cis_bi_sum, prec_cis_inconsist = ifelse((PA_sum > 0) == (NA_sum > 0), 1, 0))
+
+# cbind the information
+prec_cis_inconsis <- cbind(data, prec_cis_compare$prec_cis_inconsist)
+colnames(prec_cis_inconsis)[length(colnames(prec_cis_inconsis))] <- "prec_cis_inconsistency"
+
+# get the redcap id
+prec_cis_result <- prec_cis_inconsis %>% filter(., prec_cis_inconsistency > 0) %>% select(., redcap_id)
+Table.Print(prec_cis_result, "Inconsistency of prec_cis Variables")
+```
+
+There are `r nrow(prec_cis_result)` participant(s) have same directions of PA and NA (both >= 3 or < 3). 
+
+## postec_cis
+- check whether all responses are same
+```{r}
+index.postec_cis <- data %>% select(., starts_with("postec_cis")) %>% apply(., 1, unique) %>% lapply(., length) == 1
+PostE_CIS <- data[index.postec_cis, c("redcap_id", colnames(data)[startsWith(colnames(data), "postec_cis")])]
+PostE_CIS_result <- PostE_CIS %>% mutate(., SameValue = postec_cis_1) %>% select(., redcap_id, SameValue)
+Table.Print(PostE_CIS_result, "postec_cis")
+```
+
+There are `r nrow(PostE_CIS_result)` participant(s) responded the same value to all prec_cis questions.
+
+- check whether any PA >= 3 and any NA >= 3 / any PA <= 3 and andy NA <= 3
+```{r}
+postec_cis <- select(data, starts_with("postec_cis"))
+
+# compare each item with 3
+postec_cis_bi <- as.data.frame(ifelse(postec_cis >= 3, 1, 0))
+
+# sum the results for PA and NA
+postec_cis_bi_sum <- mutate(postec_cis_bi, PA_sum = postec_cis_4 + postec_cis_5 + postec_cis_6 + postec_cis_8 + postec_cis_10 + postec_cis_12 + postec_cis_15 + postec_cis_18 + postec_cis_19, NA_sum = postec_cis_1 + postec_cis_2 + postec_cis_3 + postec_cis_7 + postec_cis_9 + postec_cis_11 + postec_cis_13 + postec_cis_14 + postec_cis_16 + postec_cis_17)
+
+# find the inconsistency
+postec_cis_compare <- mutate(postec_cis_bi_sum, postec_cis_inconsist = ifelse((PA_sum > 0) == (NA_sum > 0), 1, 0))
+
+# cbind the information
+postec_cis_inconsis <- cbind(data, postec_cis_compare$postec_cis_inconsist)
+colnames(postec_cis_inconsis)[length(colnames(postec_cis_inconsis))] <- "postec_cis_inconsistency"
+
+# get the redcap id
+postec_cis_result <- postec_cis_inconsis %>% filter(., postec_cis_inconsistency > 0) %>% select(., redcap_id)
+Table.Print(postec_cis_result, "Inconsistency of postec_cis Variables")
+```
+
+There are `r nrow(postec_cis_result)` participant(s) have same directions of PA and NA (both >= 3 or < 3). 
+
+## FRS
+- check whether frs_1 = frs_2
+```{r}
+frs_1_2 <- select(data, redcap_id, frs_1, frs_2)
+frs_1_2_inconsis <- filter(frs_1_2, frs_1 == frs_2)
+Table.Print(frs_1_2_inconsis, "Inconsistency of frs_1 and frs_2")
+```
+
+There are `r nrow(frs_1_2_inconsis)` participant(s) responded the same value to frs_1 and frs_2 questions.
