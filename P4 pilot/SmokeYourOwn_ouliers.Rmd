@@ -1,5 +1,5 @@
 ---
-title: "0mg_outliers"
+title: "SmokeYourOwn_outliers"
 author: "Yi"
 date: "3/31/2020"
 output:
@@ -18,7 +18,7 @@ library(tidyverse)
 ```
 
 ```{r}
-data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/P4/03242020/0mg_with scoring added_3.23.2020.sav")
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/P4/03242020/Smoker your own_with scoring added_3.23.2020.sav")
 ```
 
 ```{r}
@@ -163,7 +163,7 @@ Table.Print(FRS_cost[Outliers(FRS_cost$FRS_cost), c("redcap_id", "FRS_cost")], "
 
 ### CIS
 ```{r}
-CIS <- select(data, redcap_id, CIS_Mean, PreE_CIS_Mean, PostE_CIS_Mean)
+CIS <- select(data, redcap_id, PreE_CIS_Mean, PostE_CIS_Mean)
 
 CIS_range <- cbind(apply(CIS[, -1], 2, Range))
 colnames(CIS_range) <- "(Mean - 2SD, Mean + 2SD)"
@@ -174,7 +174,7 @@ num.outliers.CIS <- apply(outliers.CIS, 2, sum)
 knitr::kable(num.outliers.CIS, caption = "Number of Ouliers in CIS variables", col.names = "# of outliers")
 
 # CIS_Mean
-Table.Print(CIS[Outliers(CIS$CIS_Mean), c("redcap_id", "CIS_Mean")], "CIS_Mean")
+#Table.Print(CIS[Outliers(CIS$CIS_Mean), c("redcap_id", "CIS_Mean")], "CIS_Mean")
 
 # PreE_CIS_Mean
 Table.Print(CIS[Outliers(CIS$PreE_CIS_Mean), c("redcap_id", "PreE_CIS_Mean")], "PreE_CIS_Mean")
