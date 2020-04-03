@@ -1,0 +1,33 @@
+---
+title: "merge datasets"
+author: "Yi"
+date: "4/3/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(tidyverse)
+```
+
+```{r}
+path.all.spss <- "/Users/zhan039/Desktop/USC_HEAL/Search for Drugs/04032020"
+file.names <- list.files(path = path.all.spss)
+
+first.path <- paste(path.all.spss, "/", file.names[1], sep = "")
+
+data <- read_sav(first.path)
+
+for (i in c(2: length(file.names))) {
+  path.add.data <- paste(path.all.spss, "/", file.names[i], sep = "")
+  add.data <- read_sav(path.add.data)
+  data <- left_join(data, add.data, by = "Day")
+}
+
+write_sav(data, path = "/Users/zhan039/Desktop/USC_HEAL/Search for Drugs/04032020/MergedData.sav")
+```
+
