@@ -173,12 +173,12 @@ Table.Print(PreE_CIS_result, "prec_cis")
 
 There are `r nrow(PreE_CIS_result)` participant(s) responded the same value to all prec_cis questions.
 
-- check whether any PA >= 3 and any NA >= 3 / any PA <= 3 and andy NA <= 3
+- check whether any PA >= 2 and any NA >= 2 / any PA <= 2 and andy NA <= 2
 ```{r}
 prec_cis <- select(data, starts_with("prec_cis"))
 
 # compare each item with 3
-prec_cis_bi <- as.data.frame(ifelse(prec_cis >= 3, 1, 0))
+prec_cis_bi <- as.data.frame(ifelse(prec_cis >= 2, 1, 0))
 
 # sum the results for PA and NA
 prec_cis_bi_sum <- mutate(prec_cis_bi, PA_sum = prec_cis_4 + prec_cis_5 + prec_cis_6 + prec_cis_8 + prec_cis_10 + prec_cis_12 + prec_cis_15 + prec_cis_18 + prec_cis_19, NA_sum = prec_cis_1 + prec_cis_2 + prec_cis_3 + prec_cis_7 + prec_cis_9 + prec_cis_11 + prec_cis_13 + prec_cis_14 + prec_cis_16 + prec_cis_17)
@@ -195,7 +195,7 @@ prec_cis_result <- prec_cis_inconsis %>% filter(., prec_cis_inconsistency > 0) %
 Table.Print(prec_cis_result, "Inconsistency of prec_cis Variables")
 ```
 
-There are `r nrow(prec_cis_result)` participant(s) have same directions of PA and NA (both >= 3 or < 3). 
+There are `r nrow(prec_cis_result)` participant(s) have same directions of PA and NA (both >= 2 or < 2). 
 
 ## postec_cis
 - check whether all responses are same
@@ -208,12 +208,12 @@ Table.Print(PostE_CIS_result, "postec_cis")
 
 There are `r nrow(PostE_CIS_result)` participant(s) responded the same value to all prec_cis questions.
 
-- check whether any PA >= 3 and any NA >= 3 / any PA <= 3 and andy NA <= 3
+- check whether any PA >= 2 and any NA >= 2 / any PA <= 2 and andy NA <= 2
 ```{r}
 postec_cis <- select(data, starts_with("postec_cis"))
 
 # compare each item with 3
-postec_cis_bi <- as.data.frame(ifelse(postec_cis >= 3, 1, 0))
+postec_cis_bi <- as.data.frame(ifelse(postec_cis >= 2, 1, 0))
 
 # sum the results for PA and NA
 postec_cis_bi_sum <- mutate(postec_cis_bi, PA_sum = postec_cis_4 + postec_cis_5 + postec_cis_6 + postec_cis_8 + postec_cis_10 + postec_cis_12 + postec_cis_15 + postec_cis_18 + postec_cis_19, NA_sum = postec_cis_1 + postec_cis_2 + postec_cis_3 + postec_cis_7 + postec_cis_9 + postec_cis_11 + postec_cis_13 + postec_cis_14 + postec_cis_16 + postec_cis_17)
@@ -230,7 +230,7 @@ postec_cis_result <- postec_cis_inconsis %>% filter(., postec_cis_inconsistency 
 Table.Print(postec_cis_result, "Inconsistency of postec_cis Variables")
 ```
 
-There are `r nrow(postec_cis_result)` participant(s) have same directions of PA and NA (both >= 3 or < 3). 
+There are `r nrow(postec_cis_result)` participant(s) have same directions of PA and NA (both >= 2 or < 2). 
 
 ## FRS
 - check whether frs_1 = frs_2
