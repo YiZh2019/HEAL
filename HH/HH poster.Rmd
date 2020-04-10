@@ -1,0 +1,105 @@
+---
+title: "HH poster"
+author: "Yi"
+date: "4/9/2020"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r include=FALSE}
+library(haven)
+library(tidyverse)
+```
+
+```{r}
+data <- read_sas("/Users/zhan039/Desktop/USC_HEAL/HH/04072020/HH_W9_Scored.sas7bdat")
+```
+
+## XX% use social media for reasons other than homework 
+```{r}
+SocialMedia <- select(data, record_id, starts_with("W9_Social"))
+
+# exclude "specify:"
+SocialMedia.di <- SocialMedia[, c(1:(ncol(SocialMedia)-1))]
+
+# create the dichotomous variable: Several times a day / daily = 1; Others = 0
+for (i in c(2: ncol(SocialMedia.di))) {
+  newvar <- paste(names(SocialMedia.di[, i]), "_di", sep = "")
+  SocialMedia.di[, newvar] <- ifelse(SocialMedia.di[, i] == 2 | SocialMedia.di[, i] == 3, 1, 0)
+}
+
+SocialMedia.count <- select(SocialMedia.di, record_id, ends_with("_di"))
+
+# People who didn't answer this section
+SocialMedia.count.NA <- filter(SocialMedia.count, is.na(W9_Social_Facebook_di) & is.na(W9_Social_Instagram_di) & is.na(W9_Social_Twitter_di) & is.na(W9_Social_Linkedin_di) & is.na(W9_Social_Pinterest_di) & is.na(W9_Social_Snapchat_di) & is.na(W9_Social_Other_di))
+
+  # check it with the original dataset
+  #filter_at(SocialMedia, c(2:(ncol(SocialMedia)-1)), all_vars(is.na(.)))
+
+# People who answered this section
+SocialMedia.count.noNA <- filter(SocialMedia.count, !(is.na(W9_Social_Facebook_di) & is.na(W9_Social_Instagram_di) & is.na(W9_Social_Twitter_di) & is.na(W9_Social_Linkedin_di) & is.na(W9_Social_Pinterest_di) & is.na(W9_Social_Snapchat_di) & is.na(W9_Social_Other_di)))
+
+SocialMedia.count.noNA$count <- apply(SocialMedia.count.noNA[, -1], 1, sum, na.rm = T)
+```
+
+For the question "How often do you visit the following social media sites?", `r nrow(SocialMedia.count.noNA)` people select at least one option. `r nrow(SocialMedia.count.NA)` participants don't answer this question.
+
+In terms of daily use or use it several times a day, the count of social media sites is summarized below:
+
+```{r}
+Table1 <- rbind(table(SocialMedia.count.noNA$count), round(prop.table(table(SocialMedia.count.noNA$count))*100, 2))
+rownames(Table1) <- c("Frequency", "Percentage")
+
+knitr::kable(Table1, caption = "Count of Social Media Sites")
+```
+
+## XX% have ever vaped e-cigarettes or cannabis
+```{r}
+EcigCannabis <- select(data, record_id, W9_Life_Use_Sub_3a, W9_Life_Use_Sub_31a, W9_Life_Use_Sub_32a, W9_Life_Use_Sub_27a)
+
+EcigCannabis.NA <- filter_at(EcigCannabis, c(2:ncol(EcigCannabis)), all_vars(is.na(.)))
+
+EcigCannabis.noNA <- filter_at(EcigCannabis, c(2:ncol(EcigCannabis)), any_vars(!is.na(.)))
+
+EcigCannabis.noNA <- mutate(EcigCannabis.noNA, Ecig_3a_di = ifelse(W9_Life_Use_Sub_3a == 1, 0, 1), Ecig_31a_di = ifelse(W9_Life_Use_Sub_31a == 1, 0, 1), Ecig_32a_di = ifelse(W9_Life_Use_Sub_32a == 1, 0, 1), Ecig_27a_di = ifelse(W9_Life_Use_Sub_27a == 1, 0, 1))
+
+EcigCannabis.noNA <- mutate(EcigCannabis.noNA, sum = Ecig_3a_di + Ecig_31a_di + Ecig_32a_di + Ecig_27a_di)
+
+EcigCannabis.noNA <- mutate(EcigCannabis.noNA, EverOrNot = ifelse(sum == 0, 0, 1))
+```
+
+For the question "Have you ever used the following substances in your life?", `r nrow(EcigCannabis.noNA)` participants have valid information on "Electronic cigarette with nicotine (E-cigs, personal vaporizer, PV)", "Juul or similar device", "Other electronic vaping device", "Electronic device to vape THC or hash oil (liquid pot, cannabis oil, weed pen, PAX Era)". People who have ever used these items are summarized below:
+
+```{r}
+Table2 <- rbind(table(EcigCannabis.noNA$EverOrNot),
+round(prop.table(table(EcigCannabis.noNA$EverOrNot))*100, 2))
+
+rownames(Table2) <- c("Frequency", "Percentage")
+colnames(Table2) <- c("Not Use", "Ever Use")
+
+knitr::kable(Table2, caption = "ever vaped e-cigarettes or cannabis")
+```
+
+
+```{r}
+Nicotine <- select(data, record_id, W9_Life_Use_Sub_1, W9_Life_Use_Sub_2a, W9_Life_Use_Sub_3a, W9_Life_Use_Sub_31a, W9_Life_Use_Sub_32a)
+
+Nicotine.NA <- filter_at(Nicotine, c(2:ncol(Nicotine)), all_vars(is.na(.)))
+Nicotine.noNA <- filter_at(Nicotine, c(2:ncol(Nicotine)), any_vars(!is.na(.)))
+
+Nicotine.noNA.di <- Nicotine.noNA
+Nicotine.noNA.di$W9_Life_Use_Sub_1_di = Nicotine.noNA.di$W9_Life_Use_Sub_1
+# create the dichotomous variable: No; Yes (W9_Life_Use_Sub_1 is dichotomous already)
+for (i in c(3: (ncol(Nicotine.noNA.di))-1)) {
+  newvar <- paste(names(Nicotine.noNA.di[, i]), "_di", sep = "")
+  Nicotine.noNA.di[, newvar] <- ifelse(Nicotine.noNA.di[, i] == 1, 0, 1)
+}
+
+
+```
+
