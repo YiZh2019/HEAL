@@ -20,9 +20,12 @@ library(tidyverse)
 data <- read_sas("/Users/zhan039/Desktop/USC_HEAL/HH/04072020/HH_W9_Scored.sas7bdat")
 ```
 
-## XX% use social media for reasons other than homework 
+## XX% use social media on a daily basis
 ```{r}
 SocialMedia <- select(data, record_id, starts_with("W9_Social"))
+
+  # check the coding
+  # apply(SocialMedia[, -1], 2, table)
 
 # exclude "specify:"
 SocialMedia.di <- SocialMedia[, c(1:(ncol(SocialMedia)-1))]
@@ -44,62 +47,176 @@ SocialMedia.count.NA <- filter(SocialMedia.count, is.na(W9_Social_Facebook_di) &
 # People who answered this section
 SocialMedia.count.noNA <- filter(SocialMedia.count, !(is.na(W9_Social_Facebook_di) & is.na(W9_Social_Instagram_di) & is.na(W9_Social_Twitter_di) & is.na(W9_Social_Linkedin_di) & is.na(W9_Social_Pinterest_di) & is.na(W9_Social_Snapchat_di) & is.na(W9_Social_Other_di)))
 
-SocialMedia.count.noNA$count <- apply(SocialMedia.count.noNA[, -1], 1, sum, na.rm = T)
+# People who answered all questions
+SocialMedia.count.valid <- filter(SocialMedia.count, (!is.na(W9_Social_Facebook_di)) & (!is.na(W9_Social_Instagram_di)) & (!is.na(W9_Social_Twitter_di)) & (!is.na(W9_Social_Linkedin_di)) & (!is.na(W9_Social_Pinterest_di)) & (!is.na(W9_Social_Snapchat_di)) & (!is.na(W9_Social_Other_di)))
+
+# filter_at(SocialMedia.count, c("W9_Social_Facebook_di", "W9_Social_Instagram_di", "W9_Social_Twitter_di", "W9_Social_Linkedin_di", "W9_Social_Pinterest_di", "W9_Social_Snapchat_di", "W9_Social_Other_di"), all_vars(!is.na(.)))
+
+SocialMedia.count.noNA$count <- apply(SocialMedia.count.noNA[, -1], 1, sum)
 ```
 
-For the question "How often do you visit the following social media sites?", `r nrow(SocialMedia.count.noNA)` people select at least one option. `r nrow(SocialMedia.count.NA)` participants don't answer this question.
+For the question "How often do you visit the following social media sites?", `r nrow(SocialMedia.count.NA)` participants don't have any valid information. `r nrow(SocialMedia.count.noNA)` participants have at least one valid information among 7 accounts. `r nrow(SocialMedia.count.valid)` participants have valid information on all 7 social media accounts for this question.
 
-In terms of daily use or use it several times a day, the count of social media sites is summarized below:
-
+Within participants who have valid information on all 7 accounts, the count of social media account daily (i.e. "several times a day" or "daily") is summarized below:
 ```{r}
-Table1 <- rbind(table(SocialMedia.count.noNA$count), round(prop.table(table(SocialMedia.count.noNA$count))*100, 2))
-rownames(Table1) <- c("Frequency", "Percentage")
+# frequency table
+TableSocial <- rbind(table(SocialMedia.count.noNA$count), round(prop.table(table(SocialMedia.count.noNA$count))*100, 2))
+rownames(TableSocial) <- c("Frequency", "Percentage")
 
-knitr::kable(Table1, caption = "Count of Social Media Sites")
+# frequency table exclude zero
+TableSocialNoZero <- rbind(table(SocialMedia.count.noNA[SocialMedia.count.noNA$count > 0, "count"]),
+round(prop.table(table(SocialMedia.count.noNA[SocialMedia.count.noNA$count > 0, "count"]))*100, 2))
+rownames(TableSocialNoZero) <- c("Frequency", "Percentage")
+
+# frequency table: 0 vs. >= 1
+SocialMedia.count.noNA <- mutate(SocialMedia.count.noNA, count.di = ifelse(count > 0, 1, 0))
+TableSocialDi <- rbind(table(SocialMedia.count.noNA$count.di),
+round(prop.table(table(SocialMedia.count.noNA$count.di))*100, 2))
+rownames(TableSocialDi) <- c("Frequency", "Percentage")
+colnames(TableSocialDi) <- c("0", "at least 1")
+
+knitr::kable(TableSocial, caption = "Count of Social Media Sites")
+knitr::kable(TableSocialNoZero, caption = "Count of Social Media Sites (exclude zero)")
+knitr::kable(TableSocialDi, caption = "Count of Social Media Sites (0 vs. at least 1)")
+```
+
+Within participants who have at least one valid information on 7 social media accounts, assuming that missing value means "do not use", the count of social media account daily (i.e. "several times a day" or "daily") is summarized below:
+```{r}
+SocialMedia.count.noNA$count.NA.Eq.Zero <- apply(SocialMedia.count.noNA[, c("W9_Social_Facebook_di", "W9_Social_Instagram_di", "W9_Social_Twitter_di", "W9_Social_Linkedin_di", "W9_Social_Pinterest_di", "W9_Social_Snapchat_di", "W9_Social_Other_di")], 1, sum, na.rm = T)
+
+# frequency table
+TableSocial.NA.Eq.Zero <- rbind(table(SocialMedia.count.noNA$count.NA.Eq.Zero),
+round(prop.table(table(SocialMedia.count.noNA$count.NA.Eq.Zero))*100, 2))
+rownames(TableSocial.NA.Eq.Zero) <- c("Frequency", "Percentage")
+
+# frequency table exlude zero
+TableSocial.NA.Eq.Zero.NoZero <- rbind(table(SocialMedia.count.noNA[SocialMedia.count.noNA$count.NA.Eq.Zero > 0, "count.NA.Eq.Zero"]),
+round(prop.table(table(SocialMedia.count.noNA[SocialMedia.count.noNA$count.NA.Eq.Zero > 0, "count.NA.Eq.Zero"]))*100, 2))
+rownames(TableSocial.NA.Eq.Zero.NoZero) <- c("Frequency", "Percentage")
+
+# frequency table: 0 vs. >= 1
+SocialMedia.count.noNA <- mutate(SocialMedia.count.noNA, count.NA.Eq.Zero.di = ifelse(count.NA.Eq.Zero > 0, 1, 0))
+TableSocial.NA.Eq.Zero.di <- rbind(table(SocialMedia.count.noNA$count.NA.Eq.Zero.di),
+round(prop.table(table(SocialMedia.count.noNA$count.NA.Eq.Zero.di))*100, 2))
+rownames(TableSocial.NA.Eq.Zero.di) <- c("Frequency", "Percentage")
+colnames(TableSocial.NA.Eq.Zero.di) <- c("0", "at least 1")
+
+knitr::kable(TableSocial.NA.Eq.Zero, caption = "Count of Social Media Sites")
+knitr::kable(TableSocial.NA.Eq.Zero.NoZero, caption = "Count of Social Media Sites (exclude zero)")
+knitr::kable(TableSocial.NA.Eq.Zero.di, caption = "Count of Social Media Sites (0 vs. at least 1)")
 ```
 
 ## XX% have ever vaped e-cigarettes or cannabis
 ```{r}
-EcigCannabis <- select(data, record_id, W9_Life_Use_Sub_3a, W9_Life_Use_Sub_31a, W9_Life_Use_Sub_32a, W9_Life_Use_Sub_27a)
+EcigCannabis <- select(data, record_id, W9_Life_Use_Sub_3a, W9_Life_Use_Sub_31a, W9_Life_Use_Sub_27a)
+
+  # check the coding
+  # apply(EcigCannabis[, -1], 2, table)
 
 EcigCannabis.NA <- filter_at(EcigCannabis, c(2:ncol(EcigCannabis)), all_vars(is.na(.)))
 
 EcigCannabis.noNA <- filter_at(EcigCannabis, c(2:ncol(EcigCannabis)), any_vars(!is.na(.)))
 
-EcigCannabis.noNA <- mutate(EcigCannabis.noNA, Ecig_3a_di = ifelse(W9_Life_Use_Sub_3a == 1, 0, 1), Ecig_31a_di = ifelse(W9_Life_Use_Sub_31a == 1, 0, 1), Ecig_32a_di = ifelse(W9_Life_Use_Sub_32a == 1, 0, 1), Ecig_27a_di = ifelse(W9_Life_Use_Sub_27a == 1, 0, 1))
+EcigCannabis.valid <- filter_at(EcigCannabis, c(2:ncol(EcigCannabis)), all_vars(!is.na(.)))
 
-EcigCannabis.noNA <- mutate(EcigCannabis.noNA, sum = Ecig_3a_di + Ecig_31a_di + Ecig_32a_di + Ecig_27a_di)
+EcigCannabis.noNA <- mutate(EcigCannabis.noNA, Ecig_3a_di = ifelse(W9_Life_Use_Sub_3a == 1, 0, 1), Ecig_31a_di = ifelse(W9_Life_Use_Sub_31a == 1, 0, 1), Ecig_27a_di = ifelse(W9_Life_Use_Sub_27a == 1, 0, 1))
+
+EcigCannabis.noNA <- mutate(EcigCannabis.noNA, sum = Ecig_3a_di + Ecig_31a_di + Ecig_27a_di)
 
 EcigCannabis.noNA <- mutate(EcigCannabis.noNA, EverOrNot = ifelse(sum == 0, 0, 1))
 ```
 
-For the question "Have you ever used the following substances in your life?", `r nrow(EcigCannabis.noNA)` participants have valid information on "Electronic cigarette with nicotine (E-cigs, personal vaporizer, PV)", "Juul or similar device", "Other electronic vaping device", "Electronic device to vape THC or hash oil (liquid pot, cannabis oil, weed pen, PAX Era)". People who have ever used these items are summarized below:
+For the question "Have you ever used the following substances in your life?", `r nrow(EcigCannabis.NA)` participants don't have any valid information on [W9_Life_Use_Sub_3a], [W9_Life_Use_Sub_31a], or [W9_Life_Use_Sub_27a]. `r nrow(EcigCannabis.noNA)` participants have valid information on all three variables. 
+
+Within participants who have valid information on all three variables, whether used these items are summarized below:
 
 ```{r}
-Table2 <- rbind(table(EcigCannabis.noNA$EverOrNot),
+TableEcigCannabis <- rbind(table(EcigCannabis.noNA$EverOrNot),
 round(prop.table(table(EcigCannabis.noNA$EverOrNot))*100, 2))
 
-rownames(Table2) <- c("Frequency", "Percentage")
-colnames(Table2) <- c("Not Use", "Ever Use")
+rownames(TableEcigCannabis) <- c("Frequency", "Percentage")
+colnames(TableEcigCannabis) <- c("Not Use", "Ever Use")
 
-knitr::kable(Table2, caption = "ever vaped e-cigarettes or cannabis")
+knitr::kable(TableEcigCannabis, caption = "ever vaped e-cigarettes or cannabis")
 ```
 
-
+## XX% report regular drug use or a mental health issue
 ```{r}
-Nicotine <- select(data, record_id, W9_Life_Use_Sub_1, W9_Life_Use_Sub_2a, W9_Life_Use_Sub_3a, W9_Life_Use_Sub_31a, W9_Life_Use_Sub_32a)
+DAST <- select(data, record_id, starts_with("W9_Dast"))
+CESD <- select(data, record_id, starts_with("W9_Cesd"))
+GAD <- select(data, record_id, starts_with("W9_Gad"))
 
-Nicotine.NA <- filter_at(Nicotine, c(2:ncol(Nicotine)), all_vars(is.na(.)))
-Nicotine.noNA <- filter_at(Nicotine, c(2:ncol(Nicotine)), any_vars(!is.na(.)))
-
-Nicotine.noNA.di <- Nicotine.noNA
-Nicotine.noNA.di$W9_Life_Use_Sub_1_di = Nicotine.noNA.di$W9_Life_Use_Sub_1
-# create the dichotomous variable: No; Yes (W9_Life_Use_Sub_1 is dichotomous already)
-for (i in c(3: (ncol(Nicotine.noNA.di))-1)) {
-  newvar <- paste(names(Nicotine.noNA.di[, i]), "_di", sep = "")
-  Nicotine.noNA.di[, newvar] <- ifelse(Nicotine.noNA.di[, i] == 1, 0, 1)
-}
+DrugOrMental <- select(data, record_id, starts_with("W9_Dast"), starts_with("W9_Cesd"), starts_with("W9_Gad"))
+  # check the coding
+  # apply(DAST[, -1], 2, table)
+  # apply(CESD[, -1], 2, table)
+  # apply(GAD[, -1], 2, table)
+#"W9_Dast_1", "W9_Dast_2", "W9_Dast_3", "W9_Dast_4", "W9_Dast_5", "W9_Dast_6", "W9_Dast_7", "W9_Dast_8", "W9_Dast_9", "W9_Dast_10", "W9_Cesd_10_1", "W9_Cesd_10_2", "W9_Cesd_10_3", "W9_Cesd_10_4", "W9_Cesd_10_5", "W9_Cesd_10_6", "W9_Cesd_10_7", "W9_Cesd_10_8", "W9_Cesd_10_9", "W9_Cesd_10_10"
 
 
+# DAST Scoring:
+# Score 1 point for each question answered “Yes,” except for question 3 for which a “No” receives 1 point.
+
+DrugOrMental <- mutate(DrugOrMental, W9_DAST_3_score = ifelse(W9_DAST_3 == 1, 0, 1))
+
+DrugOrMental <- mutate(DrugOrMental, W9_DAST_sum_new = W9_DAST_1 + W9_DAST_2 + W9_DAST_3_score + W9_DAST_4 + W9_DAST_5 + W9_DAST_6 + W9_DAST_7 + W9_DAST_8 + W9_DAST_9 + W9_DAST_10)
+
+
+# CESD Scoring:
+# question 1 & 2: Rarely or none of the time = 3 ~ All of the time = 0; 
+# Other questions: Rarely or none of the time = 0 ~ All of the time = 3;
+
+DrugOrMental <- mutate(DrugOrMental, W9_CESD_10_1_new = 3 - W9_CESD_10_1, W9_CESD_10_2_new = 3 - W9_CESD_10_2)
+
+DrugOrMental <- mutate(DrugOrMental, W9_CESD_10_sum_new = W9_CESD_10_1_new + W9_CESD_10_2_new + W9_CESD_10_3 + W9_CESD_10_4 + W9_CESD_10_5 + W9_CESD_10_6 + W9_CESD_10_7 + W9_CESD_10_8 + W9_CESD_10_9 + W9_CESD_10_10)
+
+
+# GAD Scoring:
+# sum score is calculated by the questions coded as 0 -3
+
+DrugOrMental <- mutate(DrugOrMental, W9_GAD_1_new = W9_GAD_1 - 1, W9_GAD_2_new = W9_GAD_2 - 1, W9_GAD_3_new = W9_GAD_3 - 1, W9_GAD_4_new = W9_GAD_4 - 1, W9_GAD_5_new = W9_GAD_5 - 1, W9_GAD_6_new = W9_GAD_6 - 1, W9_GAD_7_new = W9_GAD_7 - 1)
+
+DrugOrMental <- mutate(DrugOrMental, W9_GAD_sum_new = W9_GAD_1_new + W9_GAD_2_new + W9_GAD_3_new + W9_GAD_4_new + W9_GAD_5_new + W9_GAD_6_new + W9_GAD_7_new)
+
+# write.csv(DrugOrMental, file = "/Users/zhan039/Desktop/USC_HEAL/HH/04072020/test.csv")
+
+DrugOrMental.NA <- filter_at(DrugOrMental, c("W9_DAST_sum_new", "W9_CESD_10_sum_new", "W9_GAD_sum_new"), all_vars(is.na(.)))
+
+DrugOrMental.noNA <- filter_at(DrugOrMental, c("W9_DAST_sum_new", "W9_CESD_10_sum_new", "W9_GAD_sum_new"), any_vars(!is.na(.)))
+
+DrugOrMental.valid <- filter_at(DrugOrMental, c("W9_DAST_sum_new", "W9_CESD_10_sum_new", "W9_GAD_sum_new"), all_vars(!is.na(.)))
 ```
+
+For the Drug Abuse Screening Test (DAST-10), Depression Scale (CESD-R) and Anxiety Scale (GAD-7), each sum score is calculated within participants who have valid information on all questions of the corresponding test. (Please let me know if you hope to calculate sum scores in a different way, like replace the missing value with 0. I noticed that the dataset contains some sum scores for DAST-10 and CESD-R, but it looks like DAST-10 sum score is calculated in a different way from the manual's you sent me. Just let me know if you hope to use the existing sum scores, and I'm glad to update the analysis below with the existing sum scores from the dataset.)
+
+`r nrow(DrugOrMental.NA)` participants don't have any valid sum score among these three tests. `r nrow(DrugOrMental.noNA)` participants have at least one valid sum score. `r nrow(DrugOrMental.valid)` participants have valid information on all three sum scores.
+
+Within participants who have valid information on all three sum scores, people who report regular drug use (DAST-10 sum score > 2) or a mental health issue (CESD-R sum score >= 10 or GAD-7 sum score > 10) are summarized below:
+```{r}
+DrugOrMental.valid <- mutate(DrugOrMental.valid, DrugOrMental = ifelse((W9_DAST_sum_new > 2 | W9_CESD_10_sum_new >= 10 | W9_GAD_sum_new > 10), 1, 0))
+
+TableDrugMental <- rbind(table(DrugOrMental.valid$DrugOrMental),
+round(prop.table(table(DrugOrMental.valid$DrugOrMental))*100, 2))
+rownames(TableDrugMental) <- c("Frequency", "Percentage")
+colnames(TableDrugMental) <- c("No Drug Use nor Mental Health Issue", "Drug Use or Mental Health Issue")
+
+knitr::kable(TableDrugMental, caption = "Report Regular Drug Use or a Mentlal Health Issue")
+```
+
+
+```{r include=FALSE}
+#Within participants who have at least one valid sum score, assuming that the invalid sum score means the participant don't have any issue in that test, people who report regular drug use (DAST-10 sum score > 2) or a mental health issue (CESD-R sum score >= 10 or GAD-7 sum score > 10) are summarized below:
+
+DrugOrMental.noNA <- mutate(DrugOrMental.noNA, DrugOrMental = ifelse((W9_DAST_sum_new > 2 | W9_CESD_10_sum_new >= 10 | W9_GAD_sum_new > 10), 1, 0))
+
+DrugOrMental.noNA <- mutate(DrugOrMental.noNA, DrugOrMental = ifelse(is.na(DrugOrMental), 0, DrugOrMental))
+
+TableDrugMental.NA.Eq.Zero <- rbind(table(DrugOrMental.noNA$DrugOrMental),
+round(prop.table(table(DrugOrMental.noNA$DrugOrMental))*100, 2))
+rownames(TableDrugMental.NA.Eq.Zero) <- c("Frequency", "Percentage")
+colnames(TableDrugMental.NA.Eq.Zero) <- c("No Drug Use nor Mental Health Issue", "Drug Use or Mental Health Issue")
+
+knitr::kable(TableDrugMental.NA.Eq.Zero, caption = "Report Regular Drug Use or a Mentlal Health Issue")
+```
+
 
