@@ -55,9 +55,9 @@ SocialMedia.count.valid <- filter(SocialMedia.count, (!is.na(W9_Social_Facebook_
 SocialMedia.count.noNA$count <- apply(SocialMedia.count.noNA[, -1], 1, sum)
 ```
 
-For the question "How often do you visit the following social media sites?", `r nrow(SocialMedia.count.NA)` participants don't have any valid information. `r nrow(SocialMedia.count.noNA)` participants have at least one valid information among 7 accounts. `r nrow(SocialMedia.count.valid)` participants have valid information on all 7 social media accounts for this question.
+For the question "How often do you visit the following social media sites?", `r nrow(SocialMedia.count.NA)` participants don't have any valid information on any item. `r nrow(SocialMedia.count.noNA)` participants have at least one valid information among 7 social media accounts. `r nrow(SocialMedia.count.valid)` participants have valid information on all 7 social media accounts for this question.
 
-Within participants who have valid information on all 7 accounts, the count of social media account daily (i.e. "several times a day" or "daily") is summarized below:
+Among participants who have valid information on all 7 accounts, the count of social media account daily (i.e. "several times a day" or "daily") is summarized below:
 ```{r}
 # frequency table
 TableSocial <- rbind(table(SocialMedia.count.noNA$count), round(prop.table(table(SocialMedia.count.noNA$count))*100, 2))
@@ -80,7 +80,7 @@ knitr::kable(TableSocialNoZero, caption = "Count of Social Media Sites (exclude 
 knitr::kable(TableSocialDi, caption = "Count of Social Media Sites (0 vs. at least 1)")
 ```
 
-Within participants who have at least one valid information on 7 social media accounts, assuming that missing value means "do not use", the count of social media account daily (i.e. "several times a day" or "daily") is summarized below:
+Among participants who have at least one valid information among 7 accounts, assuming that missing items means "do not use it", the count of social media account daily (i.e. "several times a day" or "daily") is summarized below:
 ```{r}
 SocialMedia.count.noNA$count.NA.Eq.Zero <- apply(SocialMedia.count.noNA[, c("W9_Social_Facebook_di", "W9_Social_Instagram_di", "W9_Social_Twitter_di", "W9_Social_Linkedin_di", "W9_Social_Pinterest_di", "W9_Social_Snapchat_di", "W9_Social_Other_di")], 1, sum, na.rm = T)
 
@@ -153,50 +153,72 @@ DrugOrMental <- select(data, record_id, starts_with("W9_Dast"), starts_with("W9_
   # apply(GAD[, -1], 2, table)
 #"W9_Dast_1", "W9_Dast_2", "W9_Dast_3", "W9_Dast_4", "W9_Dast_5", "W9_Dast_6", "W9_Dast_7", "W9_Dast_8", "W9_Dast_9", "W9_Dast_10", "W9_Cesd_10_1", "W9_Cesd_10_2", "W9_Cesd_10_3", "W9_Cesd_10_4", "W9_Cesd_10_5", "W9_Cesd_10_6", "W9_Cesd_10_7", "W9_Cesd_10_8", "W9_Cesd_10_9", "W9_Cesd_10_10"
 
+DAST_exclude <- filter_at(DrugOrMental, c("W9_DAST_1", "W9_DAST_2", "W9_DAST_3", "W9_DAST_4", "W9_DAST_5", "W9_DAST_6", "W9_DAST_7", "W9_DAST_8", "W9_DAST_9", "W9_DAST_10"), all_vars(is.na(.)))
+
+CESD_exclude <- filter_at(DrugOrMental, c("W9_CESD_10_1", "W9_CESD_10_2", "W9_CESD_10_3", "W9_CESD_10_4", "W9_CESD_10_5", "W9_CESD_10_6", "W9_CESD_10_7", "W9_CESD_10_8", "W9_CESD_10_9", "W9_CESD_10_10"), all_vars(is.na(.)))
+
+GAD_exclude <- filter_at(DrugOrMental, c("W9_GAD_1", "W9_GAD_2", "W9_GAD_3", "W9_GAD_4", "W9_GAD_5", "W9_GAD_6", "W9_GAD_7"), all_vars(is.na(.)))
+
+Exclude_id <- unique(c(DAST_exclude$record_id, CESD_exclude$record_id, GAD_exclude$record_id))
+
+DrugOrMental.noNA <- filter(DrugOrMental, !(record_id %in% Exclude_id))
 
 # DAST Scoring:
-# Score 1 point for each question answered “Yes,” except for question 3 for which a “No” receives 1 point.
+# Score 1 point for each question answered “Yes,” except for question 3 for which a “No” receives 1 point. Replace NA with 0 to calculate the sum score
 
-DrugOrMental <- mutate(DrugOrMental, W9_DAST_3_score = ifelse(W9_DAST_3 == 1, 0, 1))
+DrugOrMental.noNA <- mutate(DrugOrMental.noNA, W9_DAST_3_score = ifelse(W9_DAST_3 == 1, 0, 1))
 
-DrugOrMental <- mutate(DrugOrMental, W9_DAST_sum_new = W9_DAST_1 + W9_DAST_2 + W9_DAST_3_score + W9_DAST_4 + W9_DAST_5 + W9_DAST_6 + W9_DAST_7 + W9_DAST_8 + W9_DAST_9 + W9_DAST_10)
+DrugOrMental.noNA$W9_DAST_sum_new <- apply(DrugOrMental.noNA[ , c("W9_DAST_1",  "W9_DAST_2", "W9_DAST_3_score", "W9_DAST_4", "W9_DAST_5", "W9_DAST_6", "W9_DAST_7", "W9_DAST_8", "W9_DAST_9", "W9_DAST_10")], 1, sum, na.rm = T)
 
 
 # CESD Scoring:
 # question 1 & 2: Rarely or none of the time = 3 ~ All of the time = 0; 
 # Other questions: Rarely or none of the time = 0 ~ All of the time = 3;
+# The total score is calculated by finding the sum of 10 items. Do not score the form if more than 2 items are missing. Any score equal to or above 10 is considered depressed.
 
-DrugOrMental <- mutate(DrugOrMental, W9_CESD_10_1_new = 3 - W9_CESD_10_1, W9_CESD_10_2_new = 3 - W9_CESD_10_2)
+DrugOrMental.noNA <- mutate(DrugOrMental.noNA, W9_CESD_10_1_new = 3 - W9_CESD_10_1, W9_CESD_10_2_new = 3 - W9_CESD_10_2)
 
-DrugOrMental <- mutate(DrugOrMental, W9_CESD_10_sum_new = W9_CESD_10_1_new + W9_CESD_10_2_new + W9_CESD_10_3 + W9_CESD_10_4 + W9_CESD_10_5 + W9_CESD_10_6 + W9_CESD_10_7 + W9_CESD_10_8 + W9_CESD_10_9 + W9_CESD_10_10)
+SumNa <- function(varlist) {
+  num.NA <- sum(is.na(varlist))
+  return(num.NA)
+}
+
+DrugOrMental.noNA$W9_CESD.num.NA <- apply(DrugOrMental.noNA[, c("W9_CESD_10_1_new", "W9_CESD_10_2_new", "W9_CESD_10_3", "W9_CESD_10_4", "W9_CESD_10_5", "W9_CESD_10_6", "W9_CESD_10_7", "W9_CESD_10_8", "W9_CESD_10_9", "W9_CESD_10_10")], 1, SumNa)
+
+# table(DrugOrMental.noNA$W9_CESD.num.NA)
+# No one has more than 2 items missing, so no need to exclude the participants again
+
+DrugOrMental.noNA$W9_CESD_10_sum_new <- apply(DrugOrMental.noNA[, c("W9_CESD_10_1_new", "W9_CESD_10_2_new", "W9_CESD_10_3", "W9_CESD_10_4", "W9_CESD_10_5", "W9_CESD_10_6", "W9_CESD_10_7", "W9_CESD_10_8", "W9_CESD_10_9", "W9_CESD_10_10")], 1, sum, na.rm = T)
 
 
 # GAD Scoring:
 # sum score is calculated by the questions coded as 0 -3
 
-DrugOrMental <- mutate(DrugOrMental, W9_GAD_1_new = W9_GAD_1 - 1, W9_GAD_2_new = W9_GAD_2 - 1, W9_GAD_3_new = W9_GAD_3 - 1, W9_GAD_4_new = W9_GAD_4 - 1, W9_GAD_5_new = W9_GAD_5 - 1, W9_GAD_6_new = W9_GAD_6 - 1, W9_GAD_7_new = W9_GAD_7 - 1)
+DrugOrMental.noNA <- mutate(DrugOrMental.noNA, W9_GAD_1_new = W9_GAD_1 - 1, W9_GAD_2_new = W9_GAD_2 - 1, W9_GAD_3_new = W9_GAD_3 - 1, W9_GAD_4_new = W9_GAD_4 - 1, W9_GAD_5_new = W9_GAD_5 - 1, W9_GAD_6_new = W9_GAD_6 - 1, W9_GAD_7_new = W9_GAD_7 - 1)
 
-DrugOrMental <- mutate(DrugOrMental, W9_GAD_sum_new = W9_GAD_1_new + W9_GAD_2_new + W9_GAD_3_new + W9_GAD_4_new + W9_GAD_5_new + W9_GAD_6_new + W9_GAD_7_new)
+DrugOrMental.noNA$W9_GAD_sum_new <- apply(DrugOrMental.noNA[, c("W9_GAD_1_new", "W9_GAD_2_new", "W9_GAD_3_new", "W9_GAD_4_new", "W9_GAD_5_new", "W9_GAD_6_new", "W9_GAD_7_new")], 1, sum, na.rm = T)
 
-# write.csv(DrugOrMental, file = "/Users/zhan039/Desktop/USC_HEAL/HH/04072020/test.csv")
+# write.csv(DrugOrMental.noNA, file = "/Users/zhan039/Desktop/USC_HEAL/HH/04072020/test_new.csv")
 
-DrugOrMental.NA <- filter_at(DrugOrMental, c("W9_DAST_sum_new", "W9_CESD_10_sum_new", "W9_GAD_sum_new"), all_vars(is.na(.)))
-
-DrugOrMental.noNA <- filter_at(DrugOrMental, c("W9_DAST_sum_new", "W9_CESD_10_sum_new", "W9_GAD_sum_new"), any_vars(!is.na(.)))
-
-DrugOrMental.valid <- filter_at(DrugOrMental, c("W9_DAST_sum_new", "W9_CESD_10_sum_new", "W9_GAD_sum_new"), all_vars(!is.na(.)))
 ```
 
-For the Drug Abuse Screening Test (DAST-10), Depression Scale (CESD-R) and Anxiety Scale (GAD-7), each sum score is calculated within participants who have valid information on all questions of the corresponding test. (Please let me know if you hope to calculate sum scores in a different way, like replace the missing value with 0. I noticed that the dataset contains some sum scores for DAST-10 and CESD-R, but it looks like DAST-10 sum score is calculated in a different way from the manual's you sent me. Just let me know if you hope to use the existing sum scores, and I'm glad to update the analysis below with the existing sum scores from the dataset.)
+`r length(Exclude_id)` participants who have all missing items for at least one test (Drug Abuse Screening Test [DAST-10], Depression Scale [CESD-R], Anxiety Scale [GAD-7]) are excluded from the analysis below. `r nrow(DrugOrMental.noNA)` participants who have valid information on all three tests are included in the analysis below.
 
-`r nrow(DrugOrMental.NA)` participants don't have any valid sum score among these three tests. `r nrow(DrugOrMental.noNA)` participants have at least one valid sum score. `r nrow(DrugOrMental.valid)` participants have valid information on all three sum scores.
+In terms of DAST-10, the sum score is calculated by the sum of 10 items (Score 1 point for each question answered “Yes,” except for question 3 for which a “No” receives 1
+point). Missing items are scored as zero to calculate the sum score.
 
-Within participants who have valid information on all three sum scores, people who report regular drug use (DAST-10 sum score > 2) or a mental health issue (CESD-R sum score >= 10 or GAD-7 sum score > 10) are summarized below:
+In terms of CESD-R, the sum score is calculated by the sum of 10 items. No participant has more than two missing items. All missing items are scored as zero to calculate the sum score.
+
+In terms of GAD-7, the sum score is calculated by the sum of 7 itmes (coded as 0-3). Missing items are scored as zero to calculate the sum score.
+
+(Please let me know if you hope to calculate sum scores in a different way, like only include participants who have valid information on all items for each test. I noticed that the dataset contains some sum scores for DAST-10 and CESD-R, but DAST-10 sum score looks calculated in a different way from the manual's you sent me. Just let me know if you hope to use the existing sum scores, and I'm glad to update the analysis.)
+
+Within participants who have valid information on all three tests, people who report regular drug use (DAST-10 sum score > 2) or a mental health issue (CESD-R sum score >= 10 or GAD-7 sum score > 10) are summarized below:
 ```{r}
-DrugOrMental.valid <- mutate(DrugOrMental.valid, DrugOrMental = ifelse((W9_DAST_sum_new > 2 | W9_CESD_10_sum_new >= 10 | W9_GAD_sum_new > 10), 1, 0))
+DrugOrMental.noNA<- mutate(DrugOrMental.noNA, DrugOrMental = ifelse((W9_DAST_sum_new > 2 | W9_CESD_10_sum_new >= 10 | W9_GAD_sum_new > 10), 1, 0))
 
-TableDrugMental <- rbind(table(DrugOrMental.valid$DrugOrMental),
-round(prop.table(table(DrugOrMental.valid$DrugOrMental))*100, 2))
+TableDrugMental <- rbind(table(DrugOrMental.noNA$DrugOrMental),
+round(prop.table(table(DrugOrMental.noNA$DrugOrMental))*100, 2))
 rownames(TableDrugMental) <- c("Frequency", "Percentage")
 colnames(TableDrugMental) <- c("No Drug Use nor Mental Health Issue", "Drug Use or Mental Health Issue")
 
