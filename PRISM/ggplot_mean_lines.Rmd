@@ -30,10 +30,12 @@ mnws_1[, c(3: ncol(mnws_1))] <- apply(mnws_1[, c(3: ncol(mnws_1))], 2, as.intege
 table1 <- aggregate(mnws_1[, c(3: ncol(mnws_1))], list(mnws_1$blinding_condn), mean, na.rm = T)
 
 table2 <- gather(table1, axt, value, -Group.1)
-groupname <- c("no smoking + placebo patch", "no smoking + active patch", "smoking + placebo patch", "smoking + active patch")
+# groupname <- c("no smoking + placebo patch", "no smoking + active patch", "smoking + placebo patch", "smoking + active patch")
 
 a <- ggplot(data = table2, mapping = aes(x = axt, y = value, group = Group.1, colour = as.factor(Group.1)))
 par()
-a + geom_line() + geom_point() + scale_x_discrete(breaks = table2$axt, labels = substr(table2$axt, 1, 4)) + ylab("Craving for Nicotine (Mean)") + scale_colour_discrete(name = "Group",  breaks = c(1:4), labels = c("no smoking + placebo patch", "no smoking + active patch", "smoking + placebo patch", "smoking + active patch")) + theme(legend.position = "bottom")
+graph1 <- a + geom_line() + geom_point() + scale_x_discrete(breaks = table2$axt, labels = substr(table2$axt, 1, 4)) + ylab("Craving for Nicotine (Mean)") + scale_colour_discrete(name = "Group",  breaks = c(1:4), labels = c("no smoking + placebo patch", "no smoking + active patch", "smoking + placebo patch", "smoking + active patch")) + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5, size = 20, face = "bold")) + labs(title = "MNWS Item 1 Score (Craving for Nicotine)") + guides(colour = guide_legend(nrow = 2))
+graph1
+ggsave(graph1, file = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04142020/Yi/graph1.pdf", width = 8, height = 6)
 ```
 
