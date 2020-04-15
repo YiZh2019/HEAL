@@ -1,0 +1,39 @@
+---
+title: "check mean graphs"
+author: "Yi"
+date: "4/14/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/PRISM/04142020/PRISM_Study_Completers_Clean_05Apr2020.csv", header = T, na.strings = ".")
+```
+
+```{r}
+data$blind_cond_f <- as.factor(data$blinding_condn)
+
+mnws_1 <- select(data, sid, blinding_condn, axt1_mnws_1, axt2_mnws_1, axt3_mnws_1, axt4_mnws_1, axt5_mnws_1, axt6_mnws_1, axt7_mnws_1, axt8_mnws_1, axt9_mnws_1, axt10_mnws_1)
+
+mnws_1[, c(3: ncol(mnws_1))] <- apply(mnws_1[, c(3: ncol(mnws_1))], 2, as.integer)
+
+# mnws_1 %>% group_by(blinding_condn) %>% summarise(mean(axt2_mnws_1))
+
+table1 <- aggregate(mnws_1[, c(3: ncol(mnws_1))], list(mnws_1$blinding_condn), mean, na.rm = T)
+
+table2 <- gather(table1, axt, value, -Group.1)
+groupname <- c("no smoking + placebo patch", "no smoking + active patch", "smoking + placebo patch", "smoking + active patch")
+
+a <- ggplot(data = table2, mapping = aes(x = axt, y = value, group = Group.1, colour = as.factor(Group.1)))
+par()
+a + geom_line() + geom_point() + scale_x_discrete(breaks = table2$axt, labels = substr(table2$axt, 1, 4)) + ylab("Craving for Nicotine (Mean)") + scale_colour_discrete(name = "Group",  breaks = c(1:4), labels = c("no smoking + placebo patch", "no smoking + active patch", "smoking + placebo patch", "smoking + active patch")) + theme(legend.position = "bottom")
+```
+
