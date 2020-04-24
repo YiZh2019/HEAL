@@ -1,0 +1,117 @@
+---
+title: "Pilot1"
+author: "Yi"
+date: "4/23/2020"
+output:
+  pdf_document: default
+  word_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, include=FALSE}
+library(tidyverse)
+library(gmodels)
+library(pander)
+```
+
+```{r, include=FALSE}
+# load the dataset
+data <- read.csv('/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04232020/ConjointAnalysisProl_DATA_2020-04-23_1502.csv')
+```
+
+```{r}
+# explore attention check questions
+
+ # table(data$att_check1___1, useNA = "always")
+ # table(data$att_check1___2, useNA = "always")
+ # table(data$att_check1___3, useNA = "always")
+ # table(data$att_check1___4, useNA = "always")
+ # table(data$att_check1___5, useNA = "always")
+ # table(data$att_check2, useNA = "always")
+ # table(data$last_30_ecig_yn, useNA = "always")
+
+ # table(data$att_check3a, useNA = "always")
+ # table(data$att_check3b, useNA = "always")
+
+# result of each attention check question
+data <- mutate(data, att1.success = ifelse(data$att_check1___1 == 1 & data$att_check1___4 == 1 & data$att_check1___5 == 1, 1, 0))
+
+data <- mutate(data, att2.success = ifelse(data$last_30_ecig_yn == 1 & data$att_check2 == 3, 1, ifelse(data$last_30_ecig_yn == 1, 0, NA))) # people who are not asked the second question are marked as NA
+
+data <- mutate(data, att3.success = ifelse(data$att_check3a == 4 & grepl("decision making", data$att_check3b, ignore.case = T), 1, 0))
+
+# table(data$att2.success, useNA = "always")
+data$att2.replaceNA <- data$att2.success
+data$att2.replaceNA[is.na(data$att2.replaceNA)] <- 1 # people who are not asked are marked as success
+# table(data$att2.replaceNA, useNA = "always")
+data$sum.att.success <- apply(data[, c("att1.success", "att2.replaceNA", "att3.success")], 1, sum)
+
+data$sum.att.failure <- 3 - data$sum.att.success
+```
+
+```{r}
+Freq <- as.data.frame(matrix(table(data$sum.att.failure)))
+Perc <- as.data.frame(matrix(prop.table(table(data$sum.att.failure)) * 100)) 
+table.count.failure <- cbind(Freq, Perc)
+table.count.failure <- rbind(table.count.failure, c(0, 0))
+rownames(table.count.failure) <- c(0, 1, 2, 3)
+colnames(table.count.failure) <- c("Frequency", "Percentage (%)")
+
+knitr::kable(table.count.failure, digits = 1, caption = "Number of Attention Check Failed")
+```
+
+1) A cross tab of number of attention checks failed (0-3) by bot status
+
+```{r}
+
+bot <- readRDS("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04232020/MaxDiff_Pilot1_BotFit.rds")
+
+count <- select(data, redcapid, sum.att.failure)
+
+pilot1 <- left_join(count, bot, by = "redcapid")
+
+# xtabs(~ sum.att.failure + md_fit_cut, data = pilot1)
+
+# pander:: pander(CrossTable(pilot1$sum.att.failure, pilot1$md_fit_cut, prop.chisq = FALSE), caption = "table 2")
+
+```
+
+--------------------------------------------------------------------------
+        &nbsp;\              bot status\          &nbsp;\        &nbsp;\   
+ number of attention\              &nbsp;\            \             \ 
+ check failed                       0                 1            Total    
+------------------------ -------------------- -------------- -------------
+        **0**\                 &nbsp;\           &nbsp;\       &nbsp;\    
+          N\                    113\              12\           125\      
+        Row(%)\              90.4000%\          9.6000%\      83.3333%\   
+      Column(%)\             83.7037%\         80.0000%\           \      
+        Total(%)               75.3333%          8.0000%                  
+
+        **1**\                 &nbsp;\           &nbsp;\       &nbsp;\    
+          N\                    22\                2\            24\      
+        Row(%)\              91.6667%\          8.3333%\      16.0000%\   
+      Column(%)\             16.2963%\         13.3333%\           \      
+        Total(%)               14.6667%          1.3333%                  
+
+        **2**\                 &nbsp;\           &nbsp;\       &nbsp;\    
+          N\                     0\                1\            1\       
+        Row(%)\               0.0000%\         100.0000%\     0.6667%\    
+      Column(%)\              0.0000%\          6.6667%\           \      
+        Total(%)               0.0000%           0.6667%                  
+
+         Total\                 135\               15\           150\     
+                                 90%               10%                    
+--------------------------------------------------------------------------
+
+Table: Number of attention check failed X bot status
+
+2) A cross tab of each attention check (failed vs. did not fail) by bot status 
+```{r}
+each.failure <- select(data, redcapid, )
+```
+
