@@ -100,7 +100,7 @@ pander:: pander(descr::CrossTable(pilot2$sum.att.failure, pilot2$md_fit_cut, pro
                               91.3907%       8.6093%                 
 ---------------------------------------------------------------------
 
-Table: Number of Attention Check Failures X Bot Status
+Table: Number of Attention Check Failures $\times$ Bot Status
 
 
 2) A cross tab of each attention check (failed vs. did not fail) by bot status 
@@ -158,7 +158,7 @@ pander:: pander(descr::CrossTable(pilot2.each$att2.replaceNA, pilot2.each$md_fit
                            91.3907%       8.6093%                 
 ------------------------------------------------------------------
 
-Table: Second Attention Check X Bot Status
+Table: Second Attention Check $\times$ Bot Status
 
 ```{r, include=FALSE}
 pander:: pander(descr::CrossTable(pilot2.each$att3.success, pilot2.each$md_fit_cut, prop.chisq = FALSE, dnn = c("Third Attention Check", "Bot Status")), caption = "Third Attention Check X Bot Status")
@@ -184,7 +184,7 @@ pander:: pander(descr::CrossTable(pilot2.each$att3.success, pilot2.each$md_fit_c
                           91.3907%       8.6093%                 
 -----------------------------------------------------------------
 
-Table: Third Attention Check X Bot Status
+Table: Third Attention Check $\times$ Bot Status
 
 3) Mean sawtooth survey complete time by bot status
 ```{r}
@@ -201,7 +201,7 @@ knitr::kable(Mdtime.bot, digits = 2, caption = "Mean Sawtooth Survey Complete Ti
 Mdtime.sum.fail <- pilot2 %>% group_by(sum.att.failure) %>% summarise(mean(md_time_inSec, na.rm = T), N = sum(!is.na(md_time_inSec)))
 
 colnames(Mdtime.sum.fail) <- c("Number of Attetion Check Failure", "Mean", "Valid N")
-knitr::kable(Mdtime.sum.fail, digits = 2, caption = "Sawtooth Survey Complete Time (seconds) X Number of Attention Check Failure")
+knitr::kable(Mdtime.sum.fail, digits = 2, caption = "Mean Sawtooth Survey Complete Time (seconds)")
 
 ```
 
