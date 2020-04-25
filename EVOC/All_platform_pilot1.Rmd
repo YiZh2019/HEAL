@@ -1,0 +1,220 @@
+---
+title: "Pilot 1 - All Platforms"
+author: "Yi"
+date: "4/24/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, include=FALSE}
+library(tidyverse)
+library(descr)
+library(pander)
+panderOptions("round", 1)
+```
+
+```{r}
+Prolific <- read.csv('/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04232020/ConjointAnalysisProl_DATA_2020-04-23_1502.csv')
+MTself <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04232020/ConjointAnalysisMTself_2020-04-24_1803.csv")
+TPMT <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04232020/ConjointAnalysisTPMT_DATA_2020-04-24_1756.csv")
+MTconc <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04232020/ConjointAnalysisMTconc_2020-04-24_1804.csv")
+PP <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04232020/ConjointAnalysisPPCo_DATA_2020-04-24_1757.csv")
+
+bot <- readRDS("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04232020/MaxDiff_Pilot1_BotFit.rds")
+```
+
+```{r}
+Prolific.att <- select(Prolific, redcapid, att_check1___1, att_check1___2, att_check1___3, att_check1___4, att_check1___5, last_30_ecig_yn, att_check2, att_check3a, att_check3b)
+
+MTself.att <- select(MTself, redcapid, att_check1___1, att_check1___2, att_check1___3, att_check1___4, att_check1___5, last_30_ecig_yn, att_check2, att_check3a, att_check3b)
+
+TPMT.att <- select(TPMT, redcapid, att_check1___1, att_check1___2, att_check1___3, att_check1___4, att_check1___5, last_30_ecig_yn, att_check2, att_check3a, att_check3b)
+
+MTconc.att <- select(MTconc, redcapid, att_check1___1, att_check1___2, att_check1___3, att_check1___4, att_check1___5, last_30_ecig_yn, att_check2, att_check3a, att_check3b)
+
+PP.att <- select(PP, redcapid, att_check1___1, att_check1___2, att_check1___3, att_check1___4, att_check1___5, last_30_ecig_yn, att_check2, att_check3a, att_check3b)
+
+data <- rbind(Prolific.att, MTself.att, TPMT.att, MTconc.att, PP.att)
+# length(data$redcapid)
+```
+
+```{r}
+# result of each attention check question
+data <- mutate(data, att1.success = ifelse(data$att_check1___1 == 1 & data$att_check1___4 == 1 & data$att_check1___5 == 1, 1, 0))
+
+data <- mutate(data, att2.success = ifelse(data$last_30_ecig_yn == 1 & data$att_check2 == 3, 1, ifelse(data$last_30_ecig_yn == 1, 0, NA))) # people who are not asked the second question are marked as NA
+
+data <- mutate(data, att3.success = ifelse(data$att_check3a == 4 & grepl("decision making", data$att_check3b, ignore.case = T), 1, 0))
+
+data$att2.replaceNA <- data$att2.success
+data$att2.replaceNA[is.na(data$att2.replaceNA)] <- 1 # people who are not asked are marked as success
+
+data$sum.att.success <- apply(data[, c("att1.success", "att2.replaceNA", "att3.success")], 1, sum)
+
+data$sum.att.failure <- 3 - data$sum.att.success
+
+data$att1.success <- factor(data$att1.success, levels = c(0, 1), labels = c("fail", "success"))
+data$att2.replaceNA <- factor(data$att2.replaceNA, levels = c(0, 1), labels = c("fail", "success"))
+data$att3.success <- factor(data$att3.success, levels = c(0,1), labels = c("fail", "success"))
+```
+
+```{r}
+Freq <- as.data.frame(matrix(table(data$sum.att.failure)))
+Perc <- as.data.frame(matrix(prop.table(table(data$sum.att.failure)) * 100)) 
+table.count.failure <- cbind(Freq, Perc)
+
+table.count.failure[5, ] <- c(sum(table.count.failure[, 1]), sum(table.count.failure[, 2]))
+
+rownames(table.count.failure) <- c(0, 1, 2, 3, "Total")
+colnames(table.count.failure) <- c("Frequency", "Percentage (%)")
+
+knitr::kable(table.count.failure, digits = 1, caption = "Number of Attention Check Failed")
+```
+
+1) A cross tab of number of attention checks failed (0-3) by bot status
+```{r, include=FALSE}
+count <- select(data, redcapid, sum.att.failure)
+
+pilot1 <- left_join(count, bot, by = "redcapid")
+
+table(pilot1$sum.att.failure, pilot1$md_fit_cut)
+
+pander:: pander(descr::CrossTable(pilot1$sum.att.failure, pilot1$md_fit_cut, prop.chisq = FALSE, dnn = c("Number of Attention Check Failures", "Bot Status")), caption = "Number of Attention Check Failures X Bot Status", digits = panderOptions("round"))
+```
+
+---------------------------------------------------------------
+          &nbsp;\            Bot Status\   &nbsp;\    &nbsp;\  
+ Number of Attention Check        0           1        Total   
+         Failures                                              
+--------------------------- ------------- ---------- ----------
+          **0**\              &nbsp;\      &nbsp;\    &nbsp;\  
+            N\                 544\         62\        606\    
+         Row(%)\              89.8%\       10.2%\     74.8%\   
+        Column(%)\            79.4%\       49.6%\        \     
+         Total(%)               67.2%        7.7%              
+
+          **1**\              &nbsp;\      &nbsp;\    &nbsp;\  
+            N\                 123\         34\        157\    
+         Row(%)\              78.3%\       21.7%\     19.4%\   
+        Column(%)\            18.0%\       27.2%\        \     
+         Total(%)               15.2%        4.2%              
+
+          **2**\              &nbsp;\      &nbsp;\    &nbsp;\  
+            N\                  12\         15\        27\     
+         Row(%)\              44.4%\       55.6%\     3.3%\    
+        Column(%)\             1.8%\       12.0%\        \     
+         Total(%)               1.5%         1.9%              
+
+          **3**\              &nbsp;\      &nbsp;\    &nbsp;\  
+            N\                  6\          14\        20\     
+         Row(%)\              30.0%\       70.0%\     2.5%\    
+        Column(%)\             0.9%\       11.2%\        \     
+         Total(%)               0.7%         1.7%              
+
+          Total\                685\        125\        810\   
+                                84.6%       15.4%              
+---------------------------------------------------------------
+
+Table: Number of Attention Check Failures $\times$ Bot Status
+
+2) A cross tab of each attention check (failed vs. did not fail) by bot status 
+```{r, include=FALSE}
+each.failure <- select(data, redcapid, att1.success, att2.replaceNA, att3.success)
+
+pilot1.each <- left_join(each.failure, bot, by = "redcapid")
+
+pander:: pander(descr::CrossTable(pilot1.each$att1.success, pilot1.each$md_fit_cut, prop.chisq = FALSE, dnn = c("First Attention Check", "Bot Status")), caption = "First Attention Check X Bot Status", digits = panderOptions("round"))
+```
+
+-----------------------------------------------------------
+        &nbsp;\          Bot Status\   &nbsp;\    &nbsp;\  
+ First Attention Check        0           1        Total   
+----------------------- ------------- ---------- ----------
+      **fail**\           &nbsp;\      &nbsp;\    &nbsp;\  
+          N\               123\         45\        168\    
+       Row(%)\            73.2%\       26.8%\     20.7%\   
+      Column(%)\           18%\         36%\         \     
+       Total(%)             15.2%        5.6%              
+
+     **success**\         &nbsp;\      &nbsp;\    &nbsp;\  
+          N\               562\         80\        642\    
+       Row(%)\            87.5%\       12.5%\     79.3%\   
+      Column(%)\           82%\         64%\         \     
+       Total(%)             69.4%        9.9%              
+
+        Total\              685\        125\        810\   
+                            84.6%       15.4%              
+-----------------------------------------------------------
+
+Table: First Attention Check $\times$ Bot Status
+
+```{r, include=FALSE}
+pander:: pander(descr::CrossTable(pilot1.each$att2.replaceNA, pilot1.each$md_fit_cut, prop.chisq = FALSE, dnn = c("Second Attention Check", "Bot Status")), caption = "Second Attention Check X Bot Status", digits = panderOptions("round"))
+```
+
+------------------------------------------------------------
+        &nbsp;\           Bot Status\   &nbsp;\    &nbsp;\  
+ Second Attention Check        0           1        Total   
+------------------------ ------------- ---------- ----------
+       **fail**\           &nbsp;\      &nbsp;\    &nbsp;\  
+          N\                 21\         29\        50\     
+        Row(%)\            42.0%\       58.0%\     6.2%\    
+      Column(%)\            3.1%\       23.2%\        \     
+        Total(%)             2.6%         3.6%              
+
+     **success**\          &nbsp;\      &nbsp;\    &nbsp;\  
+          N\                664\         96\        760\    
+        Row(%)\            87.4%\       12.6%\     93.8%\   
+      Column(%)\           96.9%\       76.8%\        \     
+        Total(%)             82.0%       11.9%              
+
+         Total\              685\        125\        810\   
+                             84.6%       15.4%              
+------------------------------------------------------------
+
+Table: Second Attention Check $\times$ Bot Status
+
+```{r, include=FALSE}
+pander:: pander(descr::CrossTable(pilot1.each$att3.success, pilot1.each$md_fit_cut, prop.chisq = FALSE, dnn = c("Third Attention Check", "Bot Status")), caption = "Third Attention Check X Bot Status", digits = panderOptions("round"))
+```
+
+-----------------------------------------------------------
+        &nbsp;\          Bot Status\   &nbsp;\    &nbsp;\  
+ Third Attention Check        0           1        Total   
+----------------------- ------------- ---------- ----------
+      **fail**\           &nbsp;\      &nbsp;\    &nbsp;\  
+          N\                21\         32\        53\     
+       Row(%)\            39.6%\       60.4%\     6.5%\    
+      Column(%)\           3.1%\       25.6%\        \     
+       Total(%)             2.6%         4.0%              
+
+     **success**\         &nbsp;\      &nbsp;\    &nbsp;\  
+          N\               664\         93\        757\    
+       Row(%)\            87.7%\       12.3%\     93.5%\   
+      Column(%)\          96.9%\       74.4%\        \     
+       Total(%)             82.0%       11.5%              
+
+        Total\              685\        125\        810\   
+                            84.6%       15.4%              
+-----------------------------------------------------------
+
+Table: Third Attention Check $\times$ Bot Status
+
+3) Mean sawtooth survey complete time by bot status
+```{r}
+Mdtime.bot <- pilot1 %>% group_by(md_fit_cut) %>% summarise(mean(md_time_inSec, na.rm = T), N = sum(!is.na(md_time_inSec)))
+Mdtime.bot <- Mdtime.bot[-3, ]
+colnames(Mdtime.bot) <- c("Bot Status", "Mean", "N")
+knitr::kable(Mdtime.bot, digits = 2, caption = "Mean Sawtooth Survey Complete Time (seconds)")
+```
+
+4) Mean sawtooth survey complete time by number of attention checks failed
+```{r}
+Mdtime.sum.fail <- pilot1 %>% group_by(sum.att.failure) %>% summarise(mean(md_time_inSec, na.rm = T), N = sum(!is.na(md_time_inSec)))
+colnames(Mdtime.sum.fail) <- c("Number of Attetion Check Failure", "Mean", "Valid N")
+knitr::kable(Mdtime.sum.fail, digits = 2, caption = "Mean Sawtooth Survey Complete Time (seconds)")
+```
+
