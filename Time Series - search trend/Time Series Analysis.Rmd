@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = FALSE)
 library(forecast)
 library(tseries)
 library(ggplot2)
+library(pander)
 ```
 
 ```{r}
@@ -24,14 +25,14 @@ colnames(data)[2] <- "weed.delivery"
 data$Day <- as.Date(data$Day)
 history <- data[data$Day <= "2020-03-11", ]
 
-ggplot(history, aes(Day, weed.delivery)) + geom_line() + scale_x_date("Month") + ylab("Daily weed delivery") 
+ggplot(history, aes(Day, weed.delivery)) + geom_line() + scale_x_date("Date") + ylab("Daily weed delivery") 
 
 # tsdata <- ts(history$weed.delivery, frequency = 30)
 # decomp <- stl(tsdata, s.window = "periodic")
 # deseasonal <- seasadj(decomp)
 # plot(deseasonal)
 
-adf.test(history[, 2], alternative = "stationary")
+ADFtest <- adf.test(history[, 2], alternative = "stationary")
 
 acf(history[, 2], main = "")
 pacf(history[, 2], main = "")
@@ -39,10 +40,11 @@ pacf(history[, 2], main = "")
 a <- auto.arima(history[, 2], seasonal = FALSE, stepwise = FALSE, approximation = FALSE)  # 0 0 5
 checkresiduals(a)  # white noise
 
-b <- auto.arima(history[, 2], seasonal = FALSE, max.p = 10 , max.q = 10, approximation = FALSE)  # 0 0 1
-checkresiduals(b) # not white noise
+b <- auto.arima(history[, 2], seasonal = FALSE, max.p = 10 , max.q = 10, stepwise = FALSE, approximation = FALSE)  # 0 0 5; same as a
+checkresiduals(b) 
 
 c <- arima(history[, 2], order = c(6, 0, 4))
+
 # arima(history[, 2], order = c(6, 0, 1))
 # arima(history[, 2], order = c(5, 0, 4))
 # arima(history[, 2], order = c(6, 0, 3))
@@ -50,12 +52,44 @@ c <- arima(history[, 2], order = c(6, 0, 4))
 checkresiduals(c)  # not white noise
 
 fit <- a
+```
+
+# Examine the data
+```{r}
+ggplot(history, aes(Day, weed.delivery)) + geom_line() + scale_x_date("Month") + ylab("Daily weed delivery") 
+```
+
+# Stationarity
+```{r}
+pander(ADFtest, caption = "Dickey - Fuller Test")
+```
+
+**Conclusion:** According to the Dicky - Fuller test, the series is statistically significantly stationary (p = 0.01). So the AR/ MA/ ARMA models would be considered.
+
+# Choosing Model Order and Fitting an model
+```{r}
+acf(history[, 2], main = "")
+pacf(history[, 2], main = "")
+```
+
+**The model is summarized below:**  
+
+
+```{r}
+# fit
+pander(summary(fit))
 
 ```
 
+# Evaluate the Model
 ```{r}
-fit
-checkresiduals(fit)
+pander(checkresiduals(fit))
+```
+
+**Conclusion:** The ACF plot of the residuals from the ARMA(0, 0, 5) model shows that almost all autocorrelations are within the threshold limits, indicating that the residuals are behaving like white noise., A portmanteau test returns a large p-value (p = 0.06), also suggesting the residuals are white noise. So the ARMA(0, 0, 5) is chosen as the final model.
+
+# Forecast and Plot the Result
+```{r}
 fcast <- forecast(fit, h = 19)
 time <- attr(fcast$x, "tsp")
 time <- seq(time[1], attr(fcast$mean, "tsp")[2], by = 1/time[3])
@@ -63,26 +97,34 @@ lenx <- length(fcast$x)
 lenmn <- length(fcast$mean)
 
 df <- data.frame(time = data$Day,
+                 observed = data$weed.delivery,
                  forecast = c(rep(NA, lenx), fcast$mean),
                  low1 = c(rep(NA, lenx), fcast$lower[, 1]),
                  upp1 = c(rep(NA, lenx), fcast$upper[, 1]),
                  low2 = c(rep(NA, lenx), fcast$lower[, 2]),
                  upp2 = c(rep(NA, lenx), fcast$upper[, 2]))
 
-ggplot() + geom_line(data = data, aes(Day, weed.delivery, color = "Observed")) + 
-  geom_smooth(data = df, aes(x = time, y = forecast, ymin = low2, ymax = upp2, fill = "95% CI", colour = "Forecast"), stat = "identity", na.rm = T, size = 0.5) +
-  geom_smooth(data = df, aes(x = time, y = forecast, ymin = low1, ymax = upp1, fill = "80% CI"), stat = "identity", na.rm = T, size = 0.5) + 
+lentime <- length(df$time)
+```
+
+```{r}
+ggplot() + 
+  geom_ribbon(data = df, aes(x = time, ymin = low2, ymax = upp2, fill = "95% CI"), alpha = 0.5, na.rm = T) +
+  geom_ribbon(data = df, aes(x = time, ymin = low1, ymax = upp1, fill = "80% CI"), alpha = 0.8, na.rm = T) + 
+  geom_line(data = df, aes(time, observed, color = "Observed")) +
+  geom_line(data = df, aes(x = time, y = forecast, color = "Forecast"), na.rm = T) +
   geom_vline(aes(xintercept = as.Date("2020-03-11")), colour = "#BB0000", linetype = "dashed") +
-  scale_x_date(breaks = seq(data$Day[1], data$Day[length(data$Day)], 7), labels = seq(data$Day[1], data$Day[length(data$Day)], 7)) +
+  scale_x_date(breaks = seq(df$time[1], df$time[length(df$time)], 7), labels = seq(df$time[1], df$time[length(df$time)], 7)) +
+  ggtitle("Weed Delivery in the United States") +
   xlab("Date") + 
   ylab("Weed Delivery") +
-  theme(axis.text.x = element_text(size = 7, angle = 45)) +
   scale_color_manual(name = "Group",
                      values = c("Observed" = "black", "Forecast" = "blue")) +
-  scale_fill_manual(name = "Confidence Interval",
-                    values = c("95% CI" = "grey", "80% CI" = "darkgrey"))
- 
+  scale_fill_manual(name = "Forecast CI",
+                    values = c("95% CI" = "grey", "80% CI" = "darkgrey")) +
+  theme(axis.text.x = element_text(size = 7, angle = 45), plot.title = element_text(hjust = 0.5, size = 20, face = "bold"), legend.title = element_text(size = 8, face = "bold"), legend.text = element_text(size = 7), legend.position = c(0.5, 0.9), legend.direction = "horizontal", legend.box = "vertical", legend.box.just = "top", legend.key.size = unit(5, "pt"), legend.key = element_rect(fill = "white"))  
 
+ 
 
 ```
 
