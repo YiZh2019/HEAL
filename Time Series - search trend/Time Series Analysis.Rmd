@@ -1,0 +1,87 @@
+---
+title: "Time Series Analysis"
+author: "Yi"
+date: "4/27/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(forecast)
+library(ggplot2)
+```
+
+```{r}
+data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/Search for Drugs/04272020/United States.csv", header = T, skip = 2)
+colnames(data)[2] <- "weed.delivery"
+```
+
+```{r, include=FALSE}
+data$Day <- as.Date(data$Day)
+history <- data[data$Day <= "2020-03-11", ]
+
+ggplot(history, aes(Day, weed.delivery)) + geom_line() + scale_x_date("Month") + ylab("Daily weed delivery") 
+
+# tsdata <- ts(history$weed.delivery, frequency = 30)
+# decomp <- stl(tsdata, s.window = "periodic")
+# deseasonal <- seasadj(decomp)
+# plot(deseasonal)
+
+adf.test(history[, 2], alternative = "stationary")
+
+acf(history[, 2], main = "")
+pacf(history[, 2], main = "")
+
+a <- auto.arima(history[, 2], seasonal = FALSE, stepwise = FALSE, approximation = FALSE)  # 0 0 5
+checkresiduals(a)  # white noise
+
+b <- auto.arima(history[, 2], seasonal = FALSE, max.p = 10 , max.q = 10, approximation = FALSE)  # 0 0 1
+checkresiduals(b) # not white noise
+
+c <- arima(history[, 2], order = c(6, 0, 4))
+# arima(history[, 2], order = c(6, 0, 1))
+# arima(history[, 2], order = c(5, 0, 4))
+# arima(history[, 2], order = c(6, 0, 3))
+# arima(history[, 2], order = c(7, 0, 4))
+checkresiduals(c)  # not white noise
+
+fit <- a
+
+```
+
+```{r}
+fit
+checkresiduals(fit)
+fcast <- forecast(fit, h = 19)
+time <- attr(fcast$x, "tsp")
+time <- seq(time[1], attr(fcast$mean, "tsp")[2], by = 1/time[3])
+lenx <- length(fcast$x)
+lenmn <- length(fcast$mean)
+
+df <- data.frame(time = data$Day,
+                 forecast = c(rep(NA, lenx), fcast$mean),
+                 low1 = c(rep(NA, lenx), fcast$lower[, 1]),
+                 upp1 = c(rep(NA, lenx), fcast$upper[, 1]),
+                 low2 = c(rep(NA, lenx), fcast$lower[, 2]),
+                 upp2 = c(rep(NA, lenx), fcast$upper[, 2]))
+
+ggplot() + geom_line(data = data, aes(Day, weed.delivery, color = "Observed")) + 
+  geom_smooth(data = df, aes(x = time, y = forecast, ymin = low2, ymax = upp2, fill = "95% CI", colour = "Forecast"), stat = "identity", na.rm = T, size = 0.5) +
+  geom_smooth(data = df, aes(x = time, y = forecast, ymin = low1, ymax = upp1, fill = "80% CI"), stat = "identity", na.rm = T, size = 0.5) + 
+  geom_vline(aes(xintercept = as.Date("2020-03-11")), colour = "#BB0000", linetype = "dashed") +
+  scale_x_date(breaks = seq(data$Day[1], data$Day[length(data$Day)], 7), labels = seq(data$Day[1], data$Day[length(data$Day)], 7)) +
+  xlab("Date") + 
+  ylab("Weed Delivery") +
+  theme(axis.text.x = element_text(size = 7, angle = 45)) +
+  scale_color_manual(name = "Group",
+                     values = c("Observed" = "black", "Forecast" = "blue")) +
+  scale_fill_manual(name = "Confidence Interval",
+                    values = c("95% CI" = "grey", "80% CI" = "darkgrey"))
+ 
+
+
+```
+
