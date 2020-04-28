@@ -2,7 +2,9 @@
 title: "Time Series Analysis"
 author: "Yi"
 date: "4/27/2020"
-output: pdf_document
+output:
+  pdf_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -64,7 +66,7 @@ ggplot(history, aes(Day, weed.delivery)) + geom_line() + scale_x_date("Month") +
 pander(ADFtest, caption = "Dickey - Fuller Test")
 ```
 
-**Conclusion:** According to the Dicky - Fuller test, the series is statistically significantly stationary (p = 0.01). So the AR/ MA/ ARMA models would be considered.
+**Conclusion:** According to the Dicky - Fuller test, the series is statistically significantly stationary (p = 0.01). So there's no need to difference the data.
 
 # Choosing Model Order and Fitting an model
 ```{r}
