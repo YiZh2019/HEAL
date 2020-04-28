@@ -58,7 +58,7 @@ fit <- a
 
 # Examine the data
 ```{r}
-ggplot(history, aes(Day, weed.delivery)) + geom_line() + scale_x_date("Month") + ylab("Daily weed delivery") 
+ggplot(history, aes(Day, weed.delivery)) + geom_line() + scale_x_date("Date") + ylab("Daily weed delivery") 
 ```
 
 # Stationarity
