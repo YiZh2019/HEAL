@@ -6,11 +6,12 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
-```{r}
+```{r, include=FALSE}
 library(forecast)
+library(tseries)
 library(ggplot2)
 ```
 
