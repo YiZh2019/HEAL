@@ -191,7 +191,7 @@ Table: Third Attention Check $\times$ Bot Status
 ```{r}
 Mdtime.bot <- pilot2 %>% group_by(md_fit_cut) %>% summarise(mean(md_time_inSec, na.rm = T), N = sum(!is.na(md_time_inSec)))
 
-Mdtime.bot <- Mdtime.bot[-3, ]
+# Mdtime.bot <- Mdtime.bot[-3, ]
 colnames(Mdtime.bot) <- c("Bot Status", "Mean", "N")
 
 knitr::kable(Mdtime.bot, digits = 2, caption = "Mean Sawtooth Survey Complete Time (seconds)")
