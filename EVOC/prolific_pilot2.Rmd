@@ -18,7 +18,7 @@ panderOptions("round", 1)
 
 ```{r, include=FALSE}
 # load the dataset
-data <- read.csv('/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04232020/ConjointAnalysisProl_DATA_2020-04-24_1352.csv')
+data <- read.csv('/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/Prolific2.csv', stringsAsFactors = FALSE)
 ```
 
 ```{r}
@@ -204,5 +204,40 @@ Mdtime.sum.fail <- pilot2 %>% group_by(sum.att.failure) %>% summarise(mean(md_ti
 colnames(Mdtime.sum.fail) <- c("Number of Attetion Check Failure", "Mean", "Valid N")
 knitr::kable(Mdtime.sum.fail, digits = 2, caption = "Mean Sawtooth Survey Complete Time (seconds)")
 
+```
+
+5) Mean redcap survey complete time by bot status
+```{r}
+time.ncol <- ends_with("timestamp", vars = colnames(data))
+start <- time.ncol[1]
+end <- time.ncol[length(time.ncol)]
+
+data$start.time <- strptime(data[, start], format = "%Y-%m-%d %H:%M:%S") 
+data$end.time <- strptime(data[, end], format = "%Y-%m-%d %H:%M:%S")
+
+data$diff.time <- difftime(data$end.time, data$start.time, units = "secs")
+data$diff.time <- as.numeric(data$diff.time)
+
+RCtime <- select(data, redcapid, diff.time)
+
+RCtime.bot.data <- left_join(RCtime, bot, by = "redcapid")
+```
+
+```{r}
+RCtime.bot <- RCtime.bot.data %>% group_by(md_fit_cut) %>% summarise(mean(diff.time, na.rm = T), N = sum(!is.na(diff.time)))
+
+colnames(RCtime.bot) <- c("Bot Status", "Mean", "N")
+
+knitr::kable(RCtime.bot, digits = 2, caption = "Mean Redcap Survey Complete Time (seconds)")
+```
+
+6) Mean redcap survey complete time by number of attention checks failed
+```{r}
+RCtime.att.data <- select(data, redcapid, diff.time, sum.att.failure)
+
+RCtime.sum.fail <- RCtime.att.data %>% group_by(sum.att.failure) %>% summarise(mean(diff.time, na.rm = T), N = sum(!is.na(diff.time)))
+
+colnames(RCtime.sum.fail) <- c("Number of Attetion Check Failure", "Mean", "Valid N")
+knitr::kable(RCtime.sum.fail, digits = 2, caption = "Mean Redcap Survey Complete Time (seconds)")
 ```
 
