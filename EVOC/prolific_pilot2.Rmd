@@ -207,6 +207,7 @@ knitr::kable(Mdtime.sum.fail, digits = 2, caption = "Mean Sawtooth Survey Comple
 ```
 
 5) Mean redcap survey complete time by bot status
+(Redcap survey time is the time from the beginning of the "Worker ID" section to the beginning of the "Advertisement" section.)
 ```{r}
 time.ncol <- ends_with("timestamp", vars = colnames(data))
 start <- time.ncol[1]
@@ -232,6 +233,7 @@ knitr::kable(RCtime.bot, digits = 2, caption = "Mean Redcap Survey Complete Time
 ```
 
 6) Mean redcap survey complete time by number of attention checks failed
+(Redcap survey time is the time from the beginning of the "Worker ID" section to the beginning of the "Advertisement" section.)
 ```{r}
 RCtime.att.data <- select(data, redcapid, diff.time, sum.att.failure)
 
