@@ -1,7 +1,7 @@
 ---
 title: "Pilot 1 - All Platforms"
 author: "Yi"
-date: "4/24/2020"
+date: "4/29/2020"
 output: pdf_document
 ---
 
@@ -17,27 +17,52 @@ panderOptions("round", 1)
 ```
 
 ```{r}
-Prolific <- read.csv('/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04232020/ConjointAnalysisProl_DATA_2020-04-23_1502.csv')
-MTself <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04232020/ConjointAnalysisMTself_2020-04-24_1803.csv")
-TPMT <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04232020/ConjointAnalysisTPMT_DATA_2020-04-24_1756.csv")
-MTconc <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04232020/ConjointAnalysisMTconc_2020-04-24_1804.csv")
-PP <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04232020/ConjointAnalysisPPCo_DATA_2020-04-24_1757.csv")
+Prolific <- read.csv('/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/Prolific.csv')
+MTself <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/MTself.csv")
+TPMT <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/TPMT.csv")
+MTconc <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/MTconc.csv")
+PP <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/PP.csv")
 
 bot <- readRDS("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04232020/MaxDiff_Pilot1_BotFit.rds")
 ```
 
+
 ```{r}
-Prolific.att <- select(Prolific, redcapid, att_check1___1, att_check1___2, att_check1___3, att_check1___4, att_check1___5, last_30_ecig_yn, att_check2, att_check3a, att_check3b)
+# create the redcap survey time
+CreateRCtime <- function(platform) {
+  time.ncol <- ends_with("timestamp", vars = colnames(platform))
+  start <- time.ncol[1]
+  end <- time.ncol[length(time.ncol)]
 
-MTself.att <- select(MTself, redcapid, att_check1___1, att_check1___2, att_check1___3, att_check1___4, att_check1___5, last_30_ecig_yn, att_check2, att_check3a, att_check3b)
+  platform$start.time <- strptime(platform[, start], format = "%Y-%m-%d %H:%M:%S") 
+  platform$end.time <- strptime(platform[, end], format = "%Y-%m-%d %H:%M:%S")
 
-TPMT.att <- select(TPMT, redcapid, att_check1___1, att_check1___2, att_check1___3, att_check1___4, att_check1___5, last_30_ecig_yn, att_check2, att_check3a, att_check3b)
+  platform$diff.time <- difftime(platform$end.time, platform$start.time, units = "secs")
+  platform$diff.time <- as.numeric(platform$diff.time)
+  
+  return(platform)
+}
 
-MTconc.att <- select(MTconc, redcapid, att_check1___1, att_check1___2, att_check1___3, att_check1___4, att_check1___5, last_30_ecig_yn, att_check2, att_check3a, att_check3b)
+Prolific <- CreateRCtime(Prolific)
+MTself <- CreateRCtime(MTself)
+TPMT <- CreateRCtime(TPMT)
+MTconc <- CreateRCtime(MTconc)
+PP <- CreateRCtime(PP)
+```
 
-PP.att <- select(PP, redcapid, att_check1___1, att_check1___2, att_check1___3, att_check1___4, att_check1___5, last_30_ecig_yn, att_check2, att_check3a, att_check3b)
 
-data <- rbind(Prolific.att, MTself.att, TPMT.att, MTconc.att, PP.att)
+```{r}
+Prolific.att.RC <- select(Prolific, redcapid, att_check1___1, att_check1___2, att_check1___3, att_check1___4, att_check1___5, last_30_ecig_yn, att_check2, att_check3a, att_check3b, diff.time)
+
+MTself.att.RC <- select(MTself, redcapid, att_check1___1, att_check1___2, att_check1___3, att_check1___4, att_check1___5, last_30_ecig_yn, att_check2, att_check3a, att_check3b, diff.time)
+
+TPMT.att.RC <- select(TPMT, redcapid, att_check1___1, att_check1___2, att_check1___3, att_check1___4, att_check1___5, last_30_ecig_yn, att_check2, att_check3a, att_check3b, diff.time)
+
+MTconc.att.RC <- select(MTconc, redcapid, att_check1___1, att_check1___2, att_check1___3, att_check1___4, att_check1___5, last_30_ecig_yn, att_check2, att_check3a, att_check3b, diff.time)
+
+PP.att.RC <- select(PP, redcapid, att_check1___1, att_check1___2, att_check1___3, att_check1___4, att_check1___5, last_30_ecig_yn, att_check2, att_check3a, att_check3b, diff.time)
+
+data <- rbind(Prolific.att.RC, MTself.att.RC, TPMT.att.RC, MTconc.att.RC, PP.att.RC)
 # length(data$redcapid)
 ```
 
@@ -206,7 +231,7 @@ Table: Third Attention Check $\times$ Bot Status
 3) Mean sawtooth survey complete time by bot status
 ```{r}
 Mdtime.bot <- pilot1 %>% group_by(md_fit_cut) %>% summarise(mean(md_time_inSec, na.rm = T), N = sum(!is.na(md_time_inSec)))
-Mdtime.bot <- Mdtime.bot[-3, ]
+# Mdtime.bot <- Mdtime.bot[-3, ]
 colnames(Mdtime.bot) <- c("Bot Status", "Mean", "N")
 knitr::kable(Mdtime.bot, digits = 2, caption = "Mean Sawtooth Survey Complete Time (seconds)")
 ```
@@ -216,5 +241,30 @@ knitr::kable(Mdtime.bot, digits = 2, caption = "Mean Sawtooth Survey Complete Ti
 Mdtime.sum.fail <- pilot1 %>% group_by(sum.att.failure) %>% summarise(mean(md_time_inSec, na.rm = T), N = sum(!is.na(md_time_inSec)))
 colnames(Mdtime.sum.fail) <- c("Number of Attetion Check Failure", "Mean", "Valid N")
 knitr::kable(Mdtime.sum.fail, digits = 2, caption = "Mean Sawtooth Survey Complete Time (seconds)")
+```
+
+5) Mean redcap survey complete time by bot status
+(Redcap survey time is the time from the beginning of the "Worker ID" section to the beginning of the "Advertisement" section.)
+```{r}
+RCtime <- select(data, redcapid, diff.time)
+
+RCtime.bot.data <- left_join(RCtime, bot, by = "redcapid")
+
+RCtime.bot <- RCtime.bot.data %>% group_by(md_fit_cut) %>% summarise(mean(diff.time, na.rm = T), N = sum(!is.na(diff.time)))
+
+colnames(RCtime.bot) <- c("Bot Status", "Mean", "N")
+
+knitr::kable(RCtime.bot, digits = 2, caption = "Mean Redcap Survey Complete Time (seconds)")
+```
+
+6) Mean redcap survey complete time by number of attention checks failed
+(Redcap survey time is the time from the beginning of the "Worker ID" section to the beginning of the "Advertisement" section.)
+```{r}
+RCtime.att.data <- select(data, redcapid, diff.time, sum.att.failure)
+
+RCtime.sum.fail <- RCtime.att.data %>% group_by(sum.att.failure) %>% summarise(mean(diff.time, na.rm = T), N = sum(!is.na(diff.time)))
+
+colnames(RCtime.sum.fail) <- c("Number of Attetion Check Failure", "Mean", "Valid N")
+knitr::kable(RCtime.sum.fail, digits = 2, caption = "Mean Redcap Survey Complete Time (seconds)")
 ```
 
