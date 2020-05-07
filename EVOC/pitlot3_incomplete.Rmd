@@ -1,0 +1,20 @@
+---
+title: "pilot3_incomplete"
+author: "Yi"
+date: "5/6/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+data <- read.csv('/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/05062020/prolific_export_5e69822068561d23c0fbaf1b-2.csv', stringsAsFactors = FALSE)
+```
+
+```{r}
+mean(data$time_taken)
+length(unique(data$session_id))
+```
+
