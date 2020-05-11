@@ -15,9 +15,9 @@ library(dplyr)
 ```
 
 ```{r}
-data <- read_sav("/Users/zhan039/Desktop/USC HEAL/GROW/GROW DATA-20190920T175512Z-001/GROW DATA/REDCap_wTeleform_Merged (scored + sorted)_06212018 (No 2nd survey) with DIFF.sav")
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/GROW/GROW DATA-20190920T175512Z-001/GROW DATA/REDCap_wTeleform_Merged (scored + sorted)_06212018 (No 2nd survey) with DIFF.sav")
 
-teleform.repeat <- read_sav("/Users/zhan039/Desktop/USC HEAL/GROW/GROW DATA-20190920T175512Z-001/Yi/teleform_repeat.sav")
+teleform.repeat <- read_sav("/Users/zhan039/Desktop/USC_HEAL/GROW/GROW DATA-20190920T175512Z-001/Yi/teleform_repeat.sav")
 
 head(data)
 ```
@@ -245,8 +245,21 @@ sum(!is.na(data[is.na(data$redcap_id), "nd_rest_end"])) # it also exists in the 
 fix.data <- mutate(data, shq_15___1 = ifelse(is.na(redcap_id), shq_18a_T, shq_15___1), shq_15___2 = ifelse(is.na(redcap_id), shq_18b_T, shq_15___2), shq_15___3 = ifelse(is.na(redcap_id), shq_18c_T, shq_15___3), shq_15___4 = ifelse(is.na(redcap_id), shq_18d_T, shq_15___4), shq_15___5 = ifelse(is.na(redcap_id), shq_18e_T, shq_15___5), shq_15___6 = ifelse(is.na(redcap_id), shq_18f_T, shq_15___6), shq_15___7 = ifelse(is.na(redcap_id), shq_18g_T, shq_15___7), shq_15___8 = ifelse(is.na(redcap_id), shq_18h_T, shq_15___8))
 
 # fix the shaps_7
-fix.data <- mutate(data, shaps_7 = ifelse(shaps_7 == 0, 1, shaps_7))
+fix.data <- mutate(fix.data, shaps_7 = ifelse(shaps_7 == 0, 1, shaps_7))
 
-write_sav(data = fix.data, path = "/Users/zhan039/Desktop/USC HEAL/Menthol/fix_grow_data.sav")
+write_sav(data = fix.data, path = "/Users/zhan039/Desktop/USC_HEAL/Menthol/fix_grow_data.sav")
+```
+
+```{r}
+filter.data <- filter(fix.data, piq_5 == 0 & PIQ_6c_T == 1 | piq_5 == 0 & piq_6___3 == 1)
+
+table(filter.data[filter.data$shq_8 == 1, "shq_15___1"])
+
+fix.data[which(fix.data$shq_18a_T != fix.data$shq_15___1), c("cleaned_SID", "redcap_id", "shq_18a_T", "shq_15___1")]
+
+fix.data[which(data$shq_18a_T != data$shq_15___1), c("cleaned_SID", "redcap_id", "shq_18a_T", "shq_15___1")]
+
+table(fix.data$shaps_7)
+table(data$shaps_7)
 ```
 

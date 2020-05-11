@@ -56,7 +56,7 @@ ChiSqFisher <- function(var){
 
 
 ```{r}
-data <- read_sav("/Users/zhan039/Desktop/USC HEAL/Menthol/Merged_GROW_BRAND.sav")
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/Menthol/Merged_GROW_BRAND.sav")
 
 # teleform.repeat <- read_sav("/Users/zhan039/Desktop/USC HEAL/GROW/GROW DATA-20190920T175512Z-001/Yi/teleform_repeat.sav")
 
@@ -113,10 +113,20 @@ apply(filter.data[, shq.continuous], 2, ValidN)
 apply(filter.data[, shq.continuous], 2, Ttest)
 
 # fix shq_1: remove impossible values
-menthol.shq_1.outliers <- boxplot(menthol.shq.use$shq_1)$out
-unmenthol.shq_1.outliers <- boxplot(unmenthol.shq.use$shq_1)$out
+ # menthol.shq_1.outliers <- boxplot(menthol.shq.use$shq_1)$out
+ # unmenthol.shq_1.outliers <- boxplot(unmenthol.shq.use$shq_1)$out
+ # filter.data.cleanshq1 <- filter(filter.data, (shq_8 == 1 & !shq_1 %in% menthol.shq_1.outliers) | (shq_8 == 2 & !shq_1 %in% unmenthol.shq_1.outliers))
 
-filter.data.cleanshq1 <- filter(filter.data, (shq_8 == 1 & !shq_1 %in% menthol.shq_1.outliers) | (shq_8 == 2 & !shq_1 %in% unmenthol.shq_1.outliers))
+menthol.shq1.mean <- mean(menthol.shq.use$shq_1, na.rm = T)
+menthol.shq1.sd <- sd(menthol.shq.use$shq_1, na.rm = T)
+
+unmenthol.shq1.mean <- mean(unmenthol.shq.use$shq_1, na.rm = T)
+unmenthol.shq1.sd <- sd(unmenthol.shq.use$shq_1, na.rm = T)
+
+filter.out.shq1 <- filter(filter.data, shq_8 == 1 & (shq_1 < (menthol.shq1.mean - 2 * menthol.shq1.sd) | shq_1 > (menthol.shq1.mean + 2 * menthol.shq1.sd)) | shq_8 == 2 & (shq_1 < (unmenthol.shq1.mean - 2 * unmenthol.shq1.sd) | shq_1 > (unmenthol.shq1.mean + 2 * unmenthol.shq1.sd)))
+
+
+filter.data.cleanshq1 <- filter.data[!(filter.data$shq_1 %in% filter.out.shq1$shq_1), ]
 
 Mean.SD.N(filter.data.cleanshq1[filter.data.cleanshq1$shq_8 == 1, ]$shq_1)
 Mean.SD.N(filter.data.cleanshq1[filter.data.cleanshq1$shq_8 == 2, ]$shq_1)
@@ -186,6 +196,7 @@ apply(menthol.shq.use[, shq.use[!shq.use %in% shq.continuous]], 2, FreqPercent)
 apply(unmenthol.shq.use[, shq.use[!shq.use %in% shq.continuous]], 2, FreqPercent)
 apply(filter.data[, shq.use[!shq.use %in% shq.continuous]], 2, table)
 apply(filter.data[, c("shq_6", "shq_7", "shq_10", "shq_14")], 2, ValidN)
+apply(filter.data[, c("shq_15___1", "shq_15___2", "shq_15___3", "shq_15___4", "shq_15___5", "shq_15___6", "shq_15___7", "shq_15___8")], 2, ValidN)
 
 # apply(filter.data[, shq.use[!shq.use %in% c(shq.continuous, "shq_8")]], 2, ChiSqFisher)
 # ChiSqFisher(filter.data$shq_5)
