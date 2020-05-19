@@ -1,0 +1,113 @@
+---
+title: "PRISM linear mixed regression"
+author: "Yi"
+date: "5/18/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+library(tidyverse)
+library(lme4)
+library(stargazer)
+library(pander)
+library(sjPlot)
+```
+
+
+```{r, include=FALSE}
+data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/PRISM/05182020/PRISMCompleters_w_Menthol_Status_24Apr2020.csv", na.strings = c("", "."))
+```
+
+## Explore the data
+```{r, echo=FALSE}
+rat.time <- select(data, sid,  smoking_condition_check, patch_condition, blinding_condn, rat_delay_time, menthol_status)
+rat.time$rat_delay_time <- as.numeric(rat.time$rat_delay_time)
+# head(rat.time)
+
+
+ggplot(data = rat.time, aes(x = rat_delay_time, group = as.factor(blinding_condn), fill = as.factor(blinding_condn))) + 
+  geom_histogram( position = "dodge") +
+  scale_fill_discrete(name = "Blind Condition", 
+                      breaks = c(1, 2, 3, 4),
+                      labels = c("no smoking + placebo patch", "no smoking + active patch", "smoking + placebo patch", "smoking + active patch")) +
+  xlab("Rat Delay Time") +
+  ylab("Frequency") +
+  ggtitle("Distribution of Rat Delay Time across Blind Conditions") +
+  theme(legend.position = "bottom", legend.direction = "vertical", plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), "inches")) +
+  guides(fill = guide_legend(ncol = 2, nrow = 2, byrow = TRUE))
+
+  
+
+ggplot(data = rat.time, aes(x = as.factor(smoking_condition_check), y = rat_delay_time, fill = as.factor(patch_condition))) + 
+         geom_boxplot() +
+  scale_fill_discrete(name = "Patch Condition",
+                      breaks = c(0, 1),
+                      labels = c("Placebo", "Active")) +
+  xlab("Smoking Condition") +
+  scale_x_discrete(breaks = c(0:1), labels = c("No Smoking", "Smoking")) +
+  ylab("Rat Delay Time") +
+  ggtitle("Distribution of Rat Delay Time across Smoking Condition and Patch Condition")
+
+```
+
+## Model 1: Main Effects Smoking and Patch Only
+```{r, echo=FALSE}
+a <- lmer(rat_delay_time ~ smoking_condition_check + patch_condition + (1|sid), data = rat.time)
+summary(a)
+
+pander(anova(a))
+
+# stargazer(a, type = "latex", notes = "stargazer latex")
+
+
+
+
+# b <- lme(rat_delay_time ~ smoking_condition_check + patch_condition, data = rat.time, random = ~ 1|sid)
+# summary(a)
+# summary(b)
+# anova(b)
+# qqnorm(resid(b))
+# qqline(resid(b))
+```
+
+\begin{table}[!htbp] \centering 
+  \caption{} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}}lc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{1}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-2} 
+\\[-1.8ex] & rat\_delay\_time \\ 
+\hline \\[-1.8ex] 
+ smoking\_condition\_check & 5.432$^{***}$ \\ 
+  & (1.837) \\ 
+  & \\ 
+ patch\_condition & 4.023$^{**}$ \\ 
+  & (1.837) \\ 
+  & \\ 
+ Constant & 29.625$^{***}$ \\ 
+  & (2.590) \\ 
+  & \\ 
+\hline \\[-1.8ex] 
+Observations & 264 \\ 
+Log Likelihood & $-$1,140.744 \\ 
+Akaike Inf. Crit. & 2,291.488 \\ 
+Bayesian Inf. Crit. & 2,309.368 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+ & \multicolumn{1}{r}{stargazer latex} \\ 
+\end{tabular} 
+\end{table} 
+
+### Check residuals
+```{r, echo=FALSE}
+
+qqnorm(resid(a))
+```
+
