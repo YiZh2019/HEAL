@@ -1,0 +1,157 @@
+---
+title: "Each_Samples"
+author: "Yi"
+date: "5/21/2020"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, include=FALSE}
+library(tidyverse)
+library(gtsummary)
+library(kableExtra)
+```
+
+# Prolific
+```{r}
+data <- read.csv('/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/Prolific.csv', na.strings = "")
+```
+
+
+```{r}
+# create the redcap survey time
+CreateRCtime <- function(data) {
+  time.ncol <- ends_with("timestamp", vars = colnames(data))
+  start <- time.ncol[1]
+  end <- time.ncol[length(time.ncol)]
+
+  data$start.time <- strptime(data[, start], format = "%Y-%m-%d %H:%M:%S") 
+  data$end.time <- strptime(data[, end], format = "%Y-%m-%d %H:%M:%S")
+
+  data$diff.time <- difftime(data$end.time, data$start.time, units = "secs")
+  data$diff.time <- as.numeric(data$diff.time)
+  
+  return(data)
+}
+
+data <- CreateRCtime(data)
+```
+
+
+```{r}
+### result of each attention check question
+## success
+data <- mutate(data, att1.success = ifelse(data$att_check1___1 == 1 & data$att_check1___4 == 1 & data$att_check1___5 == 1, 1, 0))
+
+data <- mutate(data, att2.success = ifelse(data$last_30_ecig_yn == 1 & data$att_check2 == 3, 1, ifelse(data$last_30_ecig_yn == 1, 0, NA))) # people who are not asked the second question are marked as NA
+
+data <- mutate(data, att3a.success = ifelse(data$att_check3a == 4, 1, 0))
+
+data <- mutate(data, att3b.success = ifelse(grepl("decision making", data$att_check3b, ignore.case = T), 1, ifelse(data$att_check3a == 4, 0, NA)))
+
+data <- mutate(data, att3.success = ifelse(data$att_check3a == 4 & grepl("decision making", data$att_check3b, ignore.case = T), 1, 0))
+
+## failure
+data <- mutate(data, att1.fail = ifelse(!(data$att_check1___1 == 1 & data$att_check1___4 == 1 & data$att_check1___5 == 1), 1, 0))
+
+# data[!is.na(data$att_check2), "last_30_ecig_yn"]
+data <- mutate(data, att2.fail = ifelse(data$last_30_ecig_yn == 1 & data$att_check2 != 3, 1, ifelse(data$last_30_ecig_yn == 1, 0, NA))) # people who are not asked the second question are marked as NA
+
+data <- mutate(data, att3a.fail = ifelse(data$att_check3a != 4, 1, 0))
+
+# data[!is.na(data$att_check3b), "att_check3a"]
+data <- mutate(data, att3b.fail = ifelse(grepl("decision making", data$att_check3b, ignore.case = T), 0, ifelse(data$att_check3a == 4, 1, NA)))
+
+data <- mutate(data, att3.fail = ifelse(!(data$att_check3a == 4 & grepl("decision making", data$att_check3b, ignore.case = T)), 1, 0))
+```
+
+```{r}
+
+FreqPerc1 <- function(data,varname) {
+  freq <- table(select(data, all_of(varname)), useNA = "always")
+  perct <- round(prop.table(freq) * 100, 1)
+  nperct <- paste(freq, " ", "(", perct, "%", ")", sep = "")
+  nperct <- as.vector(nperct)
+  nperct[4] <- sum(!is.na(data$redcapid))
+  return(nperct)
+}
+
+FreqPerc2 <- function(data, varname) {
+  freq <- table(select(data, all_of(varname)), useNA = "no")
+  perct <- round(prop.table(freq) * 100, 1)
+  nperct <- paste(freq, " ", "(", perct, "%", ")", sep = "")
+  nperct <- as.vector(nperct)
+  nperct[3] <- "0 (0%)"
+  nperct[4] <- sum(!is.na(select(data, all_of(varname))))
+  return(nperct)
+}
+
+att1 <- FreqPerc1(data, "att1.fail")
+last_30_ecig_yn <- FreqPerc1(data, "last_30_ecig_yn")
+att2_1 <- FreqPerc1(data, "att2.fail") # among all participants
+att2_2 <- FreqPerc2(data, "att2.fail") # only among [last_30_ecig_yn] = '1'
+att3a <- FreqPerc1(data, "att3a.fail")
+att3b_1 <- FreqPerc1(data, "att3b.fail")
+att3b_2 <- FreqPerc2(data, "att3b.fail")
+table1 <- as.data.frame(cbind(att1, att2_1, att2_2, att3a, att3b_2))
+ colnames(table1) <- c("First", paste0("Second", footnote_marker_alphabet(1)), paste0("Second", footnote_marker_alphabet(2)), "Third", paste0("Fourth", footnote_marker_alphabet(3)))
+rownames(table1) <- c("Success", "Failure", "Missing", "Total")
+
+kableExtra::kable(table1, escape = F, caption = "N(%) of Attention Check Questions Failures") %>% footnote(alphabet = c("Among all participants", "Only among participants who saw it (last_30_ecig_yn = 1)", "Variable name: att_check_3b")) %>% kable_styling(bootstrap_options = "striped") %>% row_spec(2, bold = T)
+```
+
+Among all participants in the Redcap (N = 158), 150 participants have valid information on bot status in the Maxdiff pilot 1 dataset. Among all participants in the Maxdiff pilot 1 dataset (N = 877), 151 participants are marked as "Prol" in the variable "project_type", while one particpant (md_id = 122) has missing value in the variable "redcapid". This participants is exluded from the table below because of the missing Redcap ID. Therefore, the valid sample size is 150. 
+
+```{r}
+bot <- readRDS("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04232020/MaxDiff_Pilot1_BotFit.rds")
+
+mergedata <- left_join(data, bot, by = "redcapid")
+
+maxdiff1 <- FreqPerc1(mergedata, "md_fit_cut")
+table2 <- as.data.frame(maxdiff1)
+colnames(table2) <- "The First MaxDiff"
+rownames(table2) <- c("Not bot", "Bot", "Missing", "Total")
+
+kableExtra::kable(table2, caption = "N(%) of Bots") %>% row_spec(2, bold = T) %>% kable_styling(bootstrap_options = "striped")
+```
+
+```{r}
+RC.mean <- mean(data$diff.time, na.rm = T)
+RC.sd <- sd(data$diff.time, na.rm = T)
+RC.low <- RC.mean - 2 * RC.sd
+RC.upp <- RC.mean + 2 * RC.sd
+RC.mean.sd <- rbind(RC.mean, RC.sd, RC.low, RC.upp)
+rownames(RC.mean.sd) <- c("Mean", "SD", "Mean - 2SD", "Mean + 2SD")
+colnames(RC.mean.sd) <- paste0("Redcap Survey Time", footnote_marker_alphabet(1))
+kableExtra::kable(RC.mean.sd, escape = F,caption = "Summary of Redcap Survey Time") %>% kable_styling(bootstrap_options = "striped") %>% footnote(alphabet = "Time from the start of \"Work Id\" section to the start of \"Advertisements\" section")
+```
+
+Based on the information above (mean - 2SD, mean + 2SD), potential outliers are listed below.
+```{r}
+RC.mean.outliers <- data[which(data$diff.time > RC.upp), c("redcapid", "diff.time")]
+RC.mean.na <- data[is.na(data$diff.time), c("redcapid", "diff.time")]
+
+colnames(RC.mean.outliers)[2] <- paste0("Redcap Survey Time", footnote_marker_alphabet(1))
+rownames(RC.mean.outliers) <- NULL
+
+colnames(RC.mean.na)[2] <- paste0("Redcap Survey Time", footnote_marker_alphabet(1))
+rownames(RC.mean.na) <- NULL
+
+kableExtra::kable(RC.mean.outliers, escape = F, caption = "Potential Outliers") %>% kable_styling(bootstrap_options = "striped") %>% footnote(alphabet = "Time from the start of \"Work Id\" section to the start of \"Advertisements\" section")
+
+
+kableExtra::kable(RC.mean.na, escape = F, caption = "Participants Who Have Missing Survey Time") %>% kable_styling(bootstrap_options = "striped") %>% footnote(alphabet = "Time from the start of \"Work Id\" section to the start of \"Advertisements\" section", general = "These are participants who have missing value in either of \"Worker ID\" time stamp or \"Advertisements\" time stamp.")
+
+```
+
+```{r}
+
+```
+
