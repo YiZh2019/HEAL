@@ -128,7 +128,7 @@ mergedata <- left_join(data, bot, by = "redcapid")
 maxdiff1 <- FreqPerc1(mergedata, "md_device_fit_cut")
 maxdiff2 <- FreqPerc1(mergedata, "md_eliquid_fit_cut")
 maxdiff3 <- FreqPerc1(mergedata, "md_reason_fit_cut")
-table2 <- as.data.frame(cbind(maxdiff1, maxdiff2, maxfdiff3))
+table2 <- as.data.frame(cbind(maxdiff1, maxdiff2, maxdiff3))
 colnames(table2) <- c("The First MaxDiff (device)", "The Second MaxDiff (liquids)", "The Third MaxDiff (reasons)")
 rownames(table2) <- c("Not bot", "Bot", "Missing", "Total")
 
