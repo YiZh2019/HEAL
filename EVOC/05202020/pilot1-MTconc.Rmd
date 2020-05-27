@@ -273,7 +273,7 @@ ST.iqr.outliers <- mutate(ST.iqr.outliers, md_time_inSec = ifelse(md_time_inSec 
 colnames(ST.iqr.outliers)[2] <- "Sawtooth Survey Time (in secs)"
 rownames(ST.iqr.outliers) <- NULL
 
-kableExtra::kable(ST.iqr.outliers, escape = F, caption = "Potential Outliers (defined by Q3 + 1.5 * IQR and Q1 - 1.5 * IQR)", align = "c") %>% kable_styling(bootstrap_options = "striped", full_width = F) %>% footnote(symbol = "These are values larger than Q3 + 3 `*` IQR or smaller than Q1 - 3`*` IQR")
+kableExtra::kable(ST.iqr.outliers, escape = F, caption = "Potential Outliers (defined by Q3 + 1.5 * IQR and Q1 - 1.5 * IQR)", align = "c") %>% kable_styling(bootstrap_options = "striped", full_width = F) 
 
 # prepare for questions 12 - 14
 mergedata <- mutate(mergedata, ST.iqr.outliers = ifelse(mergedata$redcapid %in% ST.iqr.outliers$redcapid, 1, 0))
