@@ -16,5 +16,6 @@ data <- read.csv('/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/05062020/proli
 ```{r}
 mean(data$time_taken)
 length(unique(data$session_id))
+median(data$time_taken)
 ```
 
