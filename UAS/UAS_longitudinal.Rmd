@@ -1,0 +1,37 @@
+---
+title: "UAS"
+author: "Yi"
+date: "5/20/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(tidyverse)
+```
+
+```{r}
+data <- read_sas("/Users/zhan039/Desktop/USC_HEAL/UAS/UAS_05182020/longitudinal_data/national file and format program SAS/covidpanel_us_sas_may_14_2020.sas7bdat")
+```
+
+```{r}
+table(data$wave)
+table(data$phq4_anxious)
+table(data$phq4_anxious_r)
+table(data$survey_source)
+
+data %>% filter(., start_date == end_date) %>% select(., start_date, end_date)
+data[data$start_date == data$end_date, c("start_date", "end_date")]
+```
+
+```{r}
+data %>% filter(., end_date == "2020-03-30") %>% summarise(mean = mean(coping_drinking), n = n()) 
+data %>% filter(., start_date == "2020-03-30") %>% summarise(mean = mean(coping_drinking, na.rm = T), n = n()) 
+data %>% filter(., start_date == "2020-03-30" | end_date == "2020-03-30") %>% summarise(mean = mean(coping_drinking, na.rm = T), n = n()) 
+data[data$end_date == "2020-03-30", "end_date"]
+```
+
