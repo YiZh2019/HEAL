@@ -1,0 +1,136 @@
+---
+title: "Pilot 2 - Prolific - Distribution of Survey Time"
+author: "Yi"
+date: "5/28/2020"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, include=FALSE}
+library(tidyverse)
+library(kableExtra)
+library(ggplot2)
+```
+
+```{r}
+data <- read.csv('/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/Prolific2.csv', na.strings = "")
+```
+
+## Redcap Survey Time
+
+```{r}
+# create the redcap survey time
+CreateRCtime <- function(platform) {
+  time.ncol <- ends_with("timestamp", vars = colnames(platform))
+  start <- time.ncol[1]
+  end <- time.ncol[length(time.ncol)]
+
+  platform$start.time <- strptime(platform[, start], format = "%Y-%m-%d %H:%M:%S") 
+  platform$end.time <- strptime(platform[, end], format = "%Y-%m-%d %H:%M:%S")
+
+  platform$diff.time <- difftime(platform$end.time, platform$start.time, units = "secs")
+  platform$diff.time <- as.numeric(platform$diff.time)
+  
+  return(platform)
+}
+
+data <- CreateRCtime(data)
+```
+Among all participants in the Redcap (N = 332), 304 participants have valid Redcap survey time (from the beginning of "Work ID" section to the beginning of "Advertisements" section), and they distribute as below:
+```{r}
+RC.mean <- mean(data$diff.time, na.rm = T)
+
+ggplot(data = data, aes( x = redcapid, y = diff.time)) + geom_point(na.rm = T) + labs(y = "Redcap Survey Time (in secs)", title = "Pilot 2 - Prolific Redcap Survey Time")
+
+RC.outliers <- data[which(data$diff.time > 90000), c("redcapid", "diff.time")]
+colnames(RC.outliers)[2] <- "Redcap Survey Time"
+rownames(RC.outliers) <- NULL
+```
+
+There's one extreme large value:
+
+```{r}
+kableExtra::kable(RC.outliers, caption = "Potential Outliers", align = "c") %>% kable_styling(bootstrap_options = "striped", full_width = F)
+```
+
+After removing this participant (redcapid = 8123), the Redcap Survey Time distribute as below:
+```{r}
+clean.data <- data[which(!(data$redcapid %in% RC.outliers$redcapid)), ]
+RC.clean.mean <- mean(clean.data$diff.time, na.rm = T)
+RC.under.mean <- clean.data[clean.data$diff.time < RC.clean.mean, ] # TRUE + NA
+RC.under.mean.5pct <- quantile(RC.under.mean$diff.time, probs = 0.05, na.rm = T)
+RC.clean.sd <- sd(clean.data$diff.time, na.rm = T)
+RC.clean.mean.sd <- RC.clean.mean - 2 * RC.clean.sd
+
+ggplot(data = clean.data, aes( x = redcapid, y = diff.time)) + 
+  geom_point(na.rm = T) + 
+  labs(y = "Redcap Survey Time (in secs)", title = "Pilot 2 - Prolific Redcap Survey Time (cleaned) ") + 
+  geom_hline(aes(yintercept = RC.clean.mean, colour = "Mean"), linetype = "dashed") + 
+  geom_hline(aes(yintercept = RC.under.mean.5pct, colour = str_wrap("Under the Mean, bottom 5% of the Redcap Survey Time ", width = 20)), linetype = "dashed") +
+  geom_hline(aes(yintercept = RC.clean.mean.sd, colour = "Mean - 2SD"), linetype = "dashed") + 
+  theme(legend.key.height = unit(1, "cm")) + 
+  scale_colour_discrete(name = "Reference Lines",
+                        breaks = c("Mean", str_wrap("Under the Mean, bottom 5% of the Redcap Survey Time ", width = 20), "Mean - 2SD"),
+                        labels = c("Mean", str_wrap("Under the Mean, bottom 5% of the Redcap Survey Time ", width = 20), "Mean - 2SD"))
+```
+
+Under the mean survey time from the cleand Redcap dataset, the bottom 5% of the survey time are listed below:
+```{r}
+RC.5pct.outliers <- clean.data[which(clean.data$diff.time < RC.under.mean.5pct), c("redcapid", "diff.time")]
+colnames(RC.5pct.outliers)[2] <- "Redcap Survey Time"
+rownames(RC.5pct.outliers) <- NULL
+
+kableExtra::kable(RC.5pct.outliers, caption = "Potential Questionable Redcap Survey Time", align = "c") %>% kable_styling(bootstrap_options = "striped", full_width = F)
+```
+
+## Sawtooth Survey Time
+
+```{r}
+bot <- readRDS("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04232020/MaxDiff_Pilot2_BotFit.rds")
+
+mergedata <- left_join(clean.data, bot, by = "redcapid")
+
+# sum(!is.na(mergedata$md_time_inSec))
+```
+
+After merging the cleaned Redcap dataset and the Sawtooth dataset by redcapid, among all participants in the merged dataset (N = 331), 302 participants have valid information on Sawtooth survey time, and they distribute as below:
+```{r}
+ggplot(data = mergedata, aes(x = redcapid, y = md_time_inSec)) + 
+  geom_point(na.rm = T) +
+  labs(y = "Sawtooth Survey Time (in secs)", title = "Pilot 2 - Prolific Sawtooth Survey Time") 
+```
+
+It looks good. Then add the referece lines:
+```{r}
+ST.mean <- mean(mergedata$md_time_inSec, na.rm = T)
+ST.sd <- sd(mergedata$md_time_inSec, na.rm = T)
+ST.under.mean <- mergedata[mergedata$md_time_inSec < ST.mean, ]
+ST.under.mean.5pct <- quantile(ST.under.mean$md_time_inSec, probs = 0.05, na.rm = T)
+ST.mean.sd <- ST.mean - 2 * ST.sd
+
+ggplot(data = mergedata, aes(x = redcapid, y = md_time_inSec)) + 
+  geom_point(na.rm = T) +
+  labs(y = "Sawtooth Survey Time (in secs)", title = "Pilot 2 - Prolific Sawtooth Survey Time") +
+  geom_hline(aes(yintercept = ST.mean, colour = "Mean"), linetype = "dashed") +
+  geom_hline(aes(yintercept = ST.under.mean.5pct, colour = str_wrap("Under the Mean, bottom 5% of the Redcap Survey Time ", width = 20)), linetype = "dashed") +
+  geom_hline(aes(yintercept = ST.mean.sd, colour = "Mean - 2SD"), linetype = "dashed") + 
+  theme(legend.key.height = unit(1, "cm")) + 
+  scale_colour_discrete(name = "Reference Lines",
+                        breaks = c("Mean", str_wrap("Under the Mean, bottom 5% of the Redcap Survey Time ", width = 20), "Mean - 2SD"),
+                        labels = c("Mean", str_wrap("Under the Mean, bottom 5% of the Redcap Survey Time ", width = 20), "Mean - 2SD"))
+```
+
+Under the mean survey time from the merged dataset, the bottom 5% of the survey time are listed below:
+```{r}
+ST.5pct.outliers <- mergedata[which(mergedata$md_time_inSec < ST.under.mean.5pct), c("redcapid", "md_time_inSec")]
+colnames(ST.5pct.outliers)[2] <- "Sawtooth Survey Time"
+rownames(ST.5pct.outliers) <- NULL
+
+kableExtra::kable(ST.5pct.outliers, caption = "Potential Questionable Sawtooth Survey Time", align = "c") %>% kable_styling(bootstrap_options = "striped", full_width = F)
+```
+
