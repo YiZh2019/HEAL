@@ -1,0 +1,244 @@
+---
+title: "Linear Regression"
+author: "Yi"
+date: "5/31/2020"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/GROW/GROW DATA-20190920T175512Z-001/GROW DATA/REDCap_wTeleform_Merged (scored + sorted)_06212018 (No 2nd survey) with DIFF.sav")
+```
+
+```{r}
+# independent variables
+table(data$shq_8, useNA = "ifany")  # menthol
+data <- mutate(data, menthol = ifelse(shq_8 == 2, 0, shq_8)) # recode shq_8 as 0 and 1
+table(data$menthol, useNA = "ifany") 
+
+summary(data$ND_WSWS_Craving_Mean)
+summary(data$ND_QSU_Factor1_Mean)
+summary(data$ND_QSU_Factor2_Mean)
+summary(data$ND_POMS_NM_Mean)
+summary(data$ND_WSWS_Anger_Mean)
+summary(data$ND_POMS_Anger_Mean)
+summary(data$ND_WSWS_Anxiety_Mean)
+summary(data$ND_POMS_Anxiety_Mean)
+summary(data$ND_WSWS_Sadness_Mean)
+summary(data$ND_POMS_Depression_Mean)
+summary(data$ND_POMS_PM_Mean)
+summary(data$ND_SHAPS_RC_Mean)
+summary(data$ND_POMS_Confusion_Mean)
+summary(data$ND_WSWS_Concentration_Mean)
+summary(data$ND_CIS_Mean)
+summary(data$ND_WSWS_Hunger_Mean)
+
+# dependent variables
+summary(data$DIFF_WSWS_Craving_Mean) 
+summary(data$DIFF_QSU_Factor1_Mean)
+summary(data$DIFF_QSU_Factor2_Mean)
+summary(data$DIFF_POMS_NM_Mean)
+summary(data$DIFF_WSWS_Anger_Mean)
+summary(data$DIFF_POMS_Anger_Mean)
+summary(data$DIFF_WSWS_Anxiety_Mean)
+summary(data$DIFF_POMS_Anxiety_Mean)
+summary(data$DIFF_WSWS_Sadness_Mean)
+summary(data$DIFF_POMS_Depression_Mean)
+summary(data$DIFF_POMS_PM_Mean)
+summary(data$DIFF_SHAPS_RC_Mean)
+summary(data$DIFF_POMS_Confusion_Mean)
+summary(data$DIFF_WSWS_Concentration_Mean)
+summary(data$DIFF_CIS_Mean)
+summary(data$DIFF_WSWS_Hunger_Mean)
+
+# Adjusted for:
+table(data$piq_1, useNA = "ifany")  # gender (identity)
+table(data$piq_2, useNA = "ifany")  # age
+table(data$piq_7, useNA = "ifany")  # education
+table(data$FTND_Classification, useNA = "ifany")  # FTND classification
+
+```
+
+## Main Effect Regressions: Menthal Status --> Study Outcomes - UNADJUSTED
+### Smoking Motivation Regression
+```{r}
+lr1 <- lm(DIFF_WSWS_Craving_Mean ~ menthol + ND_WSWS_Craving_Mean, data = data)
+summary(lr1)
+```
+
+```{r}
+lr2 <- lm(DIFF_QSU_Factor1_Mean ~ menthol + ND_QSU_Factor1_Mean, data)
+summary(lr2)
+```
+
+```{r}
+lr3 <- lm(DIFF_QSU_Factor2_Mean ~ menthol + ND_QSU_Factor2_Mean, data)
+summary(lr3)
+```
+
+### NA Regressions
+```{r}
+lr4 <- lm(DIFF_POMS_NM_Mean ~ menthol + ND_POMS_NM_Mean, data)
+summary(lr4)
+```
+
+```{r}
+lr5 <- lm(DIFF_WSWS_Anger_Mean ~ menthol + ND_WSWS_Anger_Mean, data)
+summary(lr5)
+```
+
+```{r}
+lr6 <- lm(DIFF_POMS_Anger_Mean ~ menthol + ND_POMS_Anger_Mean, data)
+summary(lr6)
+```
+
+```{r}
+lr7 <- lm(DIFF_WSWS_Anxiety_Mean ~ menthol + ND_WSWS_Anxiety_Mean, data)
+summary(lr7)
+```
+
+```{r}
+lr8 <- lm(DIFF_POMS_Anxiety_Mean ~ menthol + ND_POMS_Anxiety_Mean, data)
+summary(lr8)
+```
+
+```{r}
+lr9 <- lm(DIFF_WSWS_Sadness_Mean ~ menthol + ND_WSWS_Sadness_Mean, data)
+summary(lr9)
+```
+
+```{r}
+lr10 <- lm(DIFF_POMS_Depression_Mean ~ menthol + ND_POMS_Depression_Mean, data)
+summary(lr10)
+```
+
+### Low PA Regressions
+```{r}
+lr11 <- lm(DIFF_POMS_PM_Mean ~ menthol + ND_POMS_PM_Mean, data)
+summary(lr11)
+```
+
+```{r}
+lr12 <- lm(DIFF_SHAPS_RC_Mean ~ menthol + ND_SHAPS_RC_Mean, data)
+summary(lr12)
+```
+
+### Cognitive Regressions
+```{r}
+lr13 <- lm(DIFF_POMS_Confusion_Mean ~ menthol + ND_POMS_Confusion_Mean, data)
+summary(lr13)
+```
+
+```{r}
+lr14 <- lm(DIFF_WSWS_Concentration_Mean ~ menthol + ND_WSWS_Concentration_Mean, data)
+summary(lr14)
+```
+
+```{r}
+lr15 <- lm(DIFF_CIS_Mean ~ menthol + ND_CIS_Mean, data)
+summary(lr15)
+```
+
+### Other Regressions
+```{r}
+lr16 <- lm(DIFF_WSWS_Hunger_Mean ~ menthol + ND_WSWS_Hunger_Mean, data)
+summary(lr16)
+```
+
+## Main Effect Regressions menthol --> Study Outcomes -- Adjusted for age, gender, education, and FTND
+### Smoking Motivation Regressions
+```{r}
+lr1.a <- lm(DIFF_WSWS_Craving_Mean ~ menthol + ND_WSWS_Craving_Mean + piq_1 + piq_2 + piq_7 + FTND_Classification, data = data)
+summary(lr1.a)
+```
+
+```{r}
+lr2.a <- lm(DIFF_QSU_Factor1_Mean ~ menthol + ND_QSU_Factor1_Mean + piq_1 + piq_2 + piq_7 + FTND_Classification, data)
+summary(lr2.a)
+```
+
+```{r}
+lr3.a <- lm(DIFF_QSU_Factor2_Mean ~ menthol + ND_QSU_Factor2_Mean + piq_1 + piq_2 + piq_7 + FTND_Classification, data)
+summary(lr3.a)
+```
+
+### NA Regressions
+```{r}
+lr4.a <- lm(DIFF_POMS_NM_Mean ~ menthol + ND_POMS_NM_Mean + piq_1 + piq_2 + piq_7 + FTND_Classification, data)
+summary(lr4.a)
+```
+
+```{r}
+lr5.a <- lm(DIFF_WSWS_Anger_Mean ~ menthol + ND_WSWS_Anger_Mean + piq_1 + piq_2 + piq_7 + FTND_Classification, data)
+summary(lr5.a)
+```
+
+```{r}
+lr6.a <- lm(DIFF_POMS_Anger_Mean ~ menthol + ND_POMS_Anger_Mean + piq_1 + piq_2 + piq_7 + FTND_Classification, data)
+summary(lr6.a)
+```
+
+```{r}
+lr7.a <- lm(DIFF_WSWS_Anxiety_Mean ~ menthol + ND_WSWS_Anxiety_Mean + piq_1 + piq_2 + piq_7 + FTND_Classification, data)
+summary(lr7.a)
+```
+
+```{r}
+lr8.a <- lm(DIFF_POMS_Anxiety_Mean ~ menthol + ND_POMS_Anxiety_Mean + piq_1 + piq_2 + piq_7 + FTND_Classification, data)
+summary(lr8.a)
+```
+
+```{r}
+lr9.a <- lm(DIFF_WSWS_Sadness_Mean ~ menthol + ND_WSWS_Sadness_Mean + piq_1 + piq_2 + piq_7 + FTND_Classification, data)
+summary(lr9.a)
+```
+
+```{r}
+lr10.a <- lm(DIFF_POMS_Depression_Mean ~ menthol + ND_POMS_Depression_Mean + piq_1 + piq_2 + piq_7 + FTND_Classification, data)
+summary(lr10.a)
+```
+
+### Low PA Regressions
+```{r}
+lr11.a <- lm(DIFF_POMS_PM_Mean ~ menthol + ND_POMS_PM_Mean + piq_1 + piq_2 + piq_7 + FTND_Classification, data)
+summary(lr11.a)
+```
+
+```{r}
+lr12.a <- lm(DIFF_SHAPS_RC_Mean ~ menthol + ND_SHAPS_RC_Mean + piq_1 + piq_2 + piq_7 + FTND_Classification, data)
+summary(lr12.a)
+```
+
+### Cognitive Regression
+```{r}
+lr13.a <- lm(DIFF_POMS_Confusion_Mean ~ menthol + ND_POMS_Confusion_Mean + piq_1 + piq_2 + piq_7 + FTND_Classification, data)
+summary(lr13.a)
+```
+
+```{r}
+lr14.a <- lm(DIFF_WSWS_Concentration_Mean ~ menthol + ND_WSWS_Concentration_Mean + piq_1 + piq_2 + piq_7 + FTND_Classification, data)
+summary(lr14.a)
+```
+
+```{r}
+lr15.a <- lm(DIFF_CIS_Mean ~ menthol + ND_CIS_Mean + piq_1 + piq_2 + piq_7 + FTND_Classification, data)
+summary(lr15.a)
+```
+
+### Other Regressions
+```{r}
+lr16.a <- lm(DIFF_WSWS_Hunger_Mean ~ menthol + ND_WSWS_Hunger_Mean + piq_1 + piq_2 + piq_7 + FTND_Classification, data)
+summary(lr16.a)
+```
+
