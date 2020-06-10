@@ -1,0 +1,75 @@
+---
+title: "merged dataset"
+author: "Yi"
+date: "6/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(gdata)
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+test <- read.xls("/Users/zhan039/Desktop/USC_HEAL/Menthol/Nausheen/06022020/cigarette_log.xlsx")
+```
+
+```{r}
+length(unique(test$SID)) 
+
+test %>% group_by(SID) %>% summarise(n = n()) %>% filter(n > 1)
+
+test[test$SID == 50495, ]
+test <- test[-121, ]
+test[test$SID == 50495, ]
+
+```
+
+```{r}
+grow <- read_sav("/Users/zhan039/Desktop/USC_HEAL/Menthol/fix_grow_data.sav")
+```
+
+```{r}
+test.merge <- merge(grow, test, by.x = "cleaned_SID", by.y = "SID", all.x = TRUE)
+test.merge <- mutate(test.merge, menthol_consis = ifelse(shq_8 == 2 & menthol == 2, 1, ifelse(shq_8 == 2 & menthol == 1, 2, ifelse(shq_8 == 1 & menthol == 2, 3, ifelse(shq_8 == 1 & menthol == 1, 4, NA)))))
+table(test.merge$menthol_consis, useNA = "ifany")
+```
+
+
+
+```{r}
+test.merge[test.merge$cleaned_SID == 500551, ]
+test.merge[test.merge$cleaned_SID == 500557, ]
+test.merge[test.merge$cleaned_SID == 509267, ]
+test.merge[test.merge$cleaned_SID == 591027, ]
+
+
+grow$cleaned_SID <- as.character(grow$cleaned_SID)
+
+grow[endsWith(grow$cleaned_SID, "551"), "cleaned_SID"]
+grow[endsWith(grow$cleaned_SID, "557"), "cleaned_SID"]
+grow[endsWith(grow$cleaned_SID, "267"), "cleaned_SID"]
+grow[endsWith(grow$cleaned_SID, "027"), "cleaned_SID"]
+
+```
+
+```{r}
+brand <- read.xls("/Users/zhan039/Desktop/USC_HEAL/Menthol/Yi/06022020/cigarette_log_fixed.xlsx")
+```
+
+
+```{r}
+length(unique(brand$SID)) 
+brand %>% group_by(SID) %>% summarise(n = n()) %>% filter(n > 1)
+brand[brand$SID == 51027, ]
+
+merged.data <- mutate(merged.data, menthol_consis = ifelse(shq_8 == 2 & menthol == 2, 1, ifelse(shq_8 == 2 & menthol == 1, 2, ifelse(shq_8 == 1 & menthol == 2, 3, ifelse(shq_8 == 1 & menthol == 1, 4, NA)))))
+table(merged.data$menthol_consis, useNA = "ifany")
+select(merged.data[is.na(merged.data$menthol_consis),], shq_8, menthol, menthol_consis)
+```
+
