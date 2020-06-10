@@ -634,5 +634,52 @@ ValidN(filter.data$piq_8)
 ChiSqFisher(filter.data$piq_8)
 
 chisq.test(rbind(table(filter.data[filter.data$shq_8 == 1, ]$piq_8), table(filter.data[filter.data$shq_8 == 2, ]$piq_8)))
+
+# Employment
+filter.data.employ <- mutate(filter.data, employ = ifelse(piq_9 == 4, 0, ifelse(piq_9 == 3, 1, ifelse(piq_9 == 1 | piq_9 == 2 | piq_9 == 5, 2, NA))))
+
+table(filter.data$piq_9, useNA = "ifany")
+table(filter.data.employ$employ, useNA = "ifany")
+
+FreqPercent(filter.data.employ[filter.data.employ$shq_8 == 1, ]$employ)
+FreqPercent(filter.data.employ[filter.data.employ$shq_8 == 2, ]$employ)
+ValidN(filter.data.employ$employ)
+
+employ.chisq <- chisq.test(rbind(table(filter.data.employ[filter.data.employ$shq_8 == 1, ]$employ), table(filter.data.employ[filter.data.employ$shq_8 == 2, ]$employ)))
+employ.fisher <- fisher.test(rbind(table(filter.data.employ[filter.data.employ$shq_8 == 1, ]$employ), table(filter.data.employ[filter.data.employ$shq_8 == 2, ]$employ)))
+employ.chisq
+employ.fisher
+
+# Financial Situation
+FreqPercent(menthol.data$piq_12)
+FreqPercent(unmenthol.data$piq_12)
+ValidN(filter.data$piq_12)
+ChiSqFisher(filter.data$piq_12)
+
+# Income
+filter.data.income <- mutate(filter.data, income = ifelse(piq_13 == 1, 0, 1))
+table(filter.data$piq_13, useNA = "ifany")
+table(filter.data.income$income, useNA = "ifany")
+ 
+FreqPercent(filter.data.income[filter.data.income$shq_8 == 1, ]$income)
+FreqPercent(filter.data.income[filter.data.income$shq_8 == 2, ]$income)
+ValidN(filter.data.income$income)
+
+income.chisq <- chisq.test(rbind(table(filter.data.income[filter.data.income$shq_8 == 1, ]$income), table(filter.data.income[filter.data.income$shq_8 == 2, ]$income)))
+income.fisher <- fisher.test(rbind(table(filter.data.income[filter.data.income$shq_8 == 1, ]$income), table(filter.data.income[filter.data.income$shq_8 == 2, ]$income)))
+income.chisq
+income.fisher
+
+# Number of People Live in the Household
+Mean.SD.N(menthol.data$piq_14)
+Mean.SD.N(unmenthol.data$piq_14)
+ValidN(filter.data$piq_14)
+Ttest(filter.data$piq_14)
+
+# Personal Recreational Expenditure
+Mean.SD.N(menthol.data$piq_15)
+Mean.SD.N(unmenthol.data$piq_15)
+ValidN(filter.data$piq_15)
+Ttest(filter.data$piq_15)
 ```
 
