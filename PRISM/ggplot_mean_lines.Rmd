@@ -19,7 +19,7 @@ data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/PRISM/04142020/PRISM_Study_Com
 ```
 
 ```{r}
-data$blind_cond_f <- as.factor(data$blinding_condn)
+# data$blind_cond_f <- as.factor(data$blinding_condn)
 
 mnws_1 <- select(data, sid, blinding_condn, axt1_mnws_1, axt2_mnws_1, axt3_mnws_1, axt4_mnws_1, axt5_mnws_1, axt6_mnws_1, axt7_mnws_1, axt8_mnws_1, axt9_mnws_1, axt10_mnws_1)
 
@@ -45,29 +45,6 @@ graph1
 ggsave(graph1, file = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04142020/Yi/graph1.pdf", width = 8, height = 6)
 ```
 
-```{r}
-mnws_2 <- select(data, sid, blinding_condn, axt1_mnws_2, axt2_mnws_2, axt3_mnws_2, axt4_mnws_2, axt5_mnws_2, axt6_mnws_2, axt7_mnws_2, axt8_mnws_2, axt9_mnws_2, axt10_mnws_2)
-
-mnws_2[, c(3: ncol(mnws_2))] <- apply(mnws_2[, c(3: ncol(mnws_2))], 2, as.integer)
-
-# mnws_2 %>% group_by(blinding_condn) %>% summarise(mean(axt2_mnws_2))
-
-table2.1 <- aggregate(mnws_2[, c(3: ncol(mnws_2))], list(mnws_2$blinding_condn), mean, na.rm = T)
-
-table2.2 <- gather(table2.1, axt, value, -Group.1)
-table2.2$axt <- factor(table2.2$axt, levels = unique(table2.2$axt))
-levels(table2.2$axt) <- c(1:10)
-
-# groupname <- c("no smoking + placebo patch", "no smoking + active patch", "smoking + placebo patch", "smoking + active patch")
-
-library(stringr)
 
 
-b <- ggplot(data = table2.2, mapping = aes(x = axt, y = value, group = Group.1, colour = as.factor(Group.1)))
-
-graph2 <- b + geom_line() + geom_point() + ylab("Craving for Nicotine (Mean)") + scale_colour_discrete(name = "Group",  breaks = c(1:4), labels = c("no smoking + placebo patch", "no smoking + active patch", "smoking + placebo patch", "smoking + active patch")) + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5, size = 20, face = "bold")) + labs(title = "MNWS Item 1 Score (Craving for Nicotine)") + guides(colour = guide_legend(nrow = 2))
-graph2
-ggsave(graph2, file = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04142020/Yi/graph2.pdf", width = 8, height = 6)
-```
-```
 

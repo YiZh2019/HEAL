@@ -1,0 +1,51 @@
+---
+title: "CHS_W1_4"
+author: "Yi"
+date: "6/15/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+wave1 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/CHS/CHS/CHS Datasets/Wave 1/CHS_Y12.csv")
+wave2 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/CHS/CHS/CHS Datasets/Wave 2/CHS_Y13.csv")
+wave3 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/CHS/CHS/CHS Datasets/Wave 3/CHS_Y14.csv")
+wave4 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/CHS/CHS/CHS Datasets/Wave 4/CHS_Y15.csv")
+```
+
+```{r}
+Mean.sd.n <- function(var){
+    a <- cbind(mean(var, na.rm = T), 
+               sd(var, na.rm = T),
+               sum(!is.na(var)))
+    rownames(a) <- attr(var, which = "label")
+    colnames(a) <- c("Mean", "SD", "Valid N")
+    return(a)
+}
+
+FreqPercent <- function(var){
+  frequency <- table(var)
+  percentage <- prop.table(frequency) * 100
+  nperct <- paste(frequency, " ", "(", percentage, "%", ")", sep = "")
+  n <- sum(!is.na(var))
+  return(cbind(nperct, n))
+}
+```
+
+
+```{r}
+Mean.sd.n(wave1$Y12_Age)
+FreqPercent(wave1$Y12_Gender)
+FreqPercent(wave1$Y12_Race)
+summary(wave1$Y12_Race)
+
+Mean.sd.n(wave2$Y13_Age)
+
+Mean.sd.n(wave3$Y14_Age)
+
+Mean.sd.n(wave4$Y15_Age)
+```
+
