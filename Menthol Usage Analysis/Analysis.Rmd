@@ -566,6 +566,58 @@ ChiSqFisher(filter.data$piq_16c)
 ChiSqFisher(filter.data$piq_16d)
 apply(filter.data[, c("piq_16a", "piq_16b", "piq_16c", "piq_16d")], 2, ValidN)
 
+# Grandmothers and grandfathers: races
+sum(!is.na(filter.data[is.na(filter.data$redcap_id), startsWith(colnames(filter.data), "piq_17")][, 1:28]))
+sum(!is.na(filter.data[!is.na(filter.data$redcap_id), startsWith(colnames(filter.data), "piq_8")][, 2:29]))
+
+filter.data.race <- mutate(filter.data, 
+  piq_17_m_gm_ai = ifelse(is.na(redcap_id), piq_8aa_T, piq_17a___1), 
+  piq_17_m_gm_asian = ifelse(is.na(redcap_id), piq_8ab_T, piq_17a___2), 
+  piq_17_m_gm_aa = ifelse(is.na(redcap_id), piq_8ac_T, piq_17a___3), 
+  piq_17_m_gm_me = ifelse(is.na(redcap_id), piq_8ad_T, piq_17a___4), 
+  piq_17_m_gm_pi = ifelse(is.na(redcap_id), piq_8ae_T, piq_17a___5), 
+  piq_17_m_gm_white = ifelse(is.na(redcap_id), piq_8af_T, piq_17a___6),
+  piq_17_m_gm_dontknow = ifelse(is.na(redcap_id), piq_8ag_T, piq_17a___7), 
+  piq_17_m_gf_ai = ifelse(is.na(redcap_id), piq_8ba_T, piq_17b___1), 
+  piq_17_m_gf_asian = ifelse(is.na(redcap_id), piq_8bb_T, piq_17b___2), 
+  piq_17_m_gf_aa = ifelse(is.na(redcap_id), piq_8bc_T, piq_17b___3), 
+  piq_17_m_gf_me = ifelse(is.na(redcap_id), piq_8bd_T, piq_17b___4), 
+  piq_17_m_gf_pi = ifelse(is.na(redcap_id), piq_8be_T, piq_17b___5), 
+  piq_17_m_gf_white = ifelse(is.na(redcap_id), piq_8bf_T, piq_17b___6), 
+  piq_17_m_gf_dontknow = ifelse(is.na(redcap_id), piq_8bg_T, piq_17b___7), 
+  piq_17_f_gm_ai = ifelse(is.na(redcap_id), piq_8ca_T, piq_17c___1),
+  piq_17_f_gm_asian = ifelse(is.na(redcap_id), piq_8cb_T, piq_17c___2),
+  piq_17_f_gm_aa = ifelse(is.na(redcap_id), piq_8cc_T, piq_17c___3),
+  piq_17_f_gm_me = ifelse(is.na(redcap_id), piq_8cd_T, piq_17c___4),
+  piq_17_f_gm_pi = ifelse(is.na(redcap_id), piq_8ce_T, piq_17c___5),
+  piq_17_f_gm_white = ifelse(is.na(redcap_id), piq_8cf_T, piq_17c___6),
+  piq_17_f_gm_dontknow = ifelse(is.na(redcap_id), piq_8cg_T, piq_17c___7),
+  piq_17_f_gf_ai = ifelse(is.na(redcap_id), piq_8da_T, piq_17d___1),
+  piq_17_f_gf_asian = ifelse(is.na(redcap_id), piq_8db_T, piq_17d___2),
+  piq_17_f_gf_aa = ifelse(is.na(redcap_id), piq_8dc_T, piq_17d___3),
+  piq_17_f_gf_me = ifelse(is.na(redcap_id), piq_8dd_T, piq_17d___4),
+  piq_17_f_gf_pi = ifelse(is.na(redcap_id), piq_8de_T, piq_17d___5),
+  piq_17_f_gf_white = ifelse(is.na(redcap_id), piq_8df_T, piq_17d___6),
+  piq_17_f_gf_dontknow = ifelse(is.na(redcap_id), piq_8dg_T, piq_17d___7)
+)
+
+table(filter.data.race$piq_8aa_T, useNA = "always")
+table(filter.data.race$piq_17a___1, useNA = "always")
+table(filter.data.race$piq_17_m_gm_ai, useNA = "always")
+
+apply(filter.data.race[filter.data.race$shq_8 == 1, startsWith(colnames(filter.data.race), "piq_17_m_gm")], 2, FreqPercent)
+apply(filter.data.race[filter.data.race$shq_8 == 2, startsWith(colnames(filter.data.race), "piq_17_m_gm")], 2, FreqPercent)
+
+apply(filter.data.race[filter.data.race$shq_8 == 1, startsWith(colnames(filter.data.race), "piq_17_m_gf")], 2, FreqPercent)
+apply(filter.data.race[filter.data.race$shq_8 == 2, startsWith(colnames(filter.data.race), "piq_17_m_gf")], 2, FreqPercent)
+
+apply(filter.data.race[filter.data.race$shq_8 == 1, startsWith(colnames(filter.data.race), "piq_17_f_gm")], 2, FreqPercent)
+apply(filter.data.race[filter.data.race$shq_8 == 2, startsWith(colnames(filter.data.race), "piq_17_f_gm")], 2, FreqPercent)
+
+apply(filter.data.race[filter.data.race$shq_8 == 1, startsWith(colnames(filter.data.race), "piq_17_f_gf")], 2, FreqPercent)
+apply(filter.data.race[filter.data.race$shq_8 == 2, startsWith(colnames(filter.data.race), "piq_17_f_gf")], 2, FreqPercent)
+
+
 # count of races among grandmothers and grandfathers
 filter.data.piq.family <- filter.data
 filter.data.piq.family$race_ai <- apply(filter.data[, c("piq_17a___1", "piq_17b___1", "piq_17c___1", "piq_17d___1", "piq_8aa_T", "piq_8ba_T", "piq_8ca_T", "piq_8da_T")], 1, sum, na.rm = T)
@@ -681,5 +733,94 @@ Mean.SD.N(menthol.data$piq_15)
 Mean.SD.N(unmenthol.data$piq_15)
 ValidN(filter.data$piq_15)
 Ttest(filter.data$piq_15)
+```
+
+```{r}
+# rescore UPPSP
+# reverse code
+uppsp_varname <- colnames(data)[startsWith(colnames(data), "uppsp")]
+uppsp_reverse <- uppsp_varname[c(2, 7, 12, 17, 22, 29, 34, 39, 44, 50, 58, 9, 47, 3, 8, 13, 18, 23, 26, 31, 36, 41, 46, 51, 56, 5, 10, 15, 20, 25, 30, 35, 40, 45, 49, 52, 54, 57, 59)]
+
+uppsp.data <- data[, c("cleaned_SID", "shq_8", "piq_5", "PIQ_6c_T", "piq_6___3", uppsp_varname)]
+
+for (i in 1: length(uppsp_reverse)) {
+  newvar <- paste(uppsp_reverse[i], "R", sep = "_")
+  uppsp.data[, newvar] = 5 - uppsp.data[, uppsp_reverse[i]]
+}
+
+uppsp.data[, sort(names(select(uppsp.data, starts_with(uppsp_reverse), ends_with("R"))))]
+
+# Negative Urgency
+negurg <- c("uppsp_2_R", "uppsp_7_R", "uppsp_12_R", "uppsp_17_R", "uppsp_22_R", "uppsp_29_R", "uppsp_34_R", "uppsp_39_R", "uppsp_44_R", "uppsp_50_R", "uppsp_53", "uppsp_58_R")
+
+negurg.cutoff <- trunc(length(negurg) * 0.7)
+
+uppsp.data$negurg.validN <- apply(!is.na(uppsp.data[, negurg]), 1, sum)
+
+uppsp.data <- mutate(uppsp.data, uppsp_negurg = ifelse(negurg.validN > negurg.cutoff, rowMeans(uppsp.data[, negurg], na.rm = T), NA))
+
+uppsp.data[, c(negurg, "uppsp_negurg")]
+
+# positive urgency
+posurg <- c("uppsp_5_R", "uppsp_10_R", "uppsp_15_R", "uppsp_20_R", "uppsp_25_R", "uppsp_30_R", "uppsp_35_R", "uppsp_40_R", "uppsp_45_R", "uppsp_49_R", "uppsp_52_R", "uppsp_54_R", "uppsp_57_R", "uppsp_59_R")
+
+posurg.cutoff <- trunc(length(posurg) * 0.7)
+
+uppsp.data$posurg.validN <- apply(!is.na(uppsp.data[, posurg]), 1, sum)
+
+uppsp.data <- mutate(uppsp.data, uppsp_posurg = ifelse(posurg.validN > posurg.cutoff, rowMeans(uppsp.data[, posurg], na.rm = T), NA))
+
+uppsp.data[, c(posurg, "uppsp_posurg")]
+
+# (lack of) Premeditation
+premed <- c("uppsp_1", "uppsp_6", "uppsp_11", "uppsp_16", "uppsp_21", "uppsp_28", "uppsp_33", "uppsp_38", "uppsp_43", "uppsp_48", "uppsp_55")
+
+premed.cutoff <- trunc(length(premed) * 0.7)
+
+uppsp.data$premed.validN <- apply(!is.na(uppsp.data[, premed]), 1, sum)
+
+uppsp.data <- mutate(uppsp.data, uppsp_premed = ifelse(premed.validN > premed.cutoff, rowMeans(uppsp.data[, premed], na.rm = T), NA))
+
+uppsp.data[, c(premed, "uppsp_premed")]
+
+# (lack of) Perseverance
+persev <- c("uppsp_4", "uppsp_9_R", "uppsp_14", "uppsp_19", "uppsp_24", "uppsp_27", "uppsp_32", "uppsp_37", "uppsp_42", "uppsp_47_R")
+
+persev.cutoff <- trunc(length(persev) * 0.7)
+
+uppsp.data$persev.validN <- apply(!is.na(uppsp.data[, persev]), 1, sum)
+
+uppsp.data <- mutate(uppsp.data, uppsp_persev = ifelse(persev.validN > persev.cutoff, rowMeans(uppsp.data[, persev], na.rm = T), NA))
+
+uppsp.data[, c(persev, "uppsp_persev")]
+
+# Sensation Seeking 
+sens <- c("uppsp_3_R", "uppsp_8_R", "uppsp_13_R", "uppsp_18_R", "uppsp_23_R", "uppsp_26_R", "uppsp_31_R", "uppsp_36_R", "uppsp_41_R", "uppsp_46_R", "uppsp_51_R", "uppsp_56_R")
+
+sens.cutoff <- trunc(length(sens) * 0.7)
+
+uppsp.data$sens.validN <- apply(!is.na(uppsp.data[, sens]), 1, sum)
+
+uppsp.data <- mutate(uppsp.data, uppsp_sens = ifelse(sens.validN > sens.cutoff, rowMeans(uppsp.data[, sens], na.rm = T), NA))
+
+uppsp.data[, c(sens, "uppsp_sens")]
+
+uppsp.data <- filter(uppsp.data, piq_5 == 0 & PIQ_6c_T == 1 | piq_5 == 0 & piq_6___3 == 1)
+
+Mean.SD.N(uppsp.data[uppsp.data$shq_8 == 1, ]$uppsp_negurg)
+Mean.SD.N(uppsp.data[uppsp.data$shq_8 == 2, ]$uppsp_negurg)
+
+Mean.SD.N(uppsp.data[uppsp.data$shq_8 == 1, ]$uppsp_posurg)
+Mean.SD.N(uppsp.data[uppsp.data$shq_8 == 2, ]$uppsp_posurg)
+
+Mean.SD.N(uppsp.data[uppsp.data$shq_8 == 1, ]$uppsp_premed)
+Mean.SD.N(uppsp.data[uppsp.data$shq_8 == 2, ]$uppsp_premed)
+
+Mean.SD.N(uppsp.data[uppsp.data$shq_8 == 1, ]$uppsp_persev)
+Mean.SD.N(uppsp.data[uppsp.data$shq_8 == 2, ]$uppsp_persev)
+
+Mean.SD.N(uppsp.data[uppsp.data$shq_8 == 1, ]$uppsp_sens)
+Mean.SD.N(uppsp.data[uppsp.data$shq_8 == 2, ]$uppsp_sens)
+
 ```
 
