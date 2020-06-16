@@ -1,0 +1,36 @@
+---
+title: "merge_prolific2&3"
+author: "Yi"
+date: "6/16/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+data1 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/06162020/Prolific3_minus.csv", na.strings = "")
+
+data2 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/06162020/Prolific3_second.csv", na.strings = "")
+```
+
+```{r}
+repeat.name <- intersect(colnames(data1), colnames(data2))
+colnames(data1)[!colnames(data1) %in% repeat.name]
+colnames(data2)[!colnames(data2) %in% repeat.name]
+length(intersect(data1$redcapid, data2$redcapid))
+306 + 2 + 16
+
+prolific3 <- merge(data1, data2, all.x = T, all.y = T)
+
+length(intersect(colnames(data1), colnames(prolific3)))
+length(intersect(colnames(data2), colnames(prolific3)))
+
+```
+
