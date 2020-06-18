@@ -605,63 +605,105 @@ table(filter.data.race$piq_8aa_T, useNA = "always")
 table(filter.data.race$piq_17a___1, useNA = "always")
 table(filter.data.race$piq_17_m_gm_ai, useNA = "always")
 
-apply(filter.data.race[filter.data.race$shq_8 == 1, startsWith(colnames(filter.data.race), "piq_17_m_gm")], 2, FreqPercent)
-apply(filter.data.race[filter.data.race$shq_8 == 2, startsWith(colnames(filter.data.race), "piq_17_m_gm")], 2, FreqPercent)
+# count of races for grandmother (mother's side)
+filter.data.race$piq_17_m_gm_dontknow <- NA
 
-apply(filter.data.race[filter.data.race$shq_8 == 1, startsWith(colnames(filter.data.race), "piq_17_m_gf")], 2, FreqPercent)
-apply(filter.data.race[filter.data.race$shq_8 == 2, startsWith(colnames(filter.data.race), "piq_17_m_gf")], 2, FreqPercent)
+filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gm")][, 1:6] <- na_if(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gm")][, 1:6], 0)
 
-apply(filter.data.race[filter.data.race$shq_8 == 1, startsWith(colnames(filter.data.race), "piq_17_f_gm")], 2, FreqPercent)
-apply(filter.data.race[filter.data.race$shq_8 == 2, startsWith(colnames(filter.data.race), "piq_17_f_gm")], 2, FreqPercent)
+filter.data.race$piq_17_m_gm_count <- apply(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gm")][, 1:6], 1, sum, na.rm = T)
 
-apply(filter.data.race[filter.data.race$shq_8 == 1, startsWith(colnames(filter.data.race), "piq_17_f_gf")], 2, FreqPercent)
-apply(filter.data.race[filter.data.race$shq_8 == 2, startsWith(colnames(filter.data.race), "piq_17_f_gf")], 2, FreqPercent)
+filter.data.race <- mutate(filter.data.race, piq_17_m_gm_count = ifelse(piq_17_m_gm_count == 0, NA, piq_17_m_gm_count))
 
+filter.data.race$piq_17_m_gm_na <- rowSums(is.na(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gm")][, 1:7]))
 
-# count of races among grandmothers and grandfathers
-filter.data.piq.family <- filter.data
-filter.data.piq.family$race_ai <- apply(filter.data[, c("piq_17a___1", "piq_17b___1", "piq_17c___1", "piq_17d___1", "piq_8aa_T", "piq_8ba_T", "piq_8ca_T", "piq_8da_T")], 1, sum, na.rm = T)
+table(filter.data.race$piq_17_m_gm_na)
 
-filter.data.piq.family[, c("piq_17a___1", "piq_17b___1", "piq_17c___1", "piq_17d___1", "piq_8aa_T", "piq_8ba_T", "piq_8ca_T", "piq_8da_T", "race_ai")]
+filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gm")]
 
-filter.data.piq.family$race_asian <- apply(filter.data[, c("piq_17a___2", "piq_17b___2", "piq_17c___2", "piq_17d___2", "piq_8ab_T", "piq_8bb_T", "piq_8cb_T", "piq_8db_T")], 1, sum, na.rm = T)
-filter.data.piq.family[, c("piq_17a___2", "piq_17b___2", "piq_17c___2", "piq_17d___2", "piq_8ab_T", "piq_8bb_T", "piq_8cb_T", "piq_8db_T", "race_asian")]
+Mean.SD.N(filter.data.race[filter.data.race$shq_8 == 1, ]$piq_17_m_gm_count)
+Mean.SD.N(filter.data.race[filter.data.race$shq_8 == 2, ]$piq_17_m_gm_count)
+ValidN(filter.data.race$piq_17_m_gm_count)
 
-filter.data.piq.family$race_aa <- apply(filter.data[, c("piq_17a___3", "piq_17b___3", "piq_17c___3", "piq_17d___3", "piq_8ac_T", "piq_8bc_T", "piq_8cc_T", "piq_8dc_T")], 1, sum, na.rm = T)
-filter.data.piq.family[, c("piq_17a___3", "piq_17b___3", "piq_17c___3", "piq_17d___3", "piq_8ac_T", "piq_8bc_T", "piq_8cc_T", "piq_8dc_T", "race_aa")]
+m_gm.levene <- leveneTest(filter.data.race$piq_17_m_gm_count, group = as.factor(filter.data.race$shq_8), center = mean)
 
-filter.data.piq.family$race_me <- apply(filter.data[, c("piq_17a___4", "piq_17b___4", "piq_17c___4", "piq_17d___4", "piq_8ad_T", "piq_8bd_T", "piq_8cd_T", "piq_8dd_T")], 1, sum, na.rm = T)
-filter.data.piq.family[, c("piq_17a___4", "piq_17b___4", "piq_17c___4", "piq_17d___4", "piq_8ad_T", "piq_8bd_T", "piq_8cd_T", "piq_8dd_T", "race_me")]
+m_gm.levene$result[1] <- ifelse(m_gm.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
 
-filter.data.piq.family$race_pi <- apply(filter.data[, c("piq_17a___5", "piq_17b___5", "piq_17c___5", "piq_17d___5", "piq_8ae_T", "piq_8be_T", "piq_8ce_T", "piq_8de_T")], 1, sum, na.rm = T)
-filter.data.piq.family[, c("piq_17a___5", "piq_17b___5", "piq_17c___5", "piq_17d___5", "piq_8ae_T", "piq_8be_T", "piq_8ce_T", "piq_8de_T", "race_pi")]
+t.test(filter.data.race[filter.data.race$shq_8 == 1, ]$piq_17_m_gm_count, filter.data.race[filter.data.race$shq_8 == 2, ]$piq_17_m_gm_count, var.equal = m_gm.levene$result[1])
 
-filter.data.piq.family$race_white <- apply(filter.data[, c("piq_17a___6", "piq_17b___6", "piq_17c___6", "piq_17d___6", "piq_8af_T", "piq_8bf_T", "piq_8cf_T", "piq_8df_T")], 1, sum, na.rm = T)
-filter.data.piq.family[, c("piq_17a___6", "piq_17b___6", "piq_17c___6", "piq_17d___6", "piq_8af_T", "piq_8bf_T", "piq_8cf_T", "piq_8df_T", "race_white")]
+# count of races for grandfather (mother's side)
+filter.data.race$piq_17_m_gf_dontknow <- NA
 
-filter.data.piq.family <- mutate(filter.data.piq.family, race_count = (race_ai > 0) + (race_asian > 0) + (race_aa > 0) + (race_me > 0) + (race_pi > 0) + (race_white > 0))
+filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gf")][, 1:6] <- na_if(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gf")][, 1:6], 0)
 
-filter.data.piq.family[, c("race_ai", "race_asian", "race_aa", "race_me", "race_pi", "race_white", "race_count")]
+filter.data.race$piq_17_m_gf_count <- apply(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gf")][, 1:6], 1, sum, na.rm = T)
 
-filter.data.piq.family[filter.data.piq.family$race_count == 0, c("piq_17a___7", "piq_17b___7", "piq_17c___7", "piq_17d___7", "piq_8ag_T", "piq_8bg_T", "piq_8cg_T", "piq_8dg_T", "race_count")]  # No one has missing value for all variables
+filter.data.race <- mutate(filter.data.race, piq_17_m_gf_count = ifelse(piq_17_m_gf_count == 0, NA, piq_17_m_gf_count))
 
-filter.data.piq.family[filter.data.piq.family$race_count > 4, c("cleaned_SID", "race_ai", "race_asian", "race_aa", "race_me", "race_pi", "race_white", "race_count")]
+filter.data.race$piq_17_m_gf_na <- rowSums(is.na(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gf")][, 1:7]))
 
-select(data[data$cleaned_SID == 50516, ], starts_with("piq_8"))
+table(filter.data.race$piq_17_m_gf_na)
 
-filter.data.piq.family <- filter.data.piq.family[-which(filter.data.piq.family$cleaned_SID == 50516), ]
+filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gf")]
 
-filter.data.piq.family[filter.data.piq.family$race_count > 4, c("cleaned_SID", "race_ai", "race_asian", "race_aa", "race_me", "race_pi", "race_white", "race_count")]
+Mean.SD.N(filter.data.race[filter.data.race$shq_8 == 1, ]$piq_17_m_gf_count)
+Mean.SD.N(filter.data.race[filter.data.race$shq_8 == 2, ]$piq_17_m_gf_count)
+ValidN(filter.data.race$piq_17_m_gf_count)
 
-Mean.SD.N(filter.data.piq.family[filter.data.piq.family$shq_8 == 1,]$race_count)
-Mean.SD.N(filter.data.piq.family[filter.data.piq.family$shq_8 == 2,]$race_count)
-ValidN(filter.data.piq.family$race_count)
+m_gf.levene <- leveneTest(filter.data.race$piq_17_m_gf_count, group = as.factor(filter.data.race$shq_8), center = mean)
 
-race.levene <- leveneTest(filter.data.piq.family$race_count, group = as.factor(filter.data.piq.family$shq_8), center = mean)
+m_gf.levene$result[1] <- ifelse(m_gf.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
 
-race.levene$result[1] <- ifelse(race.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
-t.test(filter.data.piq.family[filter.data.piq.family$shq_8 == 1, ]$race_count, filter.data.piq.family[filter.data.piq.family$shq_8 == 2, ]$race_count, var.equal = race.levene$result[1])
+t.test(filter.data.race[filter.data.race$shq_8 == 1, ]$piq_17_m_gf_count, filter.data.race[filter.data.race$shq_8 == 2, ]$piq_17_m_gf_count, var.equal = m_gf.levene$result[1])
 
+# count of races for grandmother (father's side)
+filter.data.race$piq_17_f_gm_dontknow <- NA
+
+filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gm")][, 1:6] <- na_if(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gm")][, 1:6], 0)
+
+filter.data.race$piq_17_f_gm_count <- apply(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gm")][, 1:6], 1, sum, na.rm = T)
+
+filter.data.race <- mutate(filter.data.race, piq_17_f_gm_count = ifelse(piq_17_f_gm_count == 0, NA, piq_17_f_gm_count))
+
+filter.data.race$piq_17_f_gm_na <- rowSums(is.na(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gm")][, 1:7]))
+
+table(filter.data.race$piq_17_f_gm_na)
+
+filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gm")]
+
+Mean.SD.N(filter.data.race[filter.data.race$shq_8 == 1, ]$piq_17_f_gm_count)
+Mean.SD.N(filter.data.race[filter.data.race$shq_8 == 2, ]$piq_17_f_gm_count)
+ValidN(filter.data.race$piq_17_f_gm_count)
+
+f_gm.levene <- leveneTest(filter.data.race$piq_17_f_gm_count, group = as.factor(filter.data.race$shq_8), center = mean)
+
+f_gm.levene$result[1] <- ifelse(f_gm.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
+
+t.test(filter.data.race[filter.data.race$shq_8 == 1, ]$piq_17_f_gm_count, filter.data.race[filter.data.race$shq_8 == 2, ]$piq_17_f_gm_count, var.equal = m_gf.levene$result[1])
+
+# count of races for granfather (father's side)
+filter.data.race$piq_17_f_gf_dontknow <- NA
+
+filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gf")][, 1:6] <- na_if(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gf")][, 1:6], 0)
+
+filter.data.race$piq_17_f_gf_count <- apply(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gf")][, 1:6], 1, sum, na.rm = T)
+
+filter.data.race <- mutate(filter.data.race, piq_17_f_gf_count = ifelse(piq_17_f_gf_count == 0, NA, piq_17_f_gf_count))
+
+filter.data.race$piq_17_f_gf_na <- rowSums(is.na(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gf")][, 1:7]))
+
+table(filter.data.race$piq_17_f_gf_na)
+
+filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gf")]
+
+Mean.SD.N(filter.data.race[filter.data.race$shq_8 == 1, ]$piq_17_f_gf_count)
+Mean.SD.N(filter.data.race[filter.data.race$shq_8 == 2, ]$piq_17_f_gf_count)
+ValidN(filter.data.race$piq_17_f_gf_count)
+
+f_gf.levene <- leveneTest(filter.data.race$piq_17_f_gf_count, group = as.factor(filter.data.race$shq_8), center = mean)
+
+f_gf.levene$result[1] <- ifelse(f_gf.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
+
+t.test(filter.data.race[filter.data.race$shq_8 == 1, ]$piq_17_f_gf_count, filter.data.race[filter.data.race$shq_8 == 2, ]$piq_17_f_gf_count, var.equal = f_gf.levene$result[1])
 
 # education
 filter.data.edu <- mutate(filter.data, education = ifelse(piq_7 == 1 | piq_7 == 2, 0, 1))
@@ -683,7 +725,7 @@ FreqPercent(menthol.data$piq_8)
 FreqPercent(unmenthol.data$piq_8)
 ValidN(filter.data$piq_8)
 
-ChiSqFisher(filter.data$piq_8)
+# ChiSqFisher(filter.data$piq_8)
 
 chisq.test(rbind(table(filter.data[filter.data$shq_8 == 1, ]$piq_8), table(filter.data[filter.data$shq_8 == 2, ]$piq_8)))
 
