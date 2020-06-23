@@ -2,35 +2,142 @@
 title: "merge_prolific2&3"
 author: "Yi"
 date: "6/16/2020"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r load packages}
 library(tidyverse)
+library(gdata)
+library(descr)
+library(pander)
 ```
 
 
-```{r}
-data1 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/06162020/Prolific3_minus.csv", na.strings = "")
+```{r read datasets}
+data1 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/06162020/Prolific3_minus.csv", na.strings = "", stringsAsFactors = F)
 
-data2 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/06162020/Prolific3_second.csv", na.strings = "")
+data2 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/06162020/Prolific3_second.csv", na.strings = "", stringsAsFactors = F)
+
+prolific2 <- read.csv('/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/Prolific2.csv', na.strings = "", stringsAsFactors = F)
+
+idlist <- read.xls("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Pilot 3 Eligible.xlsx")
 ```
 
-```{r}
-repeat.name <- intersect(colnames(data1), colnames(data2))
-colnames(data1)[!colnames(data1) %in% repeat.name]
-colnames(data2)[!colnames(data2) %in% repeat.name]
-length(intersect(data1$redcapid, data2$redcapid))
-306 + 2 + 16
+```{r check and clean prolific 3}
+length(unique(data1$prolificpid))
+length(unique(data2$prolificpid))
+
+# clean data1
+data1$num.na <- rowSums(is.na(data1))
+data1 %>% group_by(prolificpid) %>% summarise(., n = n()) %>% filter(., n > 1)
+
+data1[data1$prolificpid == "5a2add709408dc00016f57d3", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 1084
+data1[data1$prolificpid == "5cc210247502a000125f9886", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 1134
+data1[data1$prolificpid == "5ce649e53e496100197ae3db", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 1053
+data1[data1$prolificpid == "5d219d16072b440018aebe98", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 1023
+
+data1 <- data1[!data1$redcapid %in% c(1084, 1134, 1053, 1023), ] 
+
+# clean data2
+data2$num.na <- rowSums(is.na(data2))
+data2 %>% group_by(prolificpid) %>% summarise(., n = n()) %>% filter(., n > 1)
+
+data2[data2$prolificpid == "5da2d3e256940100160c3bec", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 2039  # filter(data2[, c("redcapid", "prolificpid", "num.na")], prolificpid == "5da2d3e256940100160c3bec") cannot detect NA
+
+data2[is.na(data2$prolificpid), c("redcapid", "prolificpid", "num.na")] # remove redcapid = 2000
+
+data2 <- data2[!data2$redcapid %in% c(2000, 2039), ]
+```
+
+```{r merge prolific 3}
+# merge prolific 3
+length(unique(data1$prolificpid))
+length(unique(data2$prolificpid))
+
+intersec_name_3 <- intersect(colnames(data1), colnames(data2))
+colnames(data1)[!colnames(data1) %in% intersec_name_3]
+colnames(data2)[!colnames(data2) %in% intersec_name_3]
+length(intersect(data1$prolificpid, data2$prolificpid))
+
+307 + 2 + 16
 
 prolific3 <- merge(data1, data2, all.x = T, all.y = T)
 
 length(intersect(colnames(data1), colnames(prolific3)))
 length(intersect(colnames(data2), colnames(prolific3)))
+# full_join(data1, data2, by = intersect(colnames(data1), colnames(data2)))
 
+sum(prolific3$prolificpid %in% idlist$Pilot3Eligible)  # remove polificpid = "test"
+
+prolific3 <- prolific3[prolific3$prolificpid %in% idlist$Pilot3Eligible, ]
+```
+
+```{r check and clean prolific 2}
+length(unique(prolific2$prolificpid))
+
+prolific2$num.na <- rowSums(is.na(prolific2))
+
+prolific2 %>% group_by(prolificpid) %>% summarise(n = n()) %>% filter( n > 1)
+
+prolific2[prolific2$prolificpid == "5c315f577626080001a88cb2", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 8109
+
+prolific2[prolific2$prolificpid == "5c748b9188fdc20017c60436", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 8272
+
+prolific2[prolific2$prolificpid == "5d010ccecfeb82000117c42a", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 8241 8244	
+
+prolific2[prolific2$prolificpid == "5d30b94628b06900195d305e", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 8088		
+
+prolific2[prolific2$prolificpid == "5d6f02d4e0207600167e2317", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 8158	8168
+
+prolific2[prolific2$prolificpid == "5dac7c198ff76d00166a70c4", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 8040
+
+prolific2[prolific2$prolificpid == "5df1683537241c07cf8f3984", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 8160
+
+prolific2 <- prolific2[!prolific2$redcapid %in% c(8109, 8272, 8241, 8244, 8088, 8158,	8168, 8040, 8160), ]
+
+
+intersec_name_2_3 <- intersect(colnames(prolific2), colnames(prolific3))
+
+colnames(prolific2)[!colnames(prolific2) %in% intersec_name_2_3]
+colnames(prolific3)[!colnames(prolific3) %in% intersec_name_2_3]
+
+length(intersect(prolific2$prolificpid, prolific3$prolificpid))
+
+sum(is.na(prolific2$prolificpid))
+
+183 + 49 + 142
+```
+
+```{r merge prolifc 2 & 3}
+prolific2$pilot <- 2
+prolific3$pilot <- 3
+intersec_name_2_3 <- intersect(colnames(prolific2), colnames(prolific3))
+
+prolific_2_3 <- merge(prolific2, prolific3, all.x = T, all.y = T, by = c("prolificpid", "pilot", intersec_name_2_3[!intersec_name_2_3 %in% c("prolificpid", "pilot")]))
+```
+
+```{r}
+varlist_num_days <- colnames(prolific_2_3)[endsWith(colnames(prolific_2_3), "30_days")]
+
+Days_Pilot <- function(varname){
+pander(descr::CrossTable(prolific_2_3[, varname], prolific_2_3$pilot, prop.chisq = FALSE, dnn = c(varname, "Pilot")))
+}
+
+sapply(varlist_num_days, Days_Pilot)
+
+table(prolific_2_3$disp_30_days, prolific_2_3$pilot)
+
+
+validid <- prolific_2_3 %>% group_by(prolificpid) %>% summarise(x = sum(!is.na(disp_30_days))) %>% filter(x == 2) %>% select(., "prolificpid")
+
+validdata <- prolific_2_3[prolific_2_3$prolificpid %in% validid$prolificpid, ]
+
+as.data.frame.matrix(table(validdata$disp_30_days, validdata$pilot))
 ```
 
