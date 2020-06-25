@@ -1,0 +1,80 @@
+---
+title: "check age"
+author: "Yi"
+date: "6/23/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+
+```{r}
+CHS <- read.csv("/Users/zhan039/Desktop/USC_HEAL/CHS/Temp/CHS_Merged_06182020.csv", stringsAsFactors = F, na.strings = c("NA", " "))
+```
+
+```{r}
+CalcAge <- function(surveydate, birthdate) {
+  age <- trunc(as.numeric(difftime(CHS[, surveydate], CHS[, birthdate], units = "days")/365.2422))
+  return(age)
+}
+
+CHS$dobkid_new <- as.Date(CHS$dobkid, format = "%m/%d/%y")
+```
+
+```{r Y12}
+CHS$dob
+select(CHS, dobkid, dobkid_new, Y12_SurveyDate_New, Y12_Age_Calc)
+
+CHS$Y12_Age_Calc_new <- CalcAge("Y12_SurveyDate_New", "dobkid_new")
+
+select(CHS, dobkid, dobkid_new, Y12_SurveyDate_New, Y12_Age, Y12_Age_Calc, Y12_Age_Calc_new)
+```
+
+```{r Y13}
+select(CHS, dobkid, dobkid_new, Y13_SurveyDate_New, Y13_Age, Y13_Age_Calc)
+
+CHS$Y13_Age_Calc_new <- CalcAge("Y13_SurveyDate_New", "dobkid_new")
+
+select(CHS, dobkid, dobkid_new, Y13_SurveyDate_New, Y13_Age, Y13_Age_Calc, Y13_Age_Calc_new)
+```
+
+```{r Y14}
+select(CHS, dobkid, dobkid_new, Y14_SurveyDate_New, Y14_Age, Y14_Age_Calc)
+
+CHS$Y14_Age_Calc_new <- CalcAge("Y14_SurveyDate_New", "dobkid_new")
+
+select(CHS, dobkid, dobkid_new, Y14_SurveyDate_New, Y14_Age, Y14_Age_Calc, Y14_Age_Calc_new)
+```
+
+```{r Y15}
+select(CHS, dobkid, dobkid_new, Y15_SurveyDate_New, Y15_Age, Y15_Age_Calc)
+
+CHS$Y15_Age_Calc_new <- CalcAge("Y15_SurveyDate_New", "dobkid_new")
+
+select(CHS, dobkid, dobkid_new, Y15_SurveyDate_New, Y15_Age, Y15_Age_Calc, Y15_Age_Calc_new)
+```
+
+```{r summary}
+summary(CHS$Y12_Age_Calc_new)
+summary(CHS$Y13_Age_Calc_new)
+summary(CHS$Y14_Age_Calc_new)
+summary(CHS$Y15_Age_Calc_new)
+```
+
+```{r}
+CHS <- CHS[, colnames(CHS) != "dobkid_new"]
+```
+
+```{r}
+write.csv(x = CHS, file = "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/06232020/CHS_06252020.csv")
+
+write_sav(CHS, "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/06232020/CHS_06252020.sav")
+```
+
