@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(haven)
 library(tidyverse)
+library(lm.beta)
 library(psy)
 library(effsize)
 ```
@@ -80,204 +81,236 @@ table(data$FTND_SUM, useNA = "ifany")  # FTND classification
 ### Smoking Motivation Regression
 ```{r}
 lr1 <- lm(DIFF_WSWS_Craving_Mean ~ menthol + ND_WSWS_Craving_Mean, data = data)
-summary(lr1)
-confint(lr1)
+lr1.std <- lm.beta(lr1)
+summary(lr1.std)
+confint(lr1.std)
 ```
 
 ```{r}
 lr2 <- lm(DIFF_QSU_Factor1_Mean ~ menthol + ND_QSU_Factor1_Mean, data)
-summary(lr2)
-confint(lr2)
+lr2.std <- lm.beta(lr2)
+summary(lr2.std)
+confint(lr2.std)
 ```
 
 ```{r}
 lr3 <- lm(DIFF_QSU_Factor2_Mean ~ menthol + ND_QSU_Factor2_Mean, data)
-summary(lr3)
-confint(lr3)
+lr3.std <- lm.beta(lr3)
+summary(lr3.std)
+confint(lr3.std)
 ```
 
 ### NA Regressions
 ```{r}
 lr4 <- lm(DIFF_POMS_NM_Mean ~ menthol + ND_POMS_NM_Mean, data)
-summary(lr4)
-confint(lr4)
+lr4.std <- lm.beta(lr4)
+summary(lr4.std)
+confint(lr4.std)
 ```
 
 ```{r}
 lr5 <- lm(DIFF_WSWS_Anger_Mean ~ menthol + ND_WSWS_Anger_Mean, data)
-summary(lr5)
-confint(lr5)
+lr5.std <- lm.beta(lr5)
+summary(lr5.std)
+confint(lr5.std)
 ```
 
 ```{r}
 lr6 <- lm(DIFF_POMS_Anger_Mean ~ menthol + ND_POMS_Anger_Mean, data)
-summary(lr6)
-confint(lr6)
+lr6.std <- lm.beta(lr6)
+summary(lr6.std)
+confint(lr6.std)
 ```
 
 ```{r}
 lr7 <- lm(DIFF_WSWS_Anxiety_Mean ~ menthol + ND_WSWS_Anxiety_Mean, data)
-summary(lr7)
-confint(lr7)
+lr7.std <- lm.beta(lr7)
+summary(lr7.std)
+confint(lr7.std)
 ```
 
 ```{r}
 lr8 <- lm(DIFF_POMS_Anxiety_Mean ~ menthol + ND_POMS_Anxiety_Mean, data)
-summary(lr8)
-confint(lr8)
+lr8.std <- lm.beta(lr8)
+summary(lr8.std)
+confint(lr8.std)
 ```
 
 ```{r}
 lr9 <- lm(DIFF_WSWS_Sadness_Mean ~ menthol + ND_WSWS_Sadness_Mean, data)
-summary(lr9)
-confint(lr9)
+lr9.std <- lm.beta(lr9)
+summary(lr9.std)
+confint(lr9.std)
 ```
 
 ```{r}
 lr10 <- lm(DIFF_POMS_Depression_Mean ~ menthol + ND_POMS_Depression_Mean, data)
-summary(lr10)
-confint(lr10)
+lr10.std <- lm.beta(lr10)
+summary(lr10.std)
+confint(lr10.std)
 ```
 
 ### Low PA Regressions
 ```{r}
 lr11 <- lm(DIFF_POMS_PM_Mean ~ menthol + ND_POMS_PM_Mean, data)
-summary(lr11)
-confint(lr11)
+lr11.std <- lm.beta(lr11)
+summary(lr11.std)
+confint(lr11.std)
 ```
 
 ```{r}
 lr12 <- lm(DIFF_SHAPS_RC_Mean ~ menthol + ND_SHAPS_RC_Mean, data)
-summary(lr12)
-confint(lr12)
+lr12.std <- lm.beta(lr12)
+summary(lr12.std)
+confint(lr12.std)
 ```
 
 ### Cognitive Regressions
 ```{r}
 lr13 <- lm(DIFF_POMS_Confusion_Mean ~ menthol + ND_POMS_Confusion_Mean, data)
-summary(lr13)
-confint(lr13)
+lr13.std <- lm.beta(lr13)
+summary(lr13.std)
+confint(lr13.std)
 ```
 
 ```{r}
 lr14 <- lm(DIFF_WSWS_Concentration_Mean ~ menthol + ND_WSWS_Concentration_Mean, data)
-summary(lr14)
-confint(lr14)
+lr14.std <- lm.beta(lr14)
+summary(lr14.std)
+confint(lr14.std)
 ```
 
 ```{r}
 lr15 <- lm(DIFF_CIS_Mean ~ menthol + ND_CIS_Mean, data)
-summary(lr15)
-confint(lr15)
+lr15.std <- lm.beta(lr15)
+summary(lr15.std)
+confint(lr15.std)
 ```
 
 ### Other Regressions
 ```{r}
 lr16 <- lm(DIFF_WSWS_Hunger_Mean ~ menthol + ND_WSWS_Hunger_Mean, data)
-summary(lr16)
-confint(lr16)
+lr16.std <- lm.beta(lr16)
+summary(lr16.std)
+confint(lr16.std)
 ```
 
 ## Main Effect Regressions menthol --> Study Outcomes -- Adjusted for age, gender, education, and FTND
 ### Smoking Motivation Regressions
 ```{r}
 lr1.a <- lm(DIFF_WSWS_Craving_Mean ~ menthol + ND_WSWS_Craving_Mean + piq_1 + piq_2 + education + FTND_SUM, data = data)
-summary(lr1.a)
-confint(lr1.a)
+lr1.a.std <- lm.beta(lr1.a)
+summary(lr1.a.std)
+confint(lr1.a.std)
 ```
 
 ```{r}
 lr2.a <- lm(DIFF_QSU_Factor1_Mean ~ menthol + ND_QSU_Factor1_Mean + piq_1 + piq_2 + education + FTND_SUM, data)
-summary(lr2.a)
-confint(lr2.a)
+lr2.a.std <- lm.beta(lr2.a)
+summary(lr2.a.std)
+confint(lr2.a.std)
 ```
 
 ```{r}
 lr3.a <- lm(DIFF_QSU_Factor2_Mean ~ menthol + ND_QSU_Factor2_Mean + piq_1 + piq_2 + education + FTND_SUM, data)
-summary(lr3.a)
-confint(lr3.a)
+lr3.a.std <- lm.beta(lr3.a)
+summary(lr3.a.std)
+confint(lr3.a.std)
 ```
 
 ### NA Regressions
 ```{r}
 lr4.a <- lm(DIFF_POMS_NM_Mean ~ menthol + ND_POMS_NM_Mean + piq_1 + piq_2 + education + FTND_SUM, data)
-summary(lr4.a)
-confint(lr4.a)
+lr4.a.std <- lm.beta(lr4.a)
+summary(lr4.a.std)
+confint(lr4.a.std)
 ```
 
 ```{r}
 lr5.a <- lm(DIFF_WSWS_Anger_Mean ~ menthol + ND_WSWS_Anger_Mean + piq_1 + piq_2 + education + FTND_SUM, data)
-summary(lr5.a)
-confint(lr5.a)
+lr5.a.std <- lm.beta(lr5.a)
+summary(lr5.a.std)
+confint(lr5.a.std)
 ```
 
 ```{r}
 lr6.a <- lm(DIFF_POMS_Anger_Mean ~ menthol + ND_POMS_Anger_Mean + piq_1 + piq_2 + education + FTND_SUM, data)
-summary(lr6.a)
-confint(lr6.a)
+lr6.a.std <- lm.beta(lr6.a)
+summary(lr6.a.std)
+confint(lr6.a.std)
 ```
 
 ```{r}
 lr7.a <- lm(DIFF_WSWS_Anxiety_Mean ~ menthol + ND_WSWS_Anxiety_Mean + piq_1 + piq_2 + education + FTND_SUM, data)
-summary(lr7.a)
-confint(lr7.a)
+lr7.a.std <- lm.beta(lr7.a)
+summary(lr7.a.std)
+confint(lr7.a.std)
 ```
 
 ```{r}
 lr8.a <- lm(DIFF_POMS_Anxiety_Mean ~ menthol + ND_POMS_Anxiety_Mean + piq_1 + piq_2 + education + FTND_SUM, data)
-summary(lr8.a)
-confint(lr8.a)
+lr8.a.std <- lm.beta(lr8.a)
+summary(lr8.a.std)
+confint(lr8.a.std)
 ```
 
 ```{r}
 lr9.a <- lm(DIFF_WSWS_Sadness_Mean ~ menthol + ND_WSWS_Sadness_Mean + piq_1 + piq_2 + education + FTND_SUM, data)
-summary(lr9.a)
-confint(lr9.a)
+lr9.a.std <- lm.beta(lr9.a)
+summary(lr9.a.std)
+confint(lr9.a.std)
 ```
 
 ```{r}
 lr10.a <- lm(DIFF_POMS_Depression_Mean ~ menthol + ND_POMS_Depression_Mean + piq_1 + piq_2 + education + FTND_SUM, data)
-summary(lr10.a)
-confint(lr10.a)
+lr10.a.std <- lm.beta(lr10.a)
+summary(lr10.a.std)
+confint(lr10.a.std)
 ```
 
 ### Low PA Regressions
 ```{r}
 lr11.a <- lm(DIFF_POMS_PM_Mean ~ menthol + ND_POMS_PM_Mean + piq_1 + piq_2 + education + FTND_SUM, data)
-summary(lr11.a)
-confint(lr11.a)
+lr11.a.std <- lm.beta(lr11.a)
+summary(lr11.a.std)
+confint(lr11.a.std)
 ```
 
 ```{r}
 lr12.a <- lm(DIFF_SHAPS_RC_Mean ~ menthol + ND_SHAPS_RC_Mean + piq_1 + piq_2 + education + FTND_SUM, data)
-summary(lr12.a)
-confint(lr12.a)
+lr12.a.std <- lm.beta(lr12.a)
+summary(lr12.a.std)
+confint(lr12.a.std)
 ```
 
 ### Cognitive Regression
 ```{r}
 lr13.a <- lm(DIFF_POMS_Confusion_Mean ~ menthol + ND_POMS_Confusion_Mean + piq_1 + piq_2 + education + FTND_SUM, data)
-summary(lr13.a)
-confint(lr13.a)
+lr13.a.std <- lm.beta(lr13.a)
+summary(lr13.a.std)
+confint(lr13.a.std)
 ```
 
 ```{r}
 lr14.a <- lm(DIFF_WSWS_Concentration_Mean ~ menthol + ND_WSWS_Concentration_Mean + piq_1 + piq_2 + education + FTND_SUM, data)
-summary(lr14.a)
-confint(lr14.a)
+lr14.a.std <- lm.beta(lr14.a)
+summary(lr14.a.std)
+confint(lr14.a.std)
 ```
 
 ```{r}
 lr15.a <- lm(DIFF_CIS_Mean ~ menthol + ND_CIS_Mean + piq_1 + piq_2 + education + FTND_SUM, data)
-summary(lr15.a)
-confint(lr15.a)
+lr15.a.std <- lm.beta(lr15.a)
+summary(lr15.a.std)
+confint(lr15.a.std)
 ```
 
 ### Other Regressions
 ```{r}
 lr16.a <- lm(DIFF_WSWS_Hunger_Mean ~ menthol + ND_WSWS_Hunger_Mean + piq_1 + piq_2 + education + FTND_SUM, data)
-summary(lr16.a)
-confint(lr16.a)
+lr16.a.std <- lm.beta(lr16.a)
+summary(lr16.a.std)
+confint(lr16.a.std)
 ```
 
 ## Table 2. Deprivation Effects for Study Outcomes
