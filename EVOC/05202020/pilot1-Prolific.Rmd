@@ -102,10 +102,10 @@ att3b_1 <- FreqPerc1(data, "att3b.fail")
 att3b_2 <- FreqPerc2(data, "att3b.fail")
 table1 <- as.data.frame(cbind(att1, att2_1, att2_2, att3a, att3b_2))
 
-colnames(table1) <- c("First", paste0("Second", footnote_marker_alphabet(1)), paste0("Second", footnote_marker_alphabet(2)), "Third", paste0("Fourth", footnote_marker_alphabet(3)))
+colnames(table1) <- c(paste0("First", footnote_marker_alphabet(1)), paste0("Second", footnote_marker_alphabet(2)), paste0("Second", footnote_marker_alphabet(3)), "Third", paste0("Fourth", footnote_marker_alphabet(4)))
 rownames(table1) <- c("Success", "Failure", "Missing", "Total")
 
-kableExtra::kable(table1, escape = F, caption = "N(%) of Attention Check Questions Failures", align = "c") %>% footnote(alphabet = c("Among all participants", "Only among participants who saw it (last_30_ecig_yn = 1)", "Variable name of the fourth attention check: att_check_3b")) %>% kable_styling(bootstrap_options = "striped", full_width = F) %>% row_spec(2, bold = T)
+kableExtra::kable(table1, escape = F, caption = "N(%) of Attention Check Questions Failures", align = "c") %>% footnote(alphabet = c("Variable name of the first attention check: att_check1 (the wheels question), only the full selection of option 1, 4, and 5 is seemed as success", "Among all participants", "Only among participants who saw it (last_30_ecig_yn = 1)", "Variable name of the fourth attention check: att_check_3b")) %>% kable_styling(bootstrap_options = "striped", full_width = F) %>% row_spec(2, bold = T)
 ```
 
 
@@ -126,7 +126,7 @@ rownames(table2) <- c("Not bot", "Bot", "Missing", "Total")
 kableExtra::kable(table2, caption = "N(%) of Bots", align = "c") %>% row_spec(2, bold = T) %>% kable_styling(bootstrap_options = "striped", full_width = F)
 ```
 
-### 8. Check for ouliers of REDCap survey time with 2SD and mean completion time
+### 8. Check for outliers of REDCap survey time with 2SD and mean completion time
 ```{r}
 # outliers
 RC.mean <- mean(data$diff.time, na.rm = T)
@@ -200,7 +200,7 @@ kableExtra::kable(ST.mean.outliers, caption = "Potential Outliers (defined by me
 mergedata <- mutate(mergedata, ST.mean.outliers = ifelse(mergedata$redcapid %in% ST.mean.outliers$redcapid, 1, 0))
 ```
 
-### 10. Check for ouliers of REDCap survey time 
+### 10. Check for outliers of REDCap survey time 
 ```{r}
 ggplot(data = data, aes(y = diff.time)) + geom_boxplot(na.rm = T) + theme(axis.text.x = element_blank()) + labs(y = "Redcap Survey Time (in secs)", title = "Boxplot of REDCap Survey Time") + xlim(-1, 1)
 ```
