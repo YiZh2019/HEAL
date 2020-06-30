@@ -1,0 +1,148 @@
+---
+title: "HH_W9_polyuse"
+author: "Yi"
+date: "6/18/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/HH/H&H/W9 Datasets/HH_W9_Scored_051920.csv", na.strings = c("NA", " "))
+```
+
+```{r}
+Mean.SD.N <- function(var){
+ return(c(mean(var, na.rm = T),
+  sd(var, na.rm = T),
+  sum(!is.na(var))))
+}
+
+FreqPercent <- function(var){
+  frequency <- table(var)
+  percentage <- frequency/sum(!is.na(var)) * 100
+  return(rbind(frequency, percentage))
+}
+```
+
+```{r}
+summary(data$W9_DEM_Age)
+data <- filter(data, W9_DEM_Age >= 19 & W9_DEM_Age <= 20)
+```
+
+
+```{r}
+# Last 30 day cigarette use
+table(data$W9_CigPuff_Use_Last30, useNA = "always")
+table(data$W9_Cig_Use_Last30, useNA = "always")
+
+data <- mutate(data, W9_Cig_Use_Last30_ever = ifelse(is.na(W9_CigPuff_Use_Last30) & is.na(W9_Cig_Use_Last30), NA, ifelse(W9_CigPuff_Use_Last30 %in% 1 & W9_Cig_Use_Last30 %in% 1, 0, ifelse(is.na(W9_CigPuff_Use_Last30 == 1 & W9_Cig_Use_Last30 == 1), 0, 1))))  # NOTE: NA & TRUE = NA; NA |TRUE = TRUE; NA & FALSE = FALSE; NA | FALSE = NA
+
+table(data$W9_Cig_Use_Last30_ever, useNA = "always")
+
+select(data[is.na(data$W9_CigPuff_Use_Last30) != is.na(data$W9_Cig_Use_Last30), ], W9_CigPuff_Use_Last30, W9_Cig_Use_Last30, W9_Cig_Use_Last30_ever, W9_Cig_Use_Last30_Any)
+
+select(data, W9_CigPuff_Use_Last30, W9_Cig_Use_Last30, W9_Cig_Use_Last30_ever, W9_Cig_Use_Last30_Any)
+
+FreqPercent(data$W9_Cig_Use_Last30_ever)
+sum(!is.na(data$W9_Cig_Use_Last30_ever))
+```
+
+```{r}
+# Last 30 day e-cigarette use
+table(data$W9_eCig_Use_Last30, useNA = "always")
+table(data$W9_eCig_noNic_Use_Last30, useNA = "always")
+
+data <- mutate(data, W9_ECig_Use_Last30_ever = ifelse(is.na(W9_eCig_Use_Last30) & is.na(W9_eCig_noNic_Use_Last30), NA, ifelse(W9_eCig_Use_Last30 %in% 1 & W9_eCig_noNic_Use_Last30 %in% 1, 0, ifelse(is.na(W9_eCig_Use_Last30 == 1 & W9_eCig_noNic_Use_Last30 == 1), 0, 1))))  # NOTE: NA & TRUE = NA; NA |TRUE = TRUE; NA & FALSE = FALSE; NA | FALSE = NA
+
+select(data[is.na(data$W9_eCig_Use_Last30) != is.na(data$W9_eCig_noNic_Use_Last30), ], W9_eCig_Use_Last30, W9_eCig_noNic_Use_Last30, W9_ECig_Use_Last30_ever, W9_eCig_Use_Last30_Any)
+
+select(data, W9_eCig_Use_Last30, W9_eCig_noNic_Use_Last30, W9_ECig_Use_Last30_ever, W9_eCig_Use_Last30_Any)
+
+FreqPercent(data$W9_ECig_Use_Last30_ever)
+sum(!is.na(data$W9_ECig_Use_Last30_ever))
+```
+
+```{r}
+# Past 30 day JUUL 
+table(data$W9_Juul_Use_Last30, useNA = "always")
+
+data <- mutate(data, W9_Juul_Use_Last30_ever = ifelse(W9_Juul_Use_Last30 == 1, 0, 1))
+
+table(data$W9_Juul_Use_Last30_ever, useNA = "always")
+
+FreqPercent(data$W9_Juul_Use_Last30_ever)
+sum(!is.na(data$W9_Juul_Use_Last30_ever))
+```
+
+```{r}
+# Oterh vape
+table(data$W9_Other_Vape_Use_Last30, useNA = "always")
+
+data <- mutate(data, W9_Other_Vape_Use_Last30_ever = ifelse(W9_Other_Vape_Use_Last30 == 1, 0, 1))
+
+table(data$W9_Other_Vape_Use_Last30_ever, useNA = "always")
+
+FreqPercent(data$W9_Other_Vape_Use_Last30_ever)
+sum(!is.na(data$W9_Other_Vape_Use_Last30_ever))
+```
+
+```{r}
+# Hookah
+table(data$W9_Hookah_Use_Last30, useNA = "always")
+
+data <- mutate(data, W9_Hookah_Use_Last30_ever = ifelse(W9_Hookah_Use_Last30 == 1, 0, 1))
+
+table(data$W9_Hookah_Use_Last30_ever, useNA = "always")
+
+FreqPercent(data$W9_Hookah_Use_Last30_ever)
+
+sum(!is.na(data$W9_Hookah_Use_Last30_ever))
+```
+
+```{r}
+# Cigar
+table(data$W9_Cigar_Use_Last30, useNA = "always")
+table(data$W9_Cigarillo_Use_Last30, useNA = "always")
+
+data <- mutate(data, W9_Cigar_Use_Last30_ever = ifelse(is.na(W9_Cigar_Use_Last30) & is.na(W9_Cigarillo_Use_Last30), NA, ifelse(W9_Cigar_Use_Last30 %in% 1 & W9_Cigarillo_Use_Last30 %in% 1, 0, ifelse(is.na(W9_Cigar_Use_Last30 == 1 & W9_Cigarillo_Use_Last30 == 1), 0, 1))))  # NOTE: NA & TRUE = NA; NA |TRUE = TRUE; NA & FALSE = FALSE; NA | FALSE = NA
+
+select(data[is.na(data$W9_Cigar_Use_Last30) != is.na(data$W9_Cigarillo_Use_Last30), ], W9_Cigar_Use_Last30, W9_Cigarillo_Use_Last30, W9_Cigar_Use_Last30_ever)
+
+select(data, W9_Cigar_Use_Last30, W9_Cigarillo_Use_Last30, W9_Cigar_Use_Last30_ever)
+
+FreqPercent(data$W9_Cigar_Use_Last30_ever)
+
+sum(!is.na(data$W9_Cigar_Use_Last30_ever))
+```
+
+```{r}
+Past30 <- select(data, W9_Cig_Use_Last30_ever, W9_ECig_Use_Last30_ever, W9_Juul_Use_Last30_ever, W9_Other_Vape_Use_Last30_ever, W9_Hookah_Use_Last30_ever, W9_Cigar_Use_Last30_ever)
+
+Past30$count.na <- rowSums(is.na(Past30[, 1:6]))
+
+Past30$count <- rowSums(Past30[, 1:6], na.rm = T)
+
+Past30 <- mutate(Past30, count = ifelse(count.na == 6, NA, count))
+
+Past30_1 <- mutate(Past30, count = ifelse(count.na == 6, NA, rowSums(Past30[, 1:6], na.rm = T)))
+
+Past30 <- mutate(Past30, count_c = ifelse(count >= 3, 3, count))
+
+table(Past30$count, useNA = "always")
+table(Past30$count_c, useNA = "always")
+
+FreqPercent(Past30$count_c)
+
+
+Past30
+Past30_1
+```
+
