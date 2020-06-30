@@ -1,0 +1,51 @@
+---
+title: "merge_UAS185_covid19"
+author: "Yi"
+date: "6/30/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(tidyverse)
+```
+
+```{r}
+covid <- read_stata("/Users/zhan039/Desktop/USC_HEAL/UAS/06122020/longitudinal/covidpanel_us_stata_jun_10_2020.dta")
+
+uas185 <- read_stata("/Users/zhan039/Desktop/USC_HEAL/UAS/06122020/UAS185/uas185.dta")
+```
+
+```{r}
+length(unique(covid$uasid))
+```
+
+```{r}
+covid_sample <- covid[, c("gender", "age", "maritalstatus", "livewithpartner", "education", "race", "working", "sick_leave", "unemp_look", "retired", "disabled", "laborstatus", "employmenttype", "workfullpart", "hourswork", "hhincome", "anyhhmember", "hhmembernumber", "start_date", "coping_drinking", "cr026a2", "uasid")]
+
+uas185_sample <- uas185[, c("gender", "age", "maritalstatus", "livewithpartner", "education", "race", "working", "sick_leave", "unemp_look", "retired", "disabled", "laborstatus", "employmenttype", "workfullpart", "hourswork", "hhincome", "anyhhmember", "hhmembernumber", "start_date", "c129_", "c130_", "uasid")]
+
+colnames(uas185_sample)[colnames(uas185_sample) == "c129_"] <- "coping_drinking"
+colnames(uas185_sample)[colnames(uas185_sample) == "c130_"] <- "cr026a2"
+
+mergedata <- rbind(covid_sample, uas185_sample)
+
+write_sav(mergedata, "/Users/zhan039/Desktop/USC_HEAL/UAS/06292020/UAS185_COVID19.sav")
+```
+
+```{r}
+sum(is.na(covid_sample$coping_drinking))
+sum(is.na(uas185$c129_))
+sum(is.na(uas185_sample$coping_drinking))
+sum(is.na(mergedata$coping_drinking))
+
+sum(is.na(covid_sample$cr026a2))
+sum(is.na(uas185$c130_))
+sum(is.na(uas185_sample$cr026a2))
+sum(is.na(mergedata$cr026a2))
+```
+
