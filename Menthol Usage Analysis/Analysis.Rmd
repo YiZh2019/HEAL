@@ -66,7 +66,7 @@ head(data)
 
 ```{r}
 # filter observations by race 
-filter.data <- filter(data, piq_5 == 0 & PIQ_6c_T == 1 | piq_5 == 0 & piq_6___3 == 1)
+filter.data <- filter(data, piq_5 %in% 0 & (PIQ_6c_T %in% 1 | piq_6___3 %in% 1))
 ```
 
 ```{r}
