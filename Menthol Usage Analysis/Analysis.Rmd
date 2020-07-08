@@ -48,7 +48,7 @@ FreqPercent <- function(var){
 
 # chi-square or fisher test
 ChiSqFisher <- function(var){
-  chi.sq <- chisq.test(rbind(table(var[filter.data$shq_8 == 1]), table(var[filter.data$shq_8 == 2])))
+  chi.sq <- chisq.test(rbind(table(var[filter.data$shq_8 == 1]), table(var[filter.data$shq_8 == 2])), correct = F)
   fisher <- fisher.test(rbind(table(var[filter.data$shq_8 == 1]), table(var[filter.data$shq_8 == 2])))
   print(c("Chi-square:",chi.sq, "Fisher:",fisher))
 }
@@ -56,7 +56,7 @@ ChiSqFisher <- function(var){
 
 
 ```{r}
-data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/Menthol/Merged_GROW_BRAND.sav")
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/Menthol/fix_grow_data.sav")
 
 # teleform.repeat <- read_sav("/Users/zhan039/Desktop/USC HEAL/GROW/GROW DATA-20190920T175512Z-001/Yi/teleform_repeat.sav")
 
@@ -81,11 +81,11 @@ nrow(unmenthol.data)
 
 ```{r}
 # table of brand
-table(tolower(filter.data$BRAND)) 
+# table(tolower(filter.data$BRAND)) 
 
-as_tibble(FreqPercent(tolower(menthol.data$BRAND)))
-as_tibble(FreqPercent(tolower(unmenthol.data$BRAND)))
-ValidN(filter.data$BRAND)
+# as_tibble(FreqPercent(tolower(menthol.data$BRAND)))
+# as_tibble(FreqPercent(tolower(unmenthol.data$BRAND)))
+# ValidN(filter.data$BRAND)
 ```
 
 ```{r}
