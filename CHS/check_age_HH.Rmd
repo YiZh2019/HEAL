@@ -27,66 +27,109 @@ CalcAge <- function(surveydate, birthdate) {
   
   return(age)
 }
+
+CalcAge1 <- function(surveydate, birthdate) {
+ 
+  Birthdate_new <- as.Date(HH[, birthdate], format = "%m/%d/%y")
+  Surveydate_new <- as.Date(HH[, surveydate], format = "%m/%d/%y")
+  
+  age <- round(as.numeric(difftime(Surveydate_new, Birthdate_new, units = "days")/365.2422), 2)
+  
+  return(age)
+}
 ```
 
 
 ```{r W1}
 HH$W1_Age_Calc_new <- CalcAge("W1_Survey_Date", "Birthdate")
+HH$W1_Age_Calc_new_2 <- CalcAge1("W1_Survey_Date", "Birthdate")
 
-select(HH, Birthdate, W1_Survey_Date, W1_DEM_Age, W1_Age_by_Birth_New, W1_Age_Calc_new)
+select(HH, Birthdate, W1_Survey_Date, W1_DEM_Age, W1_Age_by_Birth_New, W1_Age_Calc_new, W1_Age_Calc_new_2)
+
+
 ```
 
 ```{r W2}
 HH$W2_Age_Calc_new <- CalcAge("W2_Survey_Date", "Birthdate")
+HH$W2_Age_Calc_new_2 <- CalcAge1("W2_Survey_Date", "Birthdate")
 
-
-select(HH, Birthdate, W2_Survey_Date, W2_Age_by_Birth_New, W2_Age_Calc_new)
+select(HH, Birthdate, W2_Survey_Date, W2_Age_by_Birth_New, W2_Age_Calc_new, W2_Age_Calc_new_2)
 ```
 
 ```{r W3}
 HH$W3_Age_Calc_new <- CalcAge("W3_Survey_Date", "Birthdate")
+HH$W3_Age_Calc_new_2 <- CalcAge1("W3_Survey_Date", "Birthdate")
 
-select(HH, Birthdate, W3_Survey_Date, W3_Age_by_Birth_New, W3_Age_Calc_new)
+select(HH, Birthdate, W3_Survey_Date, W3_Age_by_Birth_New, W3_Age_Calc_new, W3_Age_Calc_new_2)
 ```
 
 ```{r W4}
 HH$W4_Age_Calc_new <- CalcAge("W4_Survey_Date", "Birthdate")
+HH$W4_Age_Calc_new_2 <- CalcAge1("W4_Survey_Date", "Birthdate")
 
-select(HH, Birthdate, W4_Survey_Date, W4_Age_by_Birth_New, W4_Age_Calc_new)
+select(HH, Birthdate, W4_Survey_Date, W4_Age_by_Birth_New, W4_Age_Calc_new, W4_Age_Calc_new_2)
 ```
 
 ```{r W5}
 HH$W5_Age_Calc_new <- CalcAge("W5_Survey_Date", "Birthdate")
+HH$W5_Age_Calc_new_2 <- CalcAge1("W5_Survey_Date", "Birthdate")
 
-select(HH, Birthdate, W5_Survey_Date, W5_Age_by_Birth_New, W5_Age_Calc_new)
+select(HH, Birthdate, W5_Survey_Date, W5_Age_by_Birth_New, W5_Age_Calc_new, W5_Age_Calc_new_2)
 ```
 
 ```{r W6}
 HH$W6_Age_Calc_new <- CalcAge("W6_Survey_Date", "Birthdate")
+HH$W6_Age_Calc_new_2 <- CalcAge1("W6_Survey_Date", "Birthdate")
 
-select(HH, Birthdate, W6_Survey_Date, W6_Age_by_Birth_New, W6_Age_Calc_new)
+select(HH, Birthdate, W6_Survey_Date, W6_Age_by_Birth_New, W6_Age_Calc_new, W6_Age_Calc_new_2)
 ```
 
 ```{r W7}
 HH$W7_Age_Calc_new <- CalcAge("W7_Survey_Date", "Birthdate")
+HH$W7_Age_Calc_new_2 <- CalcAge1("W7_Survey_Date", "Birthdate")
 
-select(HH, Birthdate, W7_Survey_Date, W7_Age_by_Birth_New, W7_Age_Calc_new)
+
+select(HH, Birthdate, W7_Survey_Date, W7_Age_by_Birth_New, W7_Age_Calc_new, W7_Age_Calc_new_2)
 ```
 
 ```{r W8}
 HH$W8_Age_Calc_new <- CalcAge("W8_Survey_Date", "Birthdate")
+HH$W8_Age_Calc_new_2 <- CalcAge1("W8_Survey_Date", "Birthdate")
 
-select(HH, Birthdate, W8_Survey_Date, W8_Age_by_Birth_New, W8_Age_Calc_new)
+select(HH, Birthdate, W8_Survey_Date, W8_Age_by_Birth_New, W8_Age_Calc_new, W8_Age_Calc_new_2)
 ```
 
 ```{r summary}
-apply(HH[, c("W1_Age_Calc_new", "W2_Age_Calc_new", "W3_Age_Calc_new", "W4_Age_Calc_new", "W5_Age_Calc_new", "W6_Age_Calc_new", "W7_Age_Calc_new", "W8_Age_Calc_new")], 2, summary)
+apply(HH[, c("W1_Age_Calc_new_2", "W2_Age_Calc_new_2", "W3_Age_Calc_new_2", "W4_Age_Calc_new_2", "W5_Age_Calc_new_2", "W6_Age_Calc_new_2", "W7_Age_Calc_new_2", "W8_Age_Calc_new_2")], 2, summary)
+```
+
+```{r impute missing value}
+table(rowSums(is.na(select(HH, W1_Age_Calc_new_2, W2_Age_Calc_new_2, W3_Age_Calc_new_2, W4_Age_Calc_new_2, W5_Age_Calc_new_2, W6_Age_Calc_new_2, W7_Age_Calc_new_2, W8_Age_Calc_new_2))))
+
+colSums(is.na(select(HH[is.na(HH$W1_Age_Calc_new_2), ], W1_Age_Calc_new_2, W2_Age_Calc_new_2, W3_Age_Calc_new_2, W4_Age_Calc_new_2, W5_Age_Calc_new_2, W6_Age_Calc_new_2, W7_Age_Calc_new_2, W8_Age_Calc_new_2)))
+
+HH <- mutate(HH, W1_Age_Calc_new_2 = ifelse(is.na(W1_Age_Calc_new_2), W3_Age_Calc_new_2 - 1, W1_Age_Calc_new_2))
+
+summary(HH$W1_Age_Calc_new_2)
+
+HH <- mutate(HH, 
+             W2_Age_Calc_new_2 = ifelse(is.na(W2_Age_Calc_new_2), W1_Age_Calc_new_2 + 0.5, W2_Age_Calc_new_2), 
+             W3_Age_Calc_new_2 = ifelse(is.na(W3_Age_Calc_new_2), W1_Age_Calc_new_2 + 1, W3_Age_Calc_new_2),
+             W4_Age_Calc_new_2 = ifelse(is.na(W4_Age_Calc_new_2), W1_Age_Calc_new_2 + 1.5, W4_Age_Calc_new_2),
+             W5_Age_Calc_new_2 = ifelse(is.na(W5_Age_Calc_new_2), W1_Age_Calc_new_2 + 2, W5_Age_Calc_new_2),
+             W6_Age_Calc_new_2 = ifelse(is.na(W6_Age_Calc_new_2), W1_Age_Calc_new_2 + 2.5, W6_Age_Calc_new_2),
+             W7_Age_Calc_new_2 = ifelse(is.na(W7_Age_Calc_new_2), W1_Age_Calc_new_2 + 3, W7_Age_Calc_new_2),
+             W8_Age_Calc_new_2 = ifelse(is.na(W8_Age_Calc_new_2), W1_Age_Calc_new_2 + 3.5, W8_Age_Calc_new_2)
+             )
+
+apply(HH[, c("W1_Age_Calc_new_2", "W2_Age_Calc_new_2", "W3_Age_Calc_new_2", "W4_Age_Calc_new_2", "W5_Age_Calc_new_2", "W6_Age_Calc_new_2", "W7_Age_Calc_new_2", "W8_Age_Calc_new_2")], 2, summary)
+
 ```
 
 
 ```{r}
-write.csv(x = HH, file = "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/06232020/HH_06252020.csv")
+write.csv(x = HH, file = "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/07092020/HH_07092020.csv")
 
-write_sav(HH, "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/06232020/HH_06252020.sav")
+write_sav(HH, "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/07092020/HH_07092020.sav")
 ```
 

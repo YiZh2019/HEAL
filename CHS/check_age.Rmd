@@ -25,6 +25,11 @@ CalcAge <- function(surveydate, birthdate) {
   return(age)
 }
 
+CalcAge1 <- function(surveydate, birthdate) {
+  age <- round(as.numeric(difftime(CHS[, surveydate], CHS[, birthdate], units = "days")/365.2422), 2)
+  return(age)
+}
+
 CHS$dobkid_new <- as.Date(CHS$dobkid, format = "%m/%d/%y")
 ```
 
@@ -33,39 +38,58 @@ CHS$dob
 select(CHS, dobkid, dobkid_new, Y12_SurveyDate_New, Y12_Age_Calc)
 
 CHS$Y12_Age_Calc_new <- CalcAge("Y12_SurveyDate_New", "dobkid_new")
+CHS$Y12_Age_Calc_new_2 <- CalcAge1("Y12_SurveyDate_New", "dobkid_new")
 
-select(CHS, dobkid, dobkid_new, Y12_SurveyDate_New, Y12_Age, Y12_Age_Calc, Y12_Age_Calc_new)
+
+select(CHS, dobkid, dobkid_new, Y12_SurveyDate_New, Y12_Age, Y12_Age_Calc, Y12_Age_Calc_new, Y12_Age_Calc_new_2)
 ```
 
 ```{r Y13}
 select(CHS, dobkid, dobkid_new, Y13_SurveyDate_New, Y13_Age, Y13_Age_Calc)
 
 CHS$Y13_Age_Calc_new <- CalcAge("Y13_SurveyDate_New", "dobkid_new")
+CHS$Y13_Age_Calc_new_2 <- CalcAge1("Y13_SurveyDate_New", "dobkid_new")
 
-select(CHS, dobkid, dobkid_new, Y13_SurveyDate_New, Y13_Age, Y13_Age_Calc, Y13_Age_Calc_new)
+select(CHS, dobkid, dobkid_new, Y13_SurveyDate_New, Y13_Age, Y13_Age_Calc, Y13_Age_Calc_new, Y13_Age_Calc_new_2)
+
+select(CHS, Y12_Age_Calc_new_2, Y13_Age_Calc_new_2)
+
+CHS <- mutate(CHS, Y13_Age_Calc_new_2 = ifelse(is.na(Y13_Age_Calc_new_2), Y12_Age_Calc_new_2 + 1.5, Y13_Age_Calc_new_2))
+
+select(CHS, Y12_Age_Calc_new_2, Y13_Age_Calc_new_2)
 ```
 
 ```{r Y14}
 select(CHS, dobkid, dobkid_new, Y14_SurveyDate_New, Y14_Age, Y14_Age_Calc)
 
 CHS$Y14_Age_Calc_new <- CalcAge("Y14_SurveyDate_New", "dobkid_new")
+CHS$Y14_Age_Calc_new_2 <- CalcAge1("Y14_SurveyDate_New", "dobkid_new")
 
-select(CHS, dobkid, dobkid_new, Y14_SurveyDate_New, Y14_Age, Y14_Age_Calc, Y14_Age_Calc_new)
+select(CHS, dobkid, dobkid_new, Y14_SurveyDate_New, Y14_Age, Y14_Age_Calc, Y14_Age_Calc_new, Y14_Age_Calc_new_2)
+
+CHS <- mutate(CHS, Y14_Age_Calc_new_2 = ifelse(is.na(Y14_Age_Calc_new_2), Y12_Age_Calc_new_2 + 3, Y14_Age_Calc_new_2))
+
+select(CHS, Y12_Age_Calc_new_2, Y14_Age_Calc_new_2)
 ```
 
 ```{r Y15}
 select(CHS, dobkid, dobkid_new, Y15_SurveyDate_New, Y15_Age, Y15_Age_Calc)
 
 CHS$Y15_Age_Calc_new <- CalcAge("Y15_SurveyDate_New", "dobkid_new")
+CHS$Y15_Age_Calc_new_2 <- CalcAge1("Y15_SurveyDate_New", "dobkid_new")
 
-select(CHS, dobkid, dobkid_new, Y15_SurveyDate_New, Y15_Age, Y15_Age_Calc, Y15_Age_Calc_new)
+select(CHS, dobkid, dobkid_new, Y15_SurveyDate_New, Y15_Age, Y15_Age_Calc, Y15_Age_Calc_new, Y15_Age_Calc_new_2)
+
+CHS <- mutate(CHS, Y15_Age_Calc_new_2 = ifelse(is.na(Y15_Age_Calc_new_2), Y12_Age_Calc_new_2 + 4.5, Y15_Age_Calc_new_2))
+
+select(CHS, Y12_Age_Calc_new_2, Y15_Age_Calc_new_2)
 ```
 
 ```{r summary}
-summary(CHS$Y12_Age_Calc_new)
-summary(CHS$Y13_Age_Calc_new)
-summary(CHS$Y14_Age_Calc_new)
-summary(CHS$Y15_Age_Calc_new)
+summary(CHS$Y12_Age_Calc_new_2)
+summary(CHS$Y13_Age_Calc_new_2)
+summary(CHS$Y14_Age_Calc_new_2)
+summary(CHS$Y15_Age_Calc_new_2)
 ```
 
 ```{r}
@@ -73,8 +97,8 @@ CHS <- CHS[, colnames(CHS) != "dobkid_new"]
 ```
 
 ```{r}
-write.csv(x = CHS, file = "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/06232020/CHS_06252020.csv")
+write.csv(x = CHS, file = "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/07092020/CHS_07092020.csv")
 
-write_sav(CHS, "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/06232020/CHS_06252020.sav")
+write_sav(CHS, "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/07092020/CHS_07092020.sav")
 ```
 

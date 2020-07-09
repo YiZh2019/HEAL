@@ -15,6 +15,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(haven)
 library(tidyverse)
 library(car)
+library(effsize)
+library(rcompanion)
 ```
 
 ```{r}
@@ -52,6 +54,18 @@ ChiSqFisher <- function(var){
   fisher <- fisher.test(rbind(table(var[filter.data$shq_8 == 1]), table(var[filter.data$shq_8 == 2])))
   print(c("Chi-square:",chi.sq, "Fisher:",fisher))
 }
+
+# Hedges's g
+CohensD <- function(var){
+  d <- cohen.d(var[filter.data$shq_8 == 1], var[filter.data$shq_8 == 2], paired = F, na.rm = T, within = F, hedges.correction = T)
+  return(d)
+}
+
+# Cramer's V
+CramersV <- function(var){
+  v <- cramerV(rbind(table(var[filter.data$shq_8 == 1]), table(var[filter.data$shq_8 == 2])))
+  return(v)
+}
 ```
 
 
@@ -88,42 +102,32 @@ nrow(unmenthol.data)
 # ValidN(filter.data$BRAND)
 ```
 
-```{r}
+```{r shq}
 # Smoking History Questionnaire (shq)
-menthol.shq <- select(menthol.data, c("cleaned_SID", starts_with("shq")))
-unmenthol.shq <- select(unmenthol.data, c("cleaned_SID", starts_with("shq")))
-colnames(menthol.shq)
-shq.use <- c("shq_1","shq_2","shq_3","shq_4","shq_5","shq_6","shq_7","shq_8","shq_9___1","shq_9___2","shq_9___3","shq_9___4","shq_9___5","shq_9___6","shq_9___7","shq_9___8","shq_9___9","shq_9___10","shq_10","shq_11","shq_12","shq_13","shq_14","shq_15___1","shq_15___2","shq_15___3","shq_15___4","shq_15___5","shq_15___6","shq_15___7","shq_15___8","shq_16","shq_17","shq_18","shq_19","shq_20","shq_21","shq_22","shq_23","shq_24","shq_25","shq_26","shq_27","shq_28","shq_29","shq_30","shq_31","shq_32","shq_33","shq_34","shq_35")
-
-menthol.shq.use <- menthol.shq[, c("cleaned_SID", shq.use)]
-unmenthol.shq.use <- unmenthol.shq[, c("cleaned_SID", shq.use)]
-
-shq.continuous <- c("shq_1","shq_2","shq_3","shq_4", "shq_5", "shq_11","shq_12", "shq_13", "shq_16", "shq_17", "shq_18", "shq_19", "shq_20", "shq_21", "shq_22", "shq_23", "shq_24", "shq_25", "shq_26", "shq_27", "shq_34","shq_35")
+shq.continuous <- c("shq_2","shq_3","shq_4", "shq_5", "shq_11","shq_12", "shq_13", "shq_16", "shq_17", "shq_18", "shq_19", "shq_20", "shq_21", "shq_22", "shq_23", "shq_24", "shq_25", "shq_26", "shq_27") # recode shq_1, shq_9___1 to shq_9___10, recode shq_34, shq_35
 
 # continuous variables
-#  knitr:: kable(apply(menthol.shq.use[, shq.continuous], 2, Mean.SD.N))
-apply(menthol.shq.use[, shq.continuous], 2, Mean.SD.N)
-apply(unmenthol.shq.use[, shq.continuous], 2, Mean.SD.N)
+apply(menthol.data[, shq.continuous], 2, Mean.SD.N)
+apply(unmenthol.data[, shq.continuous], 2, Mean.SD.N)
 apply(filter.data[, shq.continuous], 2, ValidN)
-  # var.test(menthol.shq.use$shq_1, unmenthol.shq.use$shq_1)
-  # Ftest <- var.test(menthol.shq.use$shq_1, unmenthol.shq.use$shq_1)
-  # Ftest$result <- ifelse(Ftest$p.value < 0.05, FALSE, TRUE)
-  # t.test(menthol.shq.use$shq_1, unmenthol.shq.use$shq_1, var.equal = Ftest$result)
 
 apply(filter.data[, shq.continuous], 2, Ttest)
+apply(filter.data[, shq.continuous], 2, CohensD)
+
+# (mean(filter.data[filter.data$shq_8 == 1, ]$shq_3, na.rm = T) - mean(filter.data[filter.data$shq_8 == 2, ]$shq_3, na.rm = T))/sqrt((length(filter.data[filter.data$shq_8 == 1, ]$shq_3)*sd(filter.data[filter.data$shq_8 == 1, ]$shq_3, na.rm = T)^2 + length(filter.data[filter.data$shq_8 == 2, ]$shq_3)* sd(filter.data[filter.data$shq_8 == 2, ]$shq_3, na.rm = T)^2)/(length(filter.data[filter.data$shq_8 == 1, ]$shq_3) + length(filter.data[filter.data$shq_8 == 2, ]$shq_3)))
 
 # fix shq_1: remove impossible values
- # menthol.shq_1.outliers <- boxplot(menthol.shq.use$shq_1)$out
- # unmenthol.shq_1.outliers <- boxplot(unmenthol.shq.use$shq_1)$out
+ # menthol.shq_1.outliers <- boxplot(menthol.data$shq_1)$out
+ # unmenthol.shq_1.outliers <- boxplot(unmenthol.data$shq_1)$out
  # filter.data.cleanshq1 <- filter(filter.data, (shq_8 == 1 & !shq_1 %in% menthol.shq_1.outliers) | (shq_8 == 2 & !shq_1 %in% unmenthol.shq_1.outliers))
 
-menthol.shq1.mean <- mean(menthol.shq.use$shq_1, na.rm = T)
-menthol.shq1.sd <- sd(menthol.shq.use$shq_1, na.rm = T)
+menthol.shq1.mean <- mean(menthol.data$shq_1, na.rm = T)
+menthol.shq1.sd <- sd(menthol.data$shq_1, na.rm = T)
 
-unmenthol.shq1.mean <- mean(unmenthol.shq.use$shq_1, na.rm = T)
-unmenthol.shq1.sd <- sd(unmenthol.shq.use$shq_1, na.rm = T)
+unmenthol.shq1.mean <- mean(unmenthol.data$shq_1, na.rm = T)
+unmenthol.shq1.sd <- sd(unmenthol.data$shq_1, na.rm = T)
 
-filter.out.shq1 <- filter(filter.data, shq_8 == 1 & (shq_1 < (menthol.shq1.mean - 2 * menthol.shq1.sd) | shq_1 > (menthol.shq1.mean + 2 * menthol.shq1.sd)) | shq_8 == 2 & (shq_1 < (unmenthol.shq1.mean - 2 * unmenthol.shq1.sd) | shq_1 > (unmenthol.shq1.mean + 2 * unmenthol.shq1.sd)))
+filter.out.shq1 <- filter(filter.data, shq_8 == 1 & (shq_1 < (menthol.shq1.mean - 2 * menthol.shq1.sd) | shq_1 > (menthol.shq1.mean + 2 * menthol.shq1.sd)) | shq_8 == 2 & (shq_1 < (unmenthol.shq1.mean - 2 * unmenthol.shq1.sd) | shq_1 > (unmenthol.shq1.mean + 2 * unmenthol.shq1.sd)))  # remove shq_1 == 2020 and shq_1 == 1314
 
 
 filter.data.cleanshq1 <- filter.data[!(filter.data$shq_1 %in% filter.out.shq1$shq_1), ]
@@ -135,13 +139,25 @@ ValidN(filter.data.cleanshq1$shq_1)
 shq_1.levene <- leveneTest(filter.data.cleanshq1$shq_1, group = as.factor(filter.data.cleanshq1$shq_8), center = mean)
 shq_1.levene$result[1] <- ifelse(shq_1.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
 t.test(filter.data.cleanshq1[filter.data.cleanshq1$shq_8 == 1, ]$shq_1, filter.data.cleanshq1[filter.data.cleanshq1$shq_8 == 2, ]$shq_1, var.equal = shq_1.levene$result[1])
+cohen.d(filter.data.cleanshq1[filter.data.cleanshq1$shq_8 == 1, ]$shq_1, filter.data.cleanshq1[filter.data.cleanshq1$shq_8 == 2, ]$shq_1, paired = F, na.rm = T, within = F, hedges.correction = T)
+
 
 # combine shq_9___ to calculate the count of products
-test <- filter(filter.data, is.na(shq_9___1) & is.na(shq_9___2) & is.na(shq_9___3) & is.na(shq_9___4) & is.na(shq_9___5) & is.na(shq_9___6) & is.na(shq_9___7) & is.na(shq_9___8) & is.na(shq_9___9) & is.na(shq_9___10)) # the participant who has missing values in all questions about ever use of products: cleaned_SID = 50392
+shq_9___test <- filter(filter.data, is.na(shq_9___1) & is.na(shq_9___2) & is.na(shq_9___3) & is.na(shq_9___4) & is.na(shq_9___5) & is.na(shq_9___6) & is.na(shq_9___7) & is.na(shq_9___8) & is.na(shq_9___9) & is.na(shq_9___10)) # the participant who has missing values in all questions about ever use of products: cleaned_SID = 50392
 
 filter.data.combineshq9 <- filter(filter.data, !(is.na(shq_9___1) & is.na(shq_9___2) & is.na(shq_9___3) & is.na(shq_9___4) & is.na(shq_9___5) & is.na(shq_9___6) & is.na(shq_9___7) & is.na(shq_9___8) & is.na(shq_9___9) & is.na(shq_9___10))) # filter out the participant who doesn't have valid information on ever use of products
 
-filter.data.combineshq9 <- mutate(filter.data.combineshq9, shq_9___1 = ifelse(is.na(shq_9___1), 0, shq_9___1), shq_9___2 = ifelse(is.na(shq_9___2), 0, shq_9___2), shq_9___3 = ifelse(is.na(shq_9___3), 0, shq_9___3), shq_9___4 = ifelse(is.na(shq_9___4), 0, shq_9___4), shq_9___5 = ifelse(is.na(shq_9___5), 0, shq_9___5), shq_9___6 = ifelse(is.na(shq_9___6), 0, shq_9___6), shq_9___7 = ifelse(is.na(shq_9___7), 0, shq_9___7), shq_9___8 = ifelse(is.na(shq_9___8), 0, shq_9___8), shq_9___9 = ifelse(is.na(shq_9___9), 0, shq_9___9), shq_9___10 = ifelse(is.na(shq_9___10), 0, shq_9___10))
+filter.data.combineshq9 <- mutate(filter.data.combineshq9, 
+                                  shq_9___1 = ifelse(is.na(shq_9___1), 0, shq_9___1), 
+                                  shq_9___2 = ifelse(is.na(shq_9___2), 0, shq_9___2), 
+                                  shq_9___3 = ifelse(is.na(shq_9___3), 0, shq_9___3), 
+                                  shq_9___4 = ifelse(is.na(shq_9___4), 0, shq_9___4), 
+                                  shq_9___5 = ifelse(is.na(shq_9___5), 0, shq_9___5), 
+                                  shq_9___6 = ifelse(is.na(shq_9___6), 0, shq_9___6), 
+                                  shq_9___7 = ifelse(is.na(shq_9___7), 0, shq_9___7), 
+                                  shq_9___8 = ifelse(is.na(shq_9___8), 0, shq_9___8), 
+                                  shq_9___9 = ifelse(is.na(shq_9___9), 0, shq_9___9), 
+                                  shq_9___10 = ifelse(is.na(shq_9___10), 0, shq_9___10))
 
 filter.data.combineshq9$shq_9 <- filter.data.combineshq9$shq_9___1 + filter.data.combineshq9$shq_9___2 + filter.data.combineshq9$shq_9___3 + filter.data.combineshq9$shq_9___4 + filter.data.combineshq9$shq_9___5 + filter.data.combineshq9$shq_9___6 + filter.data.combineshq9$shq_9___7 + filter.data.combineshq9$shq_9___8 + filter.data.combineshq9$shq_9___9 + filter.data.combineshq9$shq_9___10  
 
@@ -151,25 +167,34 @@ apply(filter.data.combineshq9[filter.data.combineshq9$shq_8 == 2, "shq_9"], 2, M
 apply(filter.data.combineshq9[, "shq_9"], 2, ValidN)
 
 shq_9.levene <- leveneTest(filter.data.combineshq9$shq_9, group = as.factor(filter.data.combineshq9$shq_8), center = mean)
-
 shq_9.levene$result[1] <- ifelse(shq_9.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
 t.test(filter.data.combineshq9[filter.data.combineshq9$shq_8 == 1, ]$shq_9, filter.data.combineshq9[filter.data.combineshq9$shq_8 == 2, ]$shq_9, var.equal = shq_9.levene$result[1])
+cohen.d(filter.data.combineshq9[filter.data.combineshq9$shq_8 == 1, ]$shq_9, filter.data.combineshq9[filter.data.combineshq9$shq_8 == 2, ]$shq_9, paired = F, na.rm = T, within = F, hedges.correction = T)
 
-# filter.data.combineshq9 <- mutate(filter.data.combineshq9, shq_9 = ifelse(shq_9 >= 5, 11, shq_9)) 
-
-# table(filter.data.combineshq9[filter.data.combineshq9$shq_8 == 1, "shq_9"])
-# apply(filter.data.combineshq9[filter.data.combineshq9$shq_8 == 1, "shq_9"], 2, FreqPercent)
-# table(filter.data.combineshq9[filter.data.combineshq9$shq_8 == 2, "shq_9"])
-# apply(filter.data.combineshq9[filter.data.combineshq9$shq_8 == 2, "shq_9"], 2, FreqPercent)
-# apply(filter.data.combineshq9[, "shq_9"], 2, ValidN)
-# chisq.test(matrix(c(207, 91, 47, 45, 20, 11, 117, 60, 32, 16, 15, 14), ncol = 2))
 
 # combine shq_16 to shq_27 to calculate the count of withdraw symptoms
 filter.data.withdraw <- filter(filter.data, !(is.na(shq_16) & is.na(shq_17) & is.na(shq_18) & is.na(shq_19) & is.na(shq_20) & is.na(shq_21) & is.na(shq_22) & is.na(shq_23) & is.na(shq_24) & is.na(shq_25) & is.na(shq_26) & is.na(shq_27)))
 
-filter.data.withdraw <- mutate(filter.data.withdraw, shq_16d = ifelse(is.na(shq_16), 0, ifelse(shq_16 == 1, 0, 1)), shq_17d = ifelse(is.na(shq_17), 0, ifelse(shq_17 == 1, 0, 1)), shq_18d = ifelse(is.na(shq_18), 0, ifelse(shq_18 == 1, 0, 1)), shq_19d = ifelse(is.na(shq_19), 0, ifelse(shq_19 == 1, 0, 1)), shq_20d = ifelse(is.na(shq_20), 0, ifelse(shq_20 == 1, 0, 1)), shq_21d = ifelse(is.na(shq_21), 0, ifelse(shq_21 == 1, 0, 1)), shq_22d = ifelse(is.na(shq_22), 0, ifelse(shq_22 == 1, 0, 1)), shq_23d = ifelse(is.na(shq_23), 0, ifelse(shq_23 == 1, 0, 1)), shq_24d = ifelse(is.na(shq_24), 0, ifelse(shq_24 == 1, 0, 1)), shq_25d = ifelse(is.na(shq_25), 0, ifelse(shq_25 == 1, 0, 1)), shq_26d = ifelse(is.na(shq_26), 0, ifelse(shq_26 == 1, 0, 1)), shq_27d = ifelse(is.na(shq_27), 0, ifelse(shq_27 == 1, 0, 1)))
+filter.data.withdraw <- mutate(filter.data.withdraw, 
+                               shq_16d = ifelse(is.na(shq_16), 0, ifelse(shq_16 == 1, 0, 1)),
+                               shq_17d = ifelse(is.na(shq_17), 0, ifelse(shq_17 == 1, 0, 1)),
+                               shq_18d = ifelse(is.na(shq_18), 0, ifelse(shq_18 == 1, 0, 1)),
+                               shq_19d = ifelse(is.na(shq_19), 0, ifelse(shq_19 == 1, 0, 1)),
+                               shq_20d = ifelse(is.na(shq_20), 0, ifelse(shq_20 == 1, 0, 1)),
+                               shq_21d = ifelse(is.na(shq_21), 0, ifelse(shq_21 == 1, 0, 1)),
+                               shq_22d = ifelse(is.na(shq_22), 0, ifelse(shq_22 == 1, 0, 1)),
+                               shq_23d = ifelse(is.na(shq_23), 0, ifelse(shq_23 == 1, 0, 1)),
+                               shq_24d = ifelse(is.na(shq_24), 0, ifelse(shq_24 == 1, 0, 1)),
+                               shq_25d = ifelse(is.na(shq_25), 0, ifelse(shq_25 == 1, 0, 1)),
+                               shq_26d = ifelse(is.na(shq_26), 0, ifelse(shq_26 == 1, 0, 1)),
+                               shq_27d = ifelse(is.na(shq_27), 0, ifelse(shq_27 == 1, 0, 1)))
+
+table(filter.data.withdraw$shq_16, useNA = "always")
+table(filter.data.withdraw$shq_16d, useNA = "always")
 
 filter.data.withdraw <- mutate(filter.data.withdraw, withdraw.count = shq_16d + shq_17d +shq_18d + shq_19d + shq_20d + shq_21d + shq_22d + shq_23d + shq_24d + shq_25d + shq_26d + shq_27d)
+
+summary(filter.data.withdraw$withdraw.count)
 
 Mean.SD.N(filter.data.withdraw[filter.data.withdraw$shq_8 == 1, ]$withdraw.count)
 Mean.SD.N(filter.data.withdraw[filter.data.withdraw$shq_8 == 2, ]$withdraw.count)
@@ -179,6 +204,9 @@ withdraw.levene <- leveneTest(filter.data.withdraw$withdraw.count, group = as.fa
 
 withdraw.levene$result[1] <- ifelse(withdraw.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
 t.test(filter.data.withdraw[filter.data.withdraw$shq_8 == 1, ]$withdraw.count, filter.data.withdraw[filter.data.withdraw$shq_8 == 2, ]$withdraw.count, var.equal = withdraw.levene$result[1])
+cohen.d(filter.data.withdraw[filter.data.withdraw$shq_8 == 1, ]$withdraw.count, filter.data.withdraw[filter.data.withdraw$shq_8 == 2, ]$withdraw.count, paired = F, na.rm = T, within = F, hedges.correction = T)
+
+
 
 # categorize the count of withdraw symptoms to 2 levels
 filter.data.withdraw <- mutate(filter.data.withdraw, withdraw.di = ifelse(withdraw.count == 0, 0, 1))
@@ -186,15 +214,17 @@ FreqPercent(filter.data.withdraw[filter.data.withdraw$shq_8 == 1, ]$withdraw.di)
 FreqPercent(filter.data.withdraw[filter.data.withdraw$shq_8 == 2, ]$withdraw.di)
 ValidN(filter.data.withdraw$withdraw.di)
 
-withdraw.chisq <- chisq.test(rbind(table(filter.data.withdraw[filter.data.withdraw$shq_8 == 1, ]$withdraw.di), table(filter.data.withdraw[filter.data.withdraw$shq_8 == 2, ]$withdraw.di)))
+withdraw.chisq <- chisq.test(rbind(table(filter.data.withdraw[filter.data.withdraw$shq_8 == 1, ]$withdraw.di), table(filter.data.withdraw[filter.data.withdraw$shq_8 == 2, ]$withdraw.di)), correct = F)
 withdraw.fisher <- fisher.test(rbind(table(filter.data.withdraw[filter.data.withdraw$shq_8 == 1, ]$withdraw.di), table(filter.data.withdraw[filter.data.withdraw$shq_8 == 2, ]$withdraw.di)))
 withdraw.chisq
 withdraw.fisher
   
 # categorical variables
-apply(menthol.shq.use[, shq.use[!shq.use %in% shq.continuous]], 2, FreqPercent)
-apply(unmenthol.shq.use[, shq.use[!shq.use %in% shq.continuous]], 2, FreqPercent)
-apply(filter.data[, shq.use[!shq.use %in% shq.continuous]], 2, table)
+shq.cat <- c("shq_6", "shq_7", "shq_10", "shq_14", "shq_15___1", "shq_15___2", "shq_15___3", "shq_15___4", "shq_15___5", "shq_15___6", "shq_15___7", "shq_15___8")  # recode shq_28 ~ shq_33
+
+apply(menthol.data[, shq.cat], 2, FreqPercent)
+apply(unmenthol.data[, shq.cat], 2, FreqPercent)
+apply(filter.data[, shq.cat], 2, table)
 apply(filter.data[, c("shq_6", "shq_7", "shq_10", "shq_14")], 2, ValidN)
 apply(filter.data[, c("shq_15___1", "shq_15___2", "shq_15___3", "shq_15___4", "shq_15___5", "shq_15___6", "shq_15___7", "shq_15___8")], 2, ValidN)
 
@@ -202,7 +232,10 @@ apply(filter.data[, c("shq_15___1", "shq_15___2", "shq_15___3", "shq_15___4", "s
 # ChiSqFisher(filter.data$shq_5)
 # fisher.test(rbind(table(filter.data$shq_5[filter.data$shq_8 == 1]), table(filter.data$shq_5[filter.data$shq_8 == 2])))
 ChiSqFisher(filter.data$shq_6)
+CramersV(filter.data$shq_6)
+
 ChiSqFisher(filter.data$shq_7)
+CramersV(filter.data$shq_7)
 # ChiSqFisher(filter.data$shq_9___1)
 # ChiSqFisher(filter.data$shq_9___2)
 # ChiSqFisher(filter.data$shq_9___3)
@@ -216,56 +249,60 @@ ChiSqFisher(filter.data$shq_7)
 # ChiSqFisher(filter.data$shq_9___9)
 # ChiSqFisher(filter.data$shq_9___10)
 ChiSqFisher(filter.data$shq_10)
-# ChiSqFisher(filter.data$shq_13)
-chisq.test(rbind(table(filter.data$shq_13[filter.data$shq_8 == 1]), table(filter.data$shq_13[filter.data$shq_8 == 2])))
+CramersV(filter.data$shq_10)
+
 ChiSqFisher(filter.data$shq_14)
+CramersV(filter.data$shq_14)
+
 ChiSqFisher(filter.data$shq_15___1)
+CramersV(filter.data$shq_15___1)
+
 ChiSqFisher(filter.data$shq_15___2)
+CramersV(filter.data$shq_15___2)
+
 ChiSqFisher(filter.data$shq_15___3)
+CramersV(filter.data$shq_15___3)
+
 ChiSqFisher(filter.data$shq_15___4)
+CramersV(filter.data$shq_15___4)
+
 ChiSqFisher(filter.data$shq_15___5)
+CramersV(filter.data$shq_15___5)
+
 ChiSqFisher(filter.data$shq_15___6)
+CramersV(filter.data$shq_15___6)
+
 ChiSqFisher(filter.data$shq_15___7)
+CramersV(filter.data$shq_15___7)
+
 ChiSqFisher(filter.data$shq_15___8)
-ChiSqFisher(filter.data$shq_16)
-ChiSqFisher(filter.data$shq_17)
-ChiSqFisher(filter.data$shq_18)
-ChiSqFisher(filter.data$shq_19)
-ChiSqFisher(filter.data$shq_20)
-ChiSqFisher(filter.data$shq_21)
-ChiSqFisher(filter.data$shq_22)
-ChiSqFisher(filter.data$shq_23)
-ChiSqFisher(filter.data$shq_24)
-ChiSqFisher(filter.data$shq_25)
-ChiSqFisher(filter.data$shq_26)
-ChiSqFisher(filter.data$shq_27)
-ChiSqFisher(filter.data$shq_28)
-ChiSqFisher(filter.data$shq_29)
-ChiSqFisher(filter.data$shq_30)
-ChiSqFisher(filter.data$shq_31)
-ChiSqFisher(filter.data$shq_32)
-ChiSqFisher(filter.data$shq_33)
+CramersV(filter.data$shq_15___8)
+
 
 # collapse shq_28 ~ shq_33 to mother's family and father's family
-filter.data.family <- mutate(filter.data, father.family = ifelse(shq_28 ==  1 | shq_28 == 2 | shq_29 == 1 | shq_29 == 2 | shq_30 == 1 | shq_30 == 2, 1, ifelse(shq_28 == 3 & shq_29 == 3 & shq_30 == 3, 0, NA)), mother.family = ifelse(shq_31 == 1 | shq_31 == 2 | shq_32 == 1 | shq_32 == 2 | shq_33 == 1 | shq_33 == 2, 1, ifelse(shq_31 == 3 & shq_32 == 3 & shq_33 == 3, 0, NA)))
+filter.data.family <- mutate(filter.data, father.family = ifelse(shq_28 %in%  1 | shq_28 %in% 2 | shq_29 %in% 1 | shq_29 %in% 2 | shq_30 %in% 1 | shq_30 %in% 2, 1, ifelse(shq_28 %in% 3 & shq_29 %in% 3 & shq_30 %in% 3, 0, NA)), mother.family = ifelse(shq_31 %in% 1 | shq_31 %in% 2 | shq_32 %in% 1 | shq_32 %in% 2 | shq_33 %in% 1 | shq_33 %in% 2, 1, ifelse(shq_31 %in% 3 & shq_32 %in% 3 & shq_33 %in% 3, 0, NA)))
 
 FreqPercent(filter.data.family[filter.data.family$shq_8 == 1, ]$father.family)
 FreqPercent(filter.data.family[filter.data.family$shq_8 == 2, ]$father.family)
 ValidN(filter.data.family$father.family)
 
-father.chisq <- chisq.test(rbind(table(filter.data.family[filter.data.family$shq_8 == 1, ]$father.family), table(filter.data.family[filter.data.family$shq_8 == 2, ]$father.family)))
+father.chisq <- chisq.test(rbind(table(filter.data.family[filter.data.family$shq_8 == 1, ]$father.family), table(filter.data.family[filter.data.family$shq_8 == 2, ]$father.family)), correct = F)
 father.fisher <- fisher.test(rbind(table(filter.data.family[filter.data.family$shq_8 == 1, ]$father.family), table(filter.data.family[filter.data.family$shq_8 == 2, ]$father.family)))
 father.chisq
 father.fisher
+cramerV(rbind(table(filter.data.family[filter.data.family$shq_8 == 1, ]$father.family), table(filter.data.family[filter.data.family$shq_8 == 2, ]$father.family)))
+
 
 FreqPercent(filter.data.family[filter.data.family$shq_8 == 1, ]$mother.family)
 FreqPercent(filter.data.family[filter.data.family$shq_8 == 2, ]$mother.family)
 ValidN(filter.data.family$mother.family)
 
-mother.chisq <- chisq.test(rbind(table(filter.data.family[filter.data.family$shq_8 == 1, ]$mother.family), table(filter.data.family[filter.data.family$shq_8 == 2, ]$mother.family)))
+mother.chisq <- chisq.test(rbind(table(filter.data.family[filter.data.family$shq_8 == 1, ]$mother.family), table(filter.data.family[filter.data.family$shq_8 == 2, ]$mother.family)), correct = F)
 mother.fisher <- fisher.test(rbind(table(filter.data.family[filter.data.family$shq_8 == 1, ]$mother.family), table(filter.data.family[filter.data.family$shq_8 == 2, ]$mother.family)))
 mother.chisq
 mother.fisher
+cramerV(rbind(table(filter.data.family[filter.data.family$shq_8 == 1, ]$mother.family), table(filter.data.family[filter.data.family$shq_8 == 2, ]$mother.family)))
+
 
 # collapse brothers and sisters variables
 filter.data.siblings <- mutate(filter.data, sibling.prop = shq_35/shq_34 * 100)
@@ -278,17 +315,21 @@ sibling.levene <- leveneTest(filter.data.siblings$sibling.prop, group = as.facto
 
 sibling.levene$result[1] <- ifelse(sibling.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
 t.test(filter.data.siblings[filter.data.siblings$shq_8 == 1, ]$sibling.prop, filter.data.siblings[filter.data.siblings$shq_8 == 2, ]$sibling.prop, var.equal = sibling.levene$result[1])
+cohen.d(filter.data.siblings[filter.data.siblings$shq_8 == 1, ]$sibling.prop, filter.data.siblings[filter.data.siblings$shq_8 == 2, ]$sibling.prop, paired = F, na.rm = T, within = F, hedges.correction = T)
+
 
 ```
 
 
 
-```{r}
+```{r FTND}
 # FTND
 apply(menthol.data[, "FTND_SUM"], 2, Mean.SD.N)
 apply(unmenthol.data[, "FTND_SUM"], 2, Mean.SD.N)
 sum(!is.na(filter.data$FTND_SUM))
 apply(filter.data[, "FTND_SUM"], 2, Ttest)
+CohensD(filter.data$FTND_SUM)
+
 
 # BCS
 apply(menthol.data[, c("BCS_Addiction_Mean", "BCS_External_Mean", "BCS_Internal_Mean", "BCS_Mean")], 2, Mean.SD.N)
@@ -353,7 +394,7 @@ apply(filter.data[, "co"], 2, Ttest)
 
 ```
 
-```{r}
+```{r mental health}
 # CESD 
 apply(menthol.data[, "CESD_TOT_SUM"], 2, Mean.SD.N)
 apply(unmenthol.data[, "CESD_TOT_SUM"], 2, Mean.SD.N)
@@ -543,27 +584,37 @@ apply(filter.data[, "GPCS_Persistence"], 2, Ttest)
 
 ```
 
-```{r}
+```{r piq}
 ## PIQ
 # Gender
 FreqPercent(menthol.data$piq_1)
 FreqPercent(unmenthol.data$piq_1)
 ChiSqFisher(filter.data$piq_1)
 ValidN(filter.data$piq_1)
+CramersV(filter.data$piq_1)
 
 # age
 Mean.SD.N(menthol.data$piq_2)
 Mean.SD.N(unmenthol.data$piq_2)
 Ttest(filter.data$piq_2)
 ValidN(filter.data$piq_2)
+CohensD(filter.data$piq_2)
 
 # grandmother and grandfather: hispanic or not
 apply(menthol.data[, c("piq_16a", "piq_16b", "piq_16c", "piq_16d")], 2, FreqPercent)
 apply(unmenthol.data[, c("piq_16a", "piq_16b", "piq_16c", "piq_16d")], 2, FreqPercent)
 ChiSqFisher(filter.data$piq_16a)
+CramersV(filter.data$piq_16a)
+
 ChiSqFisher(filter.data$piq_16b)
+CramersV(filter.data$piq_16b)
+
 ChiSqFisher(filter.data$piq_16c)
+CramersV(filter.data$piq_16c)
+
 ChiSqFisher(filter.data$piq_16d)
+CramersV(filter.data$piq_16d)
+
 apply(filter.data[, c("piq_16a", "piq_16b", "piq_16c", "piq_16d")], 2, ValidN)
 
 # Grandmothers and grandfathers: races
@@ -605,108 +656,43 @@ table(filter.data.race$piq_8aa_T, useNA = "always")
 table(filter.data.race$piq_17a___1, useNA = "always")
 table(filter.data.race$piq_17_m_gm_ai, useNA = "always")
 
-# count of races for grandmother (mother's side)
-filter.data.race$piq_17_m_gm_dontknow <- NA
+filter.data.race$piq_17_m_gm_sum <- apply(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gm")], 1, sum, na.rm = T)
 
-filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gm")][, 1:6] <- na_if(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gm")][, 1:6], 0)
+filter.data.race$piq_17_m_gf_sum <- apply(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gf")], 1, sum, na.rm = T)
 
-filter.data.race$piq_17_m_gm_count <- apply(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gm")][, 1:6], 1, sum, na.rm = T)
+filter.data.race$piq_17_f_gm_sum <- apply(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gm")], 1, sum, na.rm = T)
 
-filter.data.race <- mutate(filter.data.race, piq_17_m_gm_count = ifelse(piq_17_m_gm_count == 0, NA, piq_17_m_gm_count))
+filter.data.race$piq_17_f_gf_sum <- apply(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gf")], 1, sum, na.rm = T)
 
-filter.data.race$piq_17_m_gm_na <- rowSums(is.na(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gm")][, 1:7]))
+filter.data.race$piq_17_all_sum <- apply(filter.data.race[, c("piq_17_m_gm_sum", "piq_17_m_gf_sum", "piq_17_f_gm_sum", "piq_17_f_gf_sum")], 1, sum)  
 
-table(filter.data.race$piq_17_m_gm_na)
+table(filter.data.race$piq_17_all_sum, useNA = "always")  # no one has missing value for all options
 
-filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gm")]
+summary(rowSums(is.na(filter.data.race[, startsWith(colnames(filter.data.race), c("piq_17_f", "piq_17_m"))])))
 
-Mean.SD.N(filter.data.race[filter.data.race$shq_8 == 1, ]$piq_17_m_gm_count)
-Mean.SD.N(filter.data.race[filter.data.race$shq_8 == 2, ]$piq_17_m_gm_count)
-ValidN(filter.data.race$piq_17_m_gm_count)
 
-m_gm.levene <- leveneTest(filter.data.race$piq_17_m_gm_count, group = as.factor(filter.data.race$shq_8), center = mean)
+filter.data.race <- mutate(filter.data.race, 
+       piq_17_m_gm_aa_only = ifelse(piq_17_m_gm_aa %in% 1 & piq_17_m_gm_sum %in% 1, 1, 0),
+       piq_17_m_gf_aa_only = ifelse(piq_17_m_gf_aa %in% 1 & piq_17_m_gf_sum %in% 1, 1, 0),
+       piq_17_f_gm_aa_only = ifelse(piq_17_f_gm_aa %in% 1 & piq_17_f_gm_sum %in% 1, 1, 0),
+       piq_17_f_gf_aa_only = ifelse(piq_17_f_gf_aa %in% 1 & piq_17_f_gf_sum %in% 1, 1, 0)
+       )
 
-m_gm.levene$result[1] <- ifelse(m_gm.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
+filter.data.race$piq_17_all_aa_only <- apply(filter.data.race[, c("piq_17_m_gm_aa_only", "piq_17_m_gf_aa_only", "piq_17_f_gm_aa_only", "piq_17_f_gf_aa_only")], 1, sum, na.rm = T)
 
-t.test(filter.data.race[filter.data.race$shq_8 == 1, ]$piq_17_m_gm_count, filter.data.race[filter.data.race$shq_8 == 2, ]$piq_17_m_gm_count, var.equal = m_gm.levene$result[1])
+table(filter.data.race[filter.data.race$shq_8 == 1, "piq_17_all_aa_only"])
+table(filter.data.race[filter.data.race$shq_8 == 2, "piq_17_all_aa_only"])
+prop.table(table(filter.data.race[filter.data.race$shq_8 == 1, "piq_17_all_aa_only"])
+)
+prop.table(table(filter.data.race[filter.data.race$shq_8 == 2, "piq_17_all_aa_only"])
+)
 
-# count of races for grandfather (mother's side)
-filter.data.race$piq_17_m_gf_dontknow <- NA
-
-filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gf")][, 1:6] <- na_if(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gf")][, 1:6], 0)
-
-filter.data.race$piq_17_m_gf_count <- apply(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gf")][, 1:6], 1, sum, na.rm = T)
-
-filter.data.race <- mutate(filter.data.race, piq_17_m_gf_count = ifelse(piq_17_m_gf_count == 0, NA, piq_17_m_gf_count))
-
-filter.data.race$piq_17_m_gf_na <- rowSums(is.na(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gf")][, 1:7]))
-
-table(filter.data.race$piq_17_m_gf_na)
-
-filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_m_gf")]
-
-Mean.SD.N(filter.data.race[filter.data.race$shq_8 == 1, ]$piq_17_m_gf_count)
-Mean.SD.N(filter.data.race[filter.data.race$shq_8 == 2, ]$piq_17_m_gf_count)
-ValidN(filter.data.race$piq_17_m_gf_count)
-
-m_gf.levene <- leveneTest(filter.data.race$piq_17_m_gf_count, group = as.factor(filter.data.race$shq_8), center = mean)
-
-m_gf.levene$result[1] <- ifelse(m_gf.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
-
-t.test(filter.data.race[filter.data.race$shq_8 == 1, ]$piq_17_m_gf_count, filter.data.race[filter.data.race$shq_8 == 2, ]$piq_17_m_gf_count, var.equal = m_gf.levene$result[1])
-
-# count of races for grandmother (father's side)
-filter.data.race$piq_17_f_gm_dontknow <- NA
-
-filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gm")][, 1:6] <- na_if(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gm")][, 1:6], 0)
-
-filter.data.race$piq_17_f_gm_count <- apply(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gm")][, 1:6], 1, sum, na.rm = T)
-
-filter.data.race <- mutate(filter.data.race, piq_17_f_gm_count = ifelse(piq_17_f_gm_count == 0, NA, piq_17_f_gm_count))
-
-filter.data.race$piq_17_f_gm_na <- rowSums(is.na(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gm")][, 1:7]))
-
-table(filter.data.race$piq_17_f_gm_na)
-
-filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gm")]
-
-Mean.SD.N(filter.data.race[filter.data.race$shq_8 == 1, ]$piq_17_f_gm_count)
-Mean.SD.N(filter.data.race[filter.data.race$shq_8 == 2, ]$piq_17_f_gm_count)
-ValidN(filter.data.race$piq_17_f_gm_count)
-
-f_gm.levene <- leveneTest(filter.data.race$piq_17_f_gm_count, group = as.factor(filter.data.race$shq_8), center = mean)
-
-f_gm.levene$result[1] <- ifelse(f_gm.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
-
-t.test(filter.data.race[filter.data.race$shq_8 == 1, ]$piq_17_f_gm_count, filter.data.race[filter.data.race$shq_8 == 2, ]$piq_17_f_gm_count, var.equal = m_gf.levene$result[1])
-
-# count of races for granfather (father's side)
-filter.data.race$piq_17_f_gf_dontknow <- NA
-
-filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gf")][, 1:6] <- na_if(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gf")][, 1:6], 0)
-
-filter.data.race$piq_17_f_gf_count <- apply(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gf")][, 1:6], 1, sum, na.rm = T)
-
-filter.data.race <- mutate(filter.data.race, piq_17_f_gf_count = ifelse(piq_17_f_gf_count == 0, NA, piq_17_f_gf_count))
-
-filter.data.race$piq_17_f_gf_na <- rowSums(is.na(filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gf")][, 1:7]))
-
-table(filter.data.race$piq_17_f_gf_na)
-
-filter.data.race[, startsWith(colnames(filter.data.race), "piq_17_f_gf")]
-
-Mean.SD.N(filter.data.race[filter.data.race$shq_8 == 1, ]$piq_17_f_gf_count)
-Mean.SD.N(filter.data.race[filter.data.race$shq_8 == 2, ]$piq_17_f_gf_count)
-ValidN(filter.data.race$piq_17_f_gf_count)
-
-f_gf.levene <- leveneTest(filter.data.race$piq_17_f_gf_count, group = as.factor(filter.data.race$shq_8), center = mean)
-
-f_gf.levene$result[1] <- ifelse(f_gf.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
-
-t.test(filter.data.race[filter.data.race$shq_8 == 1, ]$piq_17_f_gf_count, filter.data.race[filter.data.race$shq_8 == 2, ]$piq_17_f_gf_count, var.equal = f_gf.levene$result[1])
+chisq.test(rbind(table(filter.data.race[filter.data.race$shq_8 == 1, "piq_17_all_aa_only"]), table(filter.data.race[filter.data.race$shq_8 == 2, "piq_17_all_aa_only"])), correct = F)
+cramerV(rbind(table(filter.data.race[filter.data.race$shq_8 == 1, "piq_17_all_aa_only"]), table(filter.data.race[filter.data.race$shq_8 == 2, "piq_17_all_aa_only"])))
 
 # education
-filter.data.edu <- mutate(filter.data, education = ifelse(piq_7 == 1 | piq_7 == 2, 0, 1))
+filter.data.edu <- mutate(filter.data, education = ifelse(piq_7 %in% 1 | piq_7 %in% 2, 0, 1))
+filter.data.edu <- mutate(filter.data.edu, education = ifelse(is.na(piq_7), NA, education))
 
 table(filter.data.edu$education, useNA = "ifany")
 table(filter.data.edu$piq_7, useNA = "ifany")
@@ -715,9 +701,10 @@ FreqPercent(filter.data.edu[filter.data.edu$shq_8 == 1, ]$education)
 FreqPercent(filter.data.edu[filter.data.edu$shq_8 == 2, ]$education)
 ValidN(filter.data.edu$education)
 
-edu.chisq <- chisq.test(rbind(table(filter.data.edu[filter.data.edu$shq_8 == 1, ]$education), table(filter.data.edu[filter.data.edu$shq_8 == 2, ]$education)))
+edu.chisq <- chisq.test(rbind(table(filter.data.edu[filter.data.edu$shq_8 == 1, ]$education), table(filter.data.edu[filter.data.edu$shq_8 == 2, ]$education)), correct = F)
 edu.fisher <- fisher.test(rbind(table(filter.data.edu[filter.data.edu$shq_8 == 1, ]$education), table(filter.data.edu[filter.data.edu$shq_8 == 2, ]$education)))
 edu.chisq
+cramerV(rbind(table(filter.data.edu[filter.data.edu$shq_8 == 1, ]$education), table(filter.data.edu[filter.data.edu$shq_8 == 2, ]$education)))
 edu.fisher
 
 # Marital Status
@@ -727,10 +714,11 @@ ValidN(filter.data$piq_8)
 
 # ChiSqFisher(filter.data$piq_8)
 
-chisq.test(rbind(table(filter.data[filter.data$shq_8 == 1, ]$piq_8), table(filter.data[filter.data$shq_8 == 2, ]$piq_8)))
+chisq.test(rbind(table(filter.data[filter.data$shq_8 == 1, ]$piq_8), table(filter.data[filter.data$shq_8 == 2, ]$piq_8)), correct = F)
+cramerV(rbind(table(filter.data[filter.data$shq_8 == 1, ]$piq_8), table(filter.data[filter.data$shq_8 == 2, ]$piq_8)))
 
 # Employment
-filter.data.employ <- mutate(filter.data, employ = ifelse(piq_9 == 4, 0, ifelse(piq_9 == 3, 1, ifelse(piq_9 == 1 | piq_9 == 2 | piq_9 == 5, 2, NA))))
+filter.data.employ <- mutate(filter.data, employ = ifelse(piq_9 %in% 4, 0, ifelse(piq_9 %in% 3, 1, ifelse(piq_9 %in% 1 | piq_9 %in% 2 | piq_9 %in% 5, 2, NA))))
 
 table(filter.data$piq_9, useNA = "ifany")
 table(filter.data.employ$employ, useNA = "ifany")
@@ -739,8 +727,9 @@ FreqPercent(filter.data.employ[filter.data.employ$shq_8 == 1, ]$employ)
 FreqPercent(filter.data.employ[filter.data.employ$shq_8 == 2, ]$employ)
 ValidN(filter.data.employ$employ)
 
-employ.chisq <- chisq.test(rbind(table(filter.data.employ[filter.data.employ$shq_8 == 1, ]$employ), table(filter.data.employ[filter.data.employ$shq_8 == 2, ]$employ)))
+employ.chisq <- chisq.test(rbind(table(filter.data.employ[filter.data.employ$shq_8 == 1, ]$employ), table(filter.data.employ[filter.data.employ$shq_8 == 2, ]$employ)), correct = F)
 employ.fisher <- fisher.test(rbind(table(filter.data.employ[filter.data.employ$shq_8 == 1, ]$employ), table(filter.data.employ[filter.data.employ$shq_8 == 2, ]$employ)))
+cramerV(rbind(table(filter.data.employ[filter.data.employ$shq_8 == 1, ]$employ), table(filter.data.employ[filter.data.employ$shq_8 == 2, ]$employ)))
 employ.chisq
 employ.fisher
 
@@ -749,6 +738,7 @@ FreqPercent(menthol.data$piq_12)
 FreqPercent(unmenthol.data$piq_12)
 ValidN(filter.data$piq_12)
 ChiSqFisher(filter.data$piq_12)
+CramersV(filter.data$piq_12)
 
 # Income
 filter.data.income <- mutate(filter.data, income = ifelse(piq_13 == 1, 0, 1))
@@ -759,8 +749,9 @@ FreqPercent(filter.data.income[filter.data.income$shq_8 == 1, ]$income)
 FreqPercent(filter.data.income[filter.data.income$shq_8 == 2, ]$income)
 ValidN(filter.data.income$income)
 
-income.chisq <- chisq.test(rbind(table(filter.data.income[filter.data.income$shq_8 == 1, ]$income), table(filter.data.income[filter.data.income$shq_8 == 2, ]$income)))
+income.chisq <- chisq.test(rbind(table(filter.data.income[filter.data.income$shq_8 == 1, ]$income), table(filter.data.income[filter.data.income$shq_8 == 2, ]$income)), correct = F)
 income.fisher <- fisher.test(rbind(table(filter.data.income[filter.data.income$shq_8 == 1, ]$income), table(filter.data.income[filter.data.income$shq_8 == 2, ]$income)))
+cramerV(rbind(table(filter.data.income[filter.data.income$shq_8 == 1, ]$income), table(filter.data.income[filter.data.income$shq_8 == 2, ]$income)))
 income.chisq
 income.fisher
 
@@ -769,15 +760,17 @@ Mean.SD.N(menthol.data$piq_14)
 Mean.SD.N(unmenthol.data$piq_14)
 ValidN(filter.data$piq_14)
 Ttest(filter.data$piq_14)
+CohensD(filter.data$piq_14)
 
 # Personal Recreational Expenditure
 Mean.SD.N(menthol.data$piq_15)
 Mean.SD.N(unmenthol.data$piq_15)
 ValidN(filter.data$piq_15)
 Ttest(filter.data$piq_15)
+CohensD(filter.data$piq_15)
 ```
 
-```{r}
+```{r check uppsp}
 # rescore UPPSP
 # reverse code
 uppsp_varname <- colnames(data)[startsWith(colnames(data), "uppsp")]
