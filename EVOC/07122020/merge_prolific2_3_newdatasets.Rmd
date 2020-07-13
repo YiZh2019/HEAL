@@ -1,0 +1,310 @@
+---
+title: "merge and analyze prolific 2 & 3"
+author: "Yi"
+date: "7/12/2020"
+output:
+  html_document:
+    df_print: paged
+---
+<style type="text/css">
+body{ /* Normal  */
+      font-size: 16px;
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r load packages, include=FALSE}
+library(tidyverse)
+library(gdata)
+library(descr)
+library(Hmisc)
+library(expss)
+library(kableExtra)
+```
+
+```{r read datasets}
+data1 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07122020/Prolific Pilot3_minus.csv", na.strings = "", stringsAsFactors = F)
+
+data2 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07122020/Prolific Pilot3_second.csv", na.strings = "", stringsAsFactors = F)
+
+prolific2 <- read.csv('/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07122020/Prolific Pilot2.csv', na.strings = "", stringsAsFactors = F)
+
+idlist <- read.xls("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Pilot 3 Eligible.xlsx")
+```
+
+## 1. Data Cleaning
+```{r check and clean prolific 3, include=FALSE}
+length(unique(data1$prolificpid)) # 4 repeated records
+length(unique(data2$prolificpid)) # 1 repeated records
+
+# clean data1
+data1$num.na <- rowSums(is.na(data1))
+data1 %>% group_by(prolificpid) %>% summarise(., n = n()) %>% filter(., n > 1)
+
+data1[data1$prolificpid == "5a2add709408dc00016f57d3", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 1084
+data1[data1$prolificpid == "5cc210247502a000125f9886", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 1134
+data1[data1$prolificpid == "5ce649e53e496100197ae3db", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 1053
+data1[data1$prolificpid == "5d219d16072b440018aebe98", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 1023
+
+data1[data1$prolificpid == "test", ]  # remove redcapid = 1000
+
+data1 <- data1[!data1$redcapid %in% c(1084, 1134, 1053, 1023, 1000), ] 
+
+# clean data2
+data2$num.na <- rowSums(is.na(data2))
+data2 %>% group_by(prolificpid) %>% summarise(., n = n()) %>% filter(., n > 1)
+
+data2[data2$prolificpid == "5da2d3e256940100160c3bec", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 2039  # filter(data2[, c("redcapid", "prolificpid", "num.na")], prolificpid == "5da2d3e256940100160c3bec") cannot detect NA
+
+data2[is.na(data2$prolificpid), c("redcapid", "prolificpid", "num.na")] # remove redcapid = 2000
+
+data2[data2$prolificpid == "5c5002c6ee5ae100010a2f3b", ] # remove redcapid = 2063
+
+data2 <- data2[!data2$redcapid %in% c(2000, 2039, 2063), ]
+```
+### Prolific Pilot 3 (minus illicit drugs and cannabis)
+N = 167 (Raw data)
+<br>Repeated ids: "5a2add709408dc00016f57d3", "5cc210247502a000125f9886", "5ce649e53e496100197ae3db", "5d219d16072b440018aebe98"
+<br>Invalid id: “test”
+<br>N = 162 (Cleaned data) (deleted redcapid: 1084, 1134, 1053, 1023, 1000)
+
+### Prolific Pilot 3 (second wave data collection)
+N = 65 (Raw data)
+<br>Repeated ids: “5da2d3e256940100160c3bec”
+<br>Invalid id: missing value, “5c5002c6ee5ae100010a2f3b” (This id is not included in the ID list)
+<br>N = 62 (Cleaned data) (deleted redcapid: 2000, 2039， 2063)
+```{r merge prolific 3, include=FALSE}
+# merge prolific 3
+length(unique(data1$prolificpid))
+length(unique(data2$prolificpid))
+
+intersec_name_3 <- intersect(colnames(data1), colnames(data2))
+colnames(data1)[!colnames(data1) %in% intersec_name_3]
+colnames(data2)[!colnames(data2) %in% intersec_name_3]
+length(intersect(data1$prolificpid, data2$prolificpid))
+
+307 + 2 + 16  # 325 columns
+
+prolific3 <- merge(data1, data2, all.x = T, all.y = T)
+
+length(intersect(colnames(data1), colnames(prolific3)))
+length(intersect(colnames(data2), colnames(prolific3)))
+# full_join(data1, data2, by = intersect(colnames(data1), colnames(data2)))
+
+sum(prolific3$prolificpid %in% idlist$Pilot3Eligible)  # "test" is not in the id list; "5c5002c6ee5ae100010a2f3b" is not in the id list
+prolific3[!prolific3$prolificpid %in% idlist$Pilot3Eligible, "redcapid"]
+
+prolific3 <- prolific3[prolific3$prolificpid %in% idlist$Pilot3Eligible, ] # remove "test" and "5c5002c6ee5ae100010a2f3b"
+
+```
+
+```{r check and clean prolific 2, include=FALSE}
+length(unique(prolific2$prolificpid)) # 9 repeated records
+
+prolific2$num.na <- rowSums(is.na(prolific2))
+
+prolific2 %>% group_by(prolificpid) %>% summarise(n = n()) %>% filter( n > 1)
+
+prolific2[prolific2$prolificpid == "5c315f577626080001a88cb2", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 8109
+
+prolific2[prolific2$prolificpid == "5c748b9188fdc20017c60436", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 8272
+
+prolific2[prolific2$prolificpid == "5d010ccecfeb82000117c42a", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 8241 8244	
+
+prolific2[prolific2$prolificpid == "5d30b94628b06900195d305e", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 8088		
+
+prolific2[prolific2$prolificpid == "5d6f02d4e0207600167e2317", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 8158	8168
+
+prolific2[prolific2$prolificpid == "5dac7c198ff76d00166a70c4", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 8040
+
+prolific2[prolific2$prolificpid == "5df1683537241c07cf8f3984", c("redcapid", "prolificpid", "num.na")]  # remove redcapid = 8160
+
+prolific2 <- prolific2[!prolific2$redcapid %in% c(8109, 8272, 8241, 8244, 8088, 8158,	8168, 8040, 8160), ]
+
+intersec_name_2_3 <- intersect(colnames(prolific2), colnames(prolific3))
+
+colnames(prolific2)[!colnames(prolific2) %in% intersec_name_2_3]
+colnames(prolific3)[!colnames(prolific3) %in% intersec_name_2_3]
+
+length(intersect(prolific2$prolificpid, prolific3$prolificpid))
+
+sum(is.na(prolific2$prolificpid))
+
+184 + 49 + 141 # 374 columns
+```
+### Prolific Pilot 2
+N = 332 (Raw Data)
+<br>Repeated ids: “5c315f577626080001a88cb2”, “5c748b9188fdc20017c60436”, “5d010ccecfeb82000117c42a”, “5d30b94628b06900195d305e”, “5d6f02d4e0207600167e2317”, “5dac7c198ff76d00166a70c4”, “5df1683537241c07cf8f3984”
+<br>N = 323 (Cleaned Data) (deleted redcapid: 8109, 8272, 8241, 8244, 8088, 8158,	8168, 8040, 8160)
+```{r merge prolifc 2 & 3, include=FALSE}
+prolific2$pilot <- 2
+prolific3$pilot <- 3
+intersec_name_2_3 <- intersect(colnames(prolific2), colnames(prolific3))
+
+185 + 49 + 141 # 375 columns
+
+prolific_2_3 <- merge(prolific2, prolific3, all.x = T, all.y = T, by = c("prolificpid", "pilot", intersec_name_2_3[!intersec_name_2_3 %in% c("prolificpid", "pilot")]))
+```
+### Merged Dataset (long format)
+N = 547
+<br>224 participants get enrolled in both pilot 2 and 3.
+
+## 2. Data Analysis (N = 448, # of participants = 224)
+
+```{r labels}
+# LABELS
+# pilot
+val_lab(prolific_2_3$pilot) <- num_lab("
+                                    2 Pilot 2
+                                    3 Pilot 3
+                                    ")
+
+# Frequency of number of days of use
+varlist_num_days <- colnames(prolific_2_3)[endsWith(colnames(prolific_2_3), "30_days")]
+
+for(i in 1:length(varlist_num_days)){
+  
+  varname = varlist_num_days[i]
+  prolific_2_3[, varname] <- factor(prolific_2_3[, varname], levels = c(1:7), labels = c("0 days", "1 or 2 days", "3 to 5 days", "6 to 9 days", "10 to 19 days", "20 to 29 days", "All 30 days"))
+  
+}
+
+# every_day_current
+prolific_2_3$vape_every_day_current <- factor(prolific_2_3$vape_every_day_current, levels = c(0:1), labels = c("no", "Yes"))
+
+# ecig_bout
+prolific_2_3$ecig_bout_times_last30 <- factor(prolific_2_3$ecig_bout_times_last30, levels = c(1:7), labels = c("1 time per day", "2 times per day", "3 to 5 times per day", "6 to 9 times per day", "10 to 14 times per day", "15 to 20 times per day", "More than 20 times per day"))
+
+# ecig_bout_puffs_last30
+prolific_2_3$ecig_bout_puffs_last30 <- factor(prolific_2_3$ecig_bout_puffs_last30, levels = c(1:7), labels = c("1 puff", "2 puffs", "3 to 5 puffs", "6 to 9 puffs", "10 to 14 puffs", "15 to 20 puffs", "More than 20 puffs"))
+
+# myecig_type
+prolific_2_3$myecig_type <- factor(prolific_2_3$myecig_type, levels = c(1:7), labels = c("Juul or similar style device", "Suorin or similar device", "Puffbar or similar device", "Box mod", "Squonk mod", "Vape pen", "Other (please specify)"))
+```
+
+```{r functions}
+# FUNCTIONS
+Days_Pilot <- function(varname){
+  
+  temp.table <- table(validdata[, varname], validdata$pilot, useNA = "ifany")
+  rowname <- dimnames(temp.table)[[1]]
+  rowname[is.na(rowname)] <- "Missing Value"
+  dimnames(temp.table)[[1]] <- rowname
+  
+kableExtra::kable(temp.table, format = "html", caption = varname) %>% kable_styling(bootstrap_options = "striped", full_width = F)
+  
+}
+
+FreqPerct <- function(varname){
+  freq <- table(validdata[, varname], validdata$pilot, useNA = "ifany")
+  rowname <- dimnames(freq)[[1]]
+  rowname[is.na(rowname)] <- "Missing Value"
+  dimnames(freq)[[1]] <- rowname
+  
+  perct <- round(prop.table(freq, margin = 2) * 100, 1)
+  nperct <- paste(freq, " ", "(", perct, "%", ")", sep = "")
+  table <- matrix(nperct, ncol = ncol(freq))
+  colnames(table) <- colnames(freq)
+  rownames(table) <- rownames(freq)
+  kableExtra::kable(table, format = "html", caption = varname) %>% kable_styling(bootstrap_options = "striped", full_width = F)
+}
+
+```
+
+### Frequency of number of days of use for each device type in pilot 2 vs. pilot 3
+```{r Frequency of number of days of use, results = "asis"}
+# analytical dataset
+validdata <- prolific_2_3[prolific_2_3$prolificpid %in% prolific3$prolificpid, ]  # get enrolled in both pilot 2 and 3
+
+varlist_num_days <- colnames(prolific_2_3)[endsWith(colnames(prolific_2_3), "30_days")]
+
+lapply(varlist_num_days, Days_Pilot)
+```
+
+### N(%) of "every_day_current" in pilot 2 vs. pilot 3
+```{r every_day_current}
+# Days_Pilot("vape_every_day_current")
+# prop.table(table(validdata$vape_every_day_current, validdata$pilot, useNA = "always"))
+FreqPerct("vape_every_day_current")
+```
+
+
+### N(%) of ecig_bout in pilot 2 vs. pilot
+```{r ecig_bout}
+# Days_Pilot("ecig_bout_times_last30")
+# prop.table(table(validdata$ecig_bout_times_last30, validdata$pilot, useNA = "always"))
+FreqPerct("ecig_bout_times_last30")
+
+# Days_Pilot("ecig_bout_puffs_last30")
+# prop.table(table(validdata$ecig_bout_puffs_last30, validdata$pilot, useNA = "always"))
+FreqPerct("ecig_bout_puffs_last30")
+
+```
+
+### N(%) of dependence based on any 'yes' responses to questions in either the "vape addiction" or "vape quit effects" matrices 
+```{r dependence based on vape addicion or vape quit effects, include=FALSE}
+select(validdata, starts_with(c("vape_addiction", "vape_quit_effects")))
+table(rowSums(is.na(select(validdata, starts_with(c("vape_addiction", "vape_quit_effects")))
+)))  # 8 participants have missing value for all items
+
+validdata$dependence.na <- rowSums(is.na(select(validdata, starts_with(c("vape_addiction", "vape_quit_effects")))))
+validdata$dependence.vape <- rowSums(select(validdata, starts_with(c("vape_addiction", "vape_quit_effects"))))  # no need to remove na because number of na is 0 or 10
+validdata <- mutate(validdata, dependence.vape.d = ifelse(dependence.vape > 0, 1, 0))
+
+validdata$dependence.vape.d <- factor(validdata$dependence.vape.d, levels = c(0, 1), labels = c("No", "Yes"))
+
+table(validdata$dependence.na, useNA = "always")
+table(validdata$dependence.vape, useNA = "always")
+table(validdata$dependence.vape.d, useNA = "always")
+
+select(validdata, prolificpid,starts_with(c("vape_addiction", "vape_quit_effects")), dependence.na, dependence.vape, dependence.vape.d)
+
+Days_Pilot("dependence.vape.d")
+prop.table(table(validdata$dependence.vape.d, validdata$pilot))
+```
+
+```{r}
+FreqPerct("dependence.vape.d")
+```
+
+### N(%) for each category of type of device used (var "myecig_type")
+```{r myecig_type}
+# Days_Pilot("myecig_type")
+# prop.table(table(validdata$myecig_type, validdata$pilot), margin = 2)
+FreqPerct("myecig_type")
+```
+
+
+### Frequencies for all of the COVID questions from var covid_63 to covid_89h
+```{r covid_63 to covid_89h, include=FALSE}
+colnames(validdata)[startsWith(colnames(validdata), "covid")][-c(1:10, 79, 80)]
+
+covidvars <- colnames(validdata)[startsWith(colnames(validdata), "covid")][-c(1:10, 79, 80)]
+
+FreqTable <- function(varvec){
+  
+  temp.table <- table(varvec, useNA = "always")
+
+  report <- list()
+  report[[1]] <- names(varvec)
+  report[[2]] <- temp.table
+
+  return(report)
+  
+}
+
+apply(validdata[, covidvars], 2, FreqTable)
+```
+
+```{r, results="asis"}
+CovidFun <- function(varname){
+  covidtab <- table(validdata[, varname], useNA = "ifany")
+  kableExtra::kable(covidtab, col.names = c(varname, "Frequency")) %>% kable_styling(bootstrap_options = "striped", full_width = F)
+}
+
+lapply(covidvars, CovidFun)
+```
+
