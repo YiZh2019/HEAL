@@ -25,7 +25,7 @@ length(unique(covid$uasid))
 ```
 
 ```{r}
-covid_sample <- covid[, c("gender", "age", "maritalstatus", "livewithpartner", "education", "hisplatino", "race", "working", "sick_leave", "unemp_look", "retired", "disabled", "laborstatus", "employmenttype", "workfullpart", "hourswork", "hhincome", "anyhhmember", "hhmembernumber", "final_weight", "start_date", "coping_drinking", "cr026a2", "uasid")]
+covid_sample <- covid[, c("gender", "age", "maritalstatus", "livewithpartner", "education", "hisplatino", "race", "working", "sick_leave", "unemp_look", "retired", "disabled", "laborstatus", "employmenttype", "workfullpart", "hourswork", "hhincome", "anyhhmember", "hhmembernumber", "final_weight", "start_date", "coping_drinking", "cr026a2", "uasid", "wave")]
 
 uas185_sample <- uas185[, c("gender", "age", "maritalstatus", "livewithpartner", "education", "hisplatino", "race", "working", "sick_leave", "unemp_look", "retired", "disabled", "laborstatus", "employmenttype", "workfullpart", "hourswork", "hhincome", "anyhhmember", "hhmembernumber", "start_date", "c128_","c129_", "c130_", "uasid")]
 
@@ -39,11 +39,14 @@ mergedata <- merge(covid_sample, uas185_sample, all.x = T, all.y = T)
 
 mergedata$start_date <- format(mergedata$start_date, format = "%Y%m%d")
 
-write_sav(mergedata, "/Users/zhan039/Desktop/USC_HEAL/UAS/07132020/UAS185_COVID19_B.sav")
+write_sav(mergedata, "/Users/zhan039/Desktop/USC_HEAL/UAS/07152020/UAS185_COVID19_C.sav")
 ```
 
 ```{r}
 table(mergedata$datafile)
+table(mergedata$wave, useNA = "ifany")
+sum(colnames(covid_sample) %in% colnames(mergedata))
+sum(colnames(uas185_sample) %in% colnames(mergedata))
 
 sum(is.na(covid_sample$coping_drinking))
 sum(is.na(uas185$c129_))
