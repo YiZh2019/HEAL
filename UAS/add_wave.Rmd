@@ -1,0 +1,53 @@
+---
+title: "add_wave"
+author: "Yi"
+date: "7/17/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(tidyverse)
+```
+
+```{r}
+panal <- read_stata("/Users/zhan039/Desktop/USC_HEAL/UAS/07132020/covid_panal/covidpanel_us_stata_jul_8_2020.dta")
+
+wave1 <- read_stata("/Users/zhan039/Desktop/USC_HEAL/UAS/07132020/covid_individual/uas230_march_31_2020.dta")
+wave2 <- read_stata("/Users/zhan039/Desktop/USC_HEAL/UAS/07132020/covid_individual/uas235_april_29_2020.dta")
+wave3 <- read_stata("/Users/zhan039/Desktop/USC_HEAL/UAS/07132020/covid_individual/uas240_may_14_2020.dta")
+wave4 <- read_stata("/Users/zhan039/Desktop/USC_HEAL/UAS/07132020/covid_individual/uas242_may_27_2020.dta")
+wave5 <- read_stata("/Users/zhan039/Desktop/USC_HEAL/UAS/07132020/covid_individual/uas244_june_10_2020.dta")
+wave6 <- read_stata("/Users/zhan039/Desktop/USC_HEAL/UAS/07132020/covid_individual/uas246_june_23_2020.dta")
+wave7 <- read_stata("/Users/zhan039/Desktop/USC_HEAL/UAS/07132020/covid_individual/uas248_july_8_2020.dta")
+```
+
+```{r}
+sum(wave1$uasid %in% panal$uasid)
+sum(wave2$uasid %in% panal$uasid)
+sum(wave3$uasid %in% panal$uasid)
+sum(wave4$uasid %in% panal$uasid)
+sum(wave5$uasid %in% panal$uasid)
+sum(wave6$uasid %in% panal$uasid)
+sum(wave7$uasid %in% panal$uasid)
+
+length(unique(wave1$uasid))
+length(unique(wave2$uasid))
+length(unique(wave3$uasid))
+length(unique(wave4$uasid))
+length(unique(wave5$uasid))
+length(unique(wave6$uasid))
+length(unique(wave7$uasid))
+length(unique(panal$uasid))
+
+sum(is.na(panal$uasid))
+```
+
+```{r}
+table(panal$wave, useNA = "ifany")
+```
+
