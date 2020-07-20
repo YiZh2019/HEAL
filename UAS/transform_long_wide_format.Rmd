@@ -1,0 +1,55 @@
+---
+title: "transform from long format to wide format"
+author: "Yi"
+date: "7/20/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(tidyverse)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/UAS/07192020/covid_panal_07192020.sav")
+```
+
+```{r}
+varlist <- c("working", "sick_leave", "unemp_look", "retired", "disabled", "laborstatus", "employmenttype", "workfullpart", "hourswork", "hhincome", "coping_drinking", "cr026a2", "phq4_anxious", "phq4_worry", "phq4_depressed", "phq4_littleinterest", "coping_cannabis", "coping_drugs", "coping_meditate", "coping_exercise")
+
+apply(data[, varlist], 2, table, useNA = "ifany")
+
+```
+
+```{r}
+
+data_wave <- select(data, uasid, wave, varlist) %>% group_by(uasid) %>% gather(., key = variable, value = value, varlist) %>% unite(., newvariable, variable, wave, sep = "_") %>% spread(., newvariable, value)
+
+write_sav(data_wave, "/Users/zhan039/Desktop/USC_HEAL/UAS/07192020/covid_wide_Yi.sav")
+```
+
+```{r}
+select(data, uasid, waveE, varlist) %>% group_by(uasid) %>% gather(., key = variable, value = value, varlist) %>% unite(., newvariable, variable, waveE, sep = "_") %>% spread(., newvariable, value)
+
+wrong <- select(data, uasid, waveE, varlist) %>% group_by(uasid) %>% gather(., key = variable, value = value, varlist) %>% unite(., newvariable, variable, waveE, sep = "_") %>% group_by(uasid, newvariable) %>% summarise(n = n()) %>% filter(., n > 1) %>% arrange(., uasid) %>% select(uasid, newvariable)
+
+length(unique(wrong$uasid))
+  
+test <- select(data, uasid, waveE, varlist) %>% group_by(uasid) %>% gather(., key = variable, value = value, varlist) %>% unite(., newvariable, variable, waveE, sep = "_") 
+
+merge(wrong, test,all.x = T, by = c("uasid", "newvariable"))
+```
+
+```{r}
+data[data$uasid %in% wrong$uasid, c("uasid", "wave", "waveE", varlist)] %>% group_by(uasid) %>% arrange( uasid)
+
+length(unique(data[(data$uasid %in% wrong$uasid),]$uasid))
+length(unique(data$uasid))
+
+table(data[data$waveE == 12, "wave"])
+```
+
