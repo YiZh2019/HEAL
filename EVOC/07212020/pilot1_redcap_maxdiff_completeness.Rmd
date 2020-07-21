@@ -33,5 +33,7 @@ length(unique(PP$redcapid))
 
 ```{r}
 sum(is.na(bot$redcapid))
+
+bot[is.na(bot$redcapid), c("redcapid", "project_type")]
 ```
 
