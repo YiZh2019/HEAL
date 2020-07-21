@@ -1,0 +1,37 @@
+---
+title: "pilot1_redcap_maxdiff_completeness"
+author: "Yi"
+date: "7/21/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+Prolific <- read.csv('/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/Prolific.csv')
+MTself <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/MTself.csv")
+TPMT <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/TPMT.csv")
+MTconc <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/MTconc.csv")
+PP <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/PP.csv")
+
+bot <- readRDS("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04232020/MaxDiff_Pilot1_BotFit.rds")
+```
+
+```{r}
+table(bot$project_type, useNA = "ifany")
+
+length(unique(bot$redcapid))
+
+length(unique(Prolific$redcapid))
+length(unique(MTself$redcapid))
+length(unique(TPMT$redcapid))
+length(unique(MTconc$redcapid))
+length(unique(PP$redcapid))
+```
+
+```{r}
+sum(is.na(bot$redcapid))
+```
+
