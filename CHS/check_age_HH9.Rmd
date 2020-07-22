@@ -1,0 +1,110 @@
+---
+title: "check_age_HH9"
+author: "Yi"
+date: "7/22/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+HH9 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/CHS/FL temp/HH_age/HH_W9_Scored_LightDirt.csv", stringsAsFactors = F, na.strings = c("NA", " "))
+
+HH1_8 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/07092020/HH_07092020.csv", stringsAsFactors = F, na.strings = c("NA", " "))
+
+HH9 <- HH9[, -1]
+HH1_8 <- HH1_8[, -c(1, 2)]
+```
+
+```{r}
+CalcAge <- function(surveydate, birthdate) {
+  Birthdate_new <- as.Date(HH1_9[, birthdate], format = "%m/%d/%y")
+  Surveydate_new <- as.Date(HH1_9[, surveydate], format = "%Y-%m-%d")
+  
+  age <- trunc(as.numeric(difftime(Surveydate_new, Birthdate_new, units = "days")/365.2422))
+  
+  return(age)
+}
+
+CalcAge1 <- function(surveydate, birthdate) {
+ 
+  Birthdate_new <- as.Date(HH1_9[, birthdate], format = "%m/%d/%y")
+  Surveydate_new <- as.Date(HH1_9[, surveydate], format = "%Y-%m-%d")
+  
+  age <- round(as.numeric(difftime(Surveydate_new, Birthdate_new, units = "days")/365.2422), 2)
+  
+  return(age)
+}
+```
+
+```{r rename variable names in wave 9}
+varname <- colnames(HH9)[!startsWith(colnames(HH9), "W9_")] 
+newvarname <- paste("W9_", varname,sep = "")
+colnames(HH9)[!startsWith(colnames(HH9), "W9_")] <- newvarname
+
+length(colnames(HH9)[startsWith(colnames(HH9), "W9_")]) 
+
+colnames(HH9)[colnames(HH9) == "W9_SID"] <- "SID"
+```
+
+```{r check SID in both datasets}
+length(unique(HH1_8$SID))
+length(unique(HH9$SID))
+
+HH9$SID[!HH9$SID %in% HH1_8$SID]
+HH9[is.na(HH9$SID), ]
+```
+
+```{r merge datasets}
+HH1_9 <- merge(HH1_8, HH9, all.x = T, all.y = T, by = "SID")
+```
+
+```{r check date format}
+HH1_9$W9_Survey_Date
+HH1_9$W7_Survey_Date
+HH1_9$Birthdate
+
+as.Date(HH1_9[, "W9_Survey_Date"], format = "%Y-%m-%d")
+sum(is.na(HH1_9$W9_Survey_Date))
+sum(is.na(as.Date(HH1_9[, "W9_Survey_Date"], format = "%Y-%m-%d")
+))
+```
+
+
+```{r calculate age for W9}
+HH1_9$W9_Age_Calc_new <- CalcAge("W9_Survey_Date", "Birthdate")
+HH1_9$W9_Age_Calc_new_2 <- CalcAge1("W9_Survey_Date", "Birthdate")
+
+select(HH1_9, Birthdate, W9_Calc_Birthdate, W9_Survey_Date, W9_Age_Calc_new, W9_Age_Calc_new_2)
+```
+
+```{r summary}
+apply(HH1_9[, c("W1_Age_Calc_new_2", "W2_Age_Calc_new_2", "W3_Age_Calc_new_2", "W4_Age_Calc_new_2", "W5_Age_Calc_new_2", "W6_Age_Calc_new_2", "W7_Age_Calc_new_2", "W8_Age_Calc_new_2", "W9_Age_Calc_new_2")], 2, summary)
+```
+
+
+```{r impute missing value}
+table(rowSums(is.na(select(HH1_9, W1_Age_Calc_new_2, W2_Age_Calc_new_2, W3_Age_Calc_new_2, W4_Age_Calc_new_2, W5_Age_Calc_new_2, W6_Age_Calc_new_2, W7_Age_Calc_new_2, W8_Age_Calc_new_2, W9_Age_Calc_new_2))))
+
+colSums(is.na(select(HH1_9[is.na(HH1_9$W1_Age_Calc_new_2), ], W1_Age_Calc_new_2, W2_Age_Calc_new_2, W3_Age_Calc_new_2, W4_Age_Calc_new_2, W5_Age_Calc_new_2, W6_Age_Calc_new_2, W7_Age_Calc_new_2, W8_Age_Calc_new_2, W9_Age_Calc_new_2)))
+
+HH1_9 <- mutate(HH1_9, 
+                W9_Age_Calc_new_2 = ifelse(is.na(W9_Age_Calc_new_2), W1_Age_Calc_new_2 + 4, W9_Age_Calc_new_2)
+             )
+
+apply(HH1_9[, c("W1_Age_Calc_new_2", "W2_Age_Calc_new_2", "W3_Age_Calc_new_2", "W4_Age_Calc_new_2", "W5_Age_Calc_new_2", "W6_Age_Calc_new_2", "W7_Age_Calc_new_2", "W8_Age_Calc_new_2", "W9_Age_Calc_new_2")], 2, summary)
+```
+
+```{r}
+write.csv(x = HH1_9, file = "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/07222020/HH_W1_9_age.csv")
+
+write_sav(HH1_9, "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/07222020/HH_W1_9_age.sav")
+```
+
