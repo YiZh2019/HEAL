@@ -15,11 +15,11 @@ library(tidyverse)
 ```
 
 ```{r}
-data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/UAS/07192020/covid_panal_07192020.sav")
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/UAS/07232020/covid_panal_07232020.sav")
 ```
 
 ```{r}
-varlist <- c("working", "sick_leave", "unemp_look", "retired", "disabled", "laborstatus", "employmenttype", "workfullpart", "hourswork", "hhincome", "coping_drinking", "cr026a2", "phq4_anxious", "phq4_worry", "phq4_depressed", "phq4_littleinterest", "coping_cannabis", "coping_drugs", "coping_meditate", "coping_exercise")
+varlist <- c("final_weight", "coping_drinking", "coping_drinking4", "Binge_drinking", "Heavy_drinking", "cr026a2", "cr026a2A", "drinkingTotal", "coping_cannabis", "coping_drugs", "coping_meditate", "coping_exercise", "phq4_anxious", "phq4_worry", "phq4_depressed", "phq4_littleinterest", "working", "sick_leave", "unemp_layoff", "unemp_look", "retired", "disabled", "lf_other", "laborstatus", "employmenttype", "workfullpart", "hourswork")
 
 apply(data[, varlist], 2, table, useNA = "ifany")
 
@@ -29,7 +29,7 @@ apply(data[, varlist], 2, table, useNA = "ifany")
 
 data_wave <- select(data, uasid, wave, varlist) %>% group_by(uasid) %>% gather(., key = variable, value = value, varlist) %>% unite(., newvariable, variable, wave, sep = "_") %>% spread(., newvariable, value)
 
-write_sav(data_wave, "/Users/zhan039/Desktop/USC_HEAL/UAS/07192020/covid_wide_Yi.sav")
+write_sav(data_wave, "/Users/zhan039/Desktop/USC_HEAL/UAS/07232020/covid_wide_Yi.sav")
 ```
 
 ```{r}
