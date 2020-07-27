@@ -28,17 +28,31 @@ varlist <- varlist[!varlist %in% c("uasid", "wave")]
 time_invariant <- c("statereside", "gender", "maritalstatusD1", "maritalstatusD2", "educationD1", "educationD2", "educationD3", "hhincomeM", "hhincomeQ", "poverty100", "poverty150", "age", "age3Ga", "age4Ga", "age4Gb", "RACEHSP", "RACEHSP4G", "RACEHSP5G", "immigrant_status", "maritalstatus", "livewithpartner", "education", "hispanic", "white", "black", "nativeamer", "asian", "pacific", "race", "hhincome", "hhmembernumber", "Householdnumber")
 ```
 
+
+All time-invariant variables would be merged to one variable, whose value is consistent with the baseline's value. For the missing value in baseline, it would be filled with the value with the maximum count in the following up waves. 
 ```{r}
-# AlldataWide <- select(alldata, c("uasid", "wave", varlist)) %>% group_by(uasid) %>% gather(., key = variable, value = value, varlist) %>% unite(., newvariable, variable, wave, sep = "_") %>% spread(., newvariable, value)
+AlldataWide <- select(alldata, c("uasid", "wave", varlist)) %>% group_by(uasid) %>% gather(., key = variable, value = value, varlist) %>% unite(., newvariable, variable, wave, sep = "_") %>% spread(., newvariable, value)
 
 # write_sav(AlldataWide, "/Users/zhan039/Desktop/USC_HEAL/UAS/07232020/covid_wide_all.sav")
 
-AlldataWide <- select(alldata, c("uasid", "wave", varlist)) %>% group_by(uasid) %>% gather(., key = variable, value = value, varlist) %>% unite(., newvariable, variable, wave, sep = "&") %>% spread(., newvariable, value)
+# Age
+AlldataWide %>% select(., uasid, starts_with("age_")) %>% summary()
 
-AlldataAllWaveLong <- AlldataWide %>% gather(., key = var_wave, value = value, 2:ncol(AlldataWide)) %>% separate(., var_wave, c("variable", "wave"), sep = "&", convert = T) %>% spread(., variable, value)
+age <- AlldataWide %>% select(., uasid, starts_with("age_"))  # explore age 
+table(rowSums(is.na(age)), useNA = "ifany")  # In the final dataset, 9 people will have missing value in age
 
-StateReside <- AlldataWide %>% select(., uasid, starts_with("statereside&"))
-apply(StateReside[, -1], 2, summary)
+age.all <- alldata %>% group_by(uasid, age) %>% summarise(n = n()) %>% arrange(., uasid, n) %>% mutate(., rank = row_number(desc(n)))  # get the count of age for each participant 
+
+age.all <- age.all[age.all$rank == 1, ]  # values of age for imputing
+age.all <- age.all %>% rename("age_max_count" = age)
+summary(age.all$age_max_count)
+
+AlldataWide <- left_join(AlldataWide, age.all[, 1:2], by = "uasid")
+select(AlldataWide, uasid, starts_with("age_"))
+
+AlldataWide <- mutate(AlldataWide, age = ifelse(is.na(age_1), age_max_count, age_1)) # keep the baseline value of age 
+colSums(is.na(AlldataWide[, startsWith(colnames(AlldataWide), "age")]))
+
 
 
 ```
