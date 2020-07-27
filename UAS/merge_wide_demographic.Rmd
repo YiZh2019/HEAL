@@ -1,0 +1,45 @@
+---
+title: "merge_wide_demographic"
+author: "Yi"
+date: "7/23/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(tidyverse)
+library(xlsx2dfs)
+```
+
+```{r}
+alldata <- read_sav("/Users/zhan039/Desktop/USC_HEAL/UAS/07232020/covid_panal_07232020.sav")
+
+varlist <- read.xlsx("/Users/zhan039/Desktop/USC_HEAL/UAS/07232020/variable list.xlsx", colNames = F)
+
+varlist <- as.vector(varlist$X1)
+varlist <- varlist[!varlist %in% c("uasid", "wave")]
+```
+
+```{r}
+time_invariant <- c("statereside", "gender", "maritalstatusD1", "maritalstatusD2", "educationD1", "educationD2", "educationD3", "hhincomeM", "hhincomeQ", "poverty100", "poverty150", "age", "age3Ga", "age4Ga", "age4Gb", "RACEHSP", "RACEHSP4G", "RACEHSP5G", "immigrant_status", "maritalstatus", "livewithpartner", "education", "hispanic", "white", "black", "nativeamer", "asian", "pacific", "race", "hhincome", "hhmembernumber", "Householdnumber")
+```
+
+```{r}
+# AlldataWide <- select(alldata, c("uasid", "wave", varlist)) %>% group_by(uasid) %>% gather(., key = variable, value = value, varlist) %>% unite(., newvariable, variable, wave, sep = "_") %>% spread(., newvariable, value)
+
+# write_sav(AlldataWide, "/Users/zhan039/Desktop/USC_HEAL/UAS/07232020/covid_wide_all.sav")
+
+AlldataWide <- select(alldata, c("uasid", "wave", varlist)) %>% group_by(uasid) %>% gather(., key = variable, value = value, varlist) %>% unite(., newvariable, variable, wave, sep = "&") %>% spread(., newvariable, value)
+
+AlldataAllWaveLong <- AlldataWide %>% gather(., key = var_wave, value = value, 2:ncol(AlldataWide)) %>% separate(., var_wave, c("variable", "wave"), sep = "&", convert = T) %>% spread(., variable, value)
+
+StateReside <- AlldataWide %>% select(., uasid, starts_with("statereside&"))
+apply(StateReside[, -1], 2, summary)
+
+
+```
+
