@@ -17,10 +17,11 @@ library(tidyverse)
 library(lm.beta)
 library(psy)
 library(effsize)
+library(car)
 ```
 
 ```{r}
-data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/GROW/GROW DATA-20190920T175512Z-001/GROW DATA/REDCap_wTeleform_Merged (scored + sorted)_06212018 (No 2nd survey) with DIFF.sav")
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/Menthol/fix_grow_data.sav")
 
 data <- filter(data, piq_5 == 0 & PIQ_6c_T == 1 | piq_5 == 0 & piq_6___3 == 1)
 ```
@@ -324,39 +325,83 @@ Mean.sd.n <- function(var){
     return(a)
 }
 
-varlist <- select(data, ND_WSWS_Craving_Mean, D_WSWS_Craving_Mean, DIFF_WSWS_Craving_Mean, ND_QSU_Factor1_Mean, D_QSU_Factor1_Mean, DIFF_QSU_Factor1_Mean, ND_QSU_Factor2_Mean, D_QSU_Factor2_Mean, DIFF_QSU_Factor2_Mean, ND_POMS_NM_Mean, D_POMS_NM_Mean, DIFF_POMS_NM_Mean, ND_WSWS_Anger_Mean, D_WSWS_Anger_Mean, DIFF_WSWS_Anger_Mean, ND_POMS_Anger_Mean, D_POMS_Anger_Mean, DIFF_POMS_Anger_Mean, ND_WSWS_Anxiety_Mean, D_WSWS_Anxiety_Mean, DIFF_WSWS_Anxiety_Mean, ND_POMS_Anxiety_Mean, D_POMS_Anxiety_Mean, DIFF_POMS_Anxiety_Mean, ND_WSWS_Sadness_Mean, D_WSWS_Sadness_Mean, DIFF_WSWS_Sadness_Mean, ND_POMS_Depression_Mean, D_POMS_Depression_Mean, DIFF_POMS_Depression_Mean, ND_POMS_PM_Mean, D_POMS_PM_Mean, DIFF_POMS_PM_Mean, ND_SHAPS_RC_Mean, D_SHAPS_RC_Mean, DIFF_SHAPS_RC_Mean, ND_POMS_Confusion_Mean, D_POMS_Confusion_Mean, DIFF_POMS_Confusion_Mean, ND_WSWS_Concentration_Mean, D_WSWS_Concentration_Mean, DIFF_WSWS_Concentration_Mean, ND_CIS_Mean, D_CIS_Mean, DIFF_CIS_Mean, ND_WSWS_Hunger_Mean, D_WSWS_Hunger_Mean, DIFF_WSWS_Hunger_Mean)
+ValidN <- function(var){
+  return(sum(!is.na(var)))
+}
 
+Ttest <- function(var){
+  LeveneTest <- leveneTest(var, group = as.factor(filter.data$shq_8), center = mean)
+  LeveneTest$result[1] <- ifelse(LeveneTest$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
+  LeveneTest$result[2] <- !LeveneTest$result[1]
+  return(t.test(var[filter.data$shq_8 == 1], var[filter.data$shq_8 == 2], var.equal = LeveneTest$result[1]))
+}
 
-apply(varlist, 2, summary)
-```
-
-```{r}
-# CO
-Mean.sd.n(data$nd_co)
-Mean.sd.n(data$d_co)
-Mean.sd.n(data$DIFF_FS_CO_PreRAT)
-Mean.sd.n(data$DIFF_FS_CO_PostR)
-Mean.sd.n(data$DIFF_FS_CO_PreR)
+CohensD <- function(var) {
+  d <- cohen.d(var[filter.data$shq_8 == 1], var[filter.data$shq_8 == 2], paired = F, na.rm = T, within = F, hedges.correction = F)
+  return(d)
+}
 
 data$diff_co <- data$d_co - data$nd_co
-Mean.sd.n(data$diff_co)
-select(data, d_co, nd_co, diff_co)
-t.test(data$d_co, data$nd_co, paired = T)
-cohen.d(data$d_co, data$nd_co, paired = T, na.rm = T, within = F)
+
+varlist <- select(data, nd_co, d_co, diff_co, ND_WSWS_Craving_Mean, D_WSWS_Craving_Mean, DIFF_WSWS_Craving_Mean, ND_QSU_Factor1_Mean, D_QSU_Factor1_Mean, DIFF_QSU_Factor1_Mean, ND_QSU_Factor2_Mean, D_QSU_Factor2_Mean, DIFF_QSU_Factor2_Mean, ND_POMS_NM_Mean, D_POMS_NM_Mean, DIFF_POMS_NM_Mean, ND_WSWS_Anger_Mean, D_WSWS_Anger_Mean, DIFF_WSWS_Anger_Mean, ND_POMS_Anger_Mean, D_POMS_Anger_Mean, DIFF_POMS_Anger_Mean, ND_WSWS_Anxiety_Mean, D_WSWS_Anxiety_Mean, DIFF_WSWS_Anxiety_Mean, ND_POMS_Anxiety_Mean, D_POMS_Anxiety_Mean, DIFF_POMS_Anxiety_Mean, ND_WSWS_Sadness_Mean, D_WSWS_Sadness_Mean, DIFF_WSWS_Sadness_Mean, ND_POMS_Depression_Mean, D_POMS_Depression_Mean, DIFF_POMS_Depression_Mean, ND_POMS_PM_Mean, D_POMS_PM_Mean, DIFF_POMS_PM_Mean, ND_SHAPS_RC_Mean, D_SHAPS_RC_Mean, DIFF_SHAPS_RC_Mean, ND_POMS_Confusion_Mean, D_POMS_Confusion_Mean, DIFF_POMS_Confusion_Mean, ND_WSWS_Concentration_Mean, D_WSWS_Concentration_Mean, DIFF_WSWS_Concentration_Mean, ND_CIS_Mean, D_CIS_Mean, DIFF_CIS_Mean, ND_WSWS_Hunger_Mean, D_WSWS_Hunger_Mean, DIFF_WSWS_Hunger_Mean, shq_8)
+
+# split data to menthol and unmenthol
+filter.data <- varlist
+table(filter.data$shq_8)
+filter.data <- filter.data[!is.na(filter.data$shq_8), ]
+menthol.data <- filter(filter.data, shq_8 == 1)
+unmenthol.data <- filter(filter.data, shq_8 == 2)
+nrow(menthol.data)
+nrow(unmenthol.data)
+
+
+# apply(varlist, 2, summary)
+```
+
+```{r sample of analysis}
+# CO
+Mean.sd.n(menthol.data$nd_co)
+Mean.sd.n(menthol.data$d_co)
+Mean.sd.n(menthol.data$diff_co)
+
+Mean.sd.n(unmenthol.data$nd_co)
+Mean.sd.n(unmenthol.data$d_co)
+Mean.sd.n(unmenthol.data$diff_co)
+
+select(menthol.data, d_co, nd_co, diff_co)
+Ttest(filter.data$diff_co)
+CohensD(filter.data$diff_co)
+ValidN(filter.data$diff_co)
+
 -35.355/sqrt(597)
 # Urge/Craving
 # WSWS craving
-Mean.sd.n(data$ND_WSWS_Craving_Mean)
-Mean.sd.n(data$D_WSWS_Craving_Mean)
-Mean.sd.n(data$DIFF_WSWS_Craving_Mean)
+Mean.sd.n(menthol.data$ND_WSWS_Craving_Mean)
+Mean.sd.n(menthol.data$D_WSWS_Craving_Mean)
+Mean.sd.n(menthol.data$DIFF_WSWS_Craving_Mean)
+
+Mean.sd.n(unmenthol.data$ND_WSWS_Craving_Mean)
+Mean.sd.n(unmenthol.data$D_WSWS_Craving_Mean)
+Mean.sd.n(unmenthol.data$DIFF_WSWS_Craving_Mean)
+
+Ttest(filter.data$DIFF_WSWS_Craving_Mean)
+CohensD(filter.data$DIFF_WSWS_Craving_Mean)
+ValidN(filter.data$DIFF_WSWS_Craving_Mean)
+
 cronbach(data[, c("nd_wsws_7", "nd_wsws_9", "nd_wsws_17", "nd_wsws_21")])
 cronbach(data[, c("d_wsws_7", "d_wsws_9", "d_wsws_17", "d_wsws_21")])
-t.test(data$D_WSWS_Craving_Mean, data$ND_WSWS_Craving_Mean, paired = T)
 ```
 
-```{r}
+```{r run all analyses}
 # Mean SD N
-apply(varlist, 2, Mean.sd.n)
+apply(menthol.data[, -ncol(menthol.data)], 2, Mean.sd.n)
+apply(unmenthol.data[, -ncol(unmenthol.data)], 2, Mean.sd.n)
+
+diff_vars <- colnames(filter.data)[grepl("diff_", colnames(filter.data), ignore.case = T)]
+
+apply(filter.data[, diff_vars], 2, CohensD)
+apply(filter.data[, diff_vars], 2, Ttest)
+
 ```
 
 ```{r}
