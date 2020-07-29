@@ -1,0 +1,129 @@
+---
+title: "Create the merged dataset of pilot 1"
+author: "Yi"
+date: "7/21/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+Prolific <- read.csv('/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/Prolific.csv', na.strings = "")
+MTself <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/MTself.csv", na.strings = "")
+TPMT <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/TPMT.csv", na.strings = "")
+MTconc <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/MTconc.csv", na.strings = "")
+PP <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/PP.csv", na.strings = "")
+
+completers <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/EVOC Pilot 1 Approved REDCap IDs.csv")
+```
+
+```{r explore id}
+Prolific_MTself <- intersect(colnames(Prolific), colnames(MTself))
+colnames(Prolific)[!colnames(Prolific) %in% Prolific_MTself]
+colnames(MTself)[!colnames(MTself) %in% Prolific_MTself]
+colnames(TPMT)[!colnames(TPMT) %in% Prolific_MTself]
+colnames(MTconc)[!colnames(MTconc) %in% Prolific_MTself]
+colnames(PP)[!colnames(PP) %in% Prolific_MTself]
+Prolific_MTself[!Prolific_MTself %in% colnames(PP)]
+
+length(unique(Prolific$prolificid))
+length(unique(MTself$mturkid))
+length(unique(TPMT$tpmturkid))
+length(unique(MTconc$mturkidcon))
+length(unique(PP$aid))
+
+```
+
+```{r explore datasets redcap completers}
+
+Log.Prolific <- completers[completers$study == "prolific", ]
+Log.MTconc <- completers[completers$study == "mturkcon", ]
+Log.PP <- completers[completers$study == "ppcon", ]
+Log.MTself <- completers[completers$study == "mturkself", ]
+Log.TPMT <- completers[completers$study == "tpmturk", ]
+
+length(intersect(Log.Prolific$redcapid, Prolific$redcapid))
+length(intersect(Log.MTconc$redcapid, MTconc$redcapid))
+length(intersect(Log.PP$redcapid, PP$redcapid))
+length(intersect(Log.MTself$redcapid, MTself$redcapid))
+length(intersect(Log.TPMT$redcapid, TPMT$redcapid))
+
+```
+
+```{r merge datasets}
+Prolific_clean <- Prolific[Prolific$redcapid %in% Log.Prolific$redcapid, ]
+MTconc_clean <- MTconc[MTconc$redcapid %in% Log.MTconc$redcapid, ]
+PP_clean <- PP[PP$redcapid %in% Log.PP$redcapid, ]
+MTself_clean <- MTself[MTself$redcapid %in% Log.MTself$redcapid, ]
+TPMT_clean <- TPMT[TPMT$redcapid %in% Log.TPMT$redcapid, ]
+
+colnames(Prolific_clean)[colnames(Prolific_clean) == "prolificid"] <- "Participant_id"
+colnames(MTconc_clean)[colnames(MTconc_clean) == "mturkidcon"] <- "Participant_id"
+colnames(PP_clean)[colnames(PP_clean) == "aid" ] <- "Participant_id"
+colnames(MTself_clean)[colnames(MTself_clean) == "mturkid" ] <- "Participant_id"
+colnames(TPMT_clean)[colnames(TPMT_clean) == "tpmturkid"] <- "Participant_id"
+
+PP_clean$worker_id_timestamp <- NA
+PP_clean$worker_id_complete <- NA
+
+Prolific_clean$project_type <- "prolific"
+MTconc_clean$project_type <- "mturkcon"
+PP_clean$project_type <- "pp"
+MTself_clean$project_type <- "mturkself"
+TPMT_clean$project_type <- "tpmturk"
+
+data <- rbind(Prolific_clean, MTconc_clean, PP_clean, MTself_clean, TPMT_clean)
+
+data <- rename(data, "ecig_use_patterns_complete" = ecigarette_use_patterns_complete, "ecig_use_patterns_timestamp" = ecigarette_use_patterns_timestamp)
+sort(sapply(colnames(data), nchar))
+```
+
+```{r number of attention check}
+data <- mutate(data, att1_success = ifelse(data$att_check1___1 %in% 1 & data$att_check1___4 %in% 1 & data$att_check1___5 %in% 1, 1, 0))
+select(data, starts_with("att_check1"), att1_success)
+select(data, starts_with("att_check1"), att1_success) %>% summary
+
+table(data$att_check2, data$last_30_ecig_yn, useNA = "ifany")
+data <- mutate(data, att2_success = ifelse(data$last_30_ecig_yn %in% 1 & data$att_check2 %in% 3, 1, ifelse(data$last_30_ecig_yn %in% 1, 0, NA))) # people who are not asked the second question are marked as NA
+table(data$att2_success, useNA = "ifany")
+
+table(data$att_check3a, data$att_check3b, useNA = "ifany")
+data <- mutate(data, att3_success = ifelse(data$att_check3a %in% 4 & grepl("decision making", data$att_check3b, ignore.case = T), 1, 0))
+table(data$att3_success, useNA = "ifany")
+
+data$att2_replaceNA <- data$att2_success
+data$att2_replaceNA[is.na(data$att2_replaceNA)] <- 1 # people who are not asked are marked as success
+table(data$att2_replaceNA, useNA = "ifany")
+
+data$sum_att_success <- apply(data[, c("att1_success", "att2_replaceNA", "att3_success")], 1, sum)
+
+data$sum_att_failure <- 3 - data$sum_att_success
+
+# data$att1.success <- factor(data$att1.success, levels = c(0, 1), labels = c("fail", "success"))
+# data$att2.success <- factor(data$att2.success, levels = c(0, 1), labels = c("fail", "success"))
+# data$att3.success <- factor(data$att3.success, levels = c(0,1), labels = c("fail", "success"))
+
+select(data, att1_success, att2_success, att3_success, sum_att_failure)
+
+newdata <- select(data, -att2_replaceNA, -sum_att_success)
+
+length(unique(newdata$Participant_id))
+```
+
+```{r save datasets}
+write.csv(newdata, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07282020/EVOC_pilot1.csv", na = "")
+
+write_sav(newdata, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07282020/EVOC_pilot1.sav")
+
+write_sas(newdata, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07282020/EVOC_pilot1.sas7bdat")
+
+write_dta(newdata, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07282020/EVOC_pilot1.dta")
+```
+
