@@ -1,0 +1,109 @@
+---
+title: "Create the merged dataset of pilot 2 and 3"
+author: "Yi"
+date: "7/30/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+data1 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07122020/Prolific Pilot3_minus.csv", na.strings = "", stringsAsFactors = F)
+
+data2 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07122020/Prolific Pilot3_second.csv", na.strings = "", stringsAsFactors = F)
+
+prolific2 <- read.csv('/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07122020/Prolific Pilot2.csv', na.strings = "", stringsAsFactors = F)
+
+pptlist_pilot2 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Participant_list/EVOC Pilot 2 Participant List.csv")
+
+pptlist_pilot3_1 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Participant_list/EVOC Pilot 3 Wave 1 Participant List.csv")
+
+pptlist_pilot3_2 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Participant_list/EVOC Pilot 3 Wave 2 Participant List.csv")
+```
+
+```{r clean datasets}
+data1_clean <- data1[data1$redcapid %in% pptlist_pilot3_1$redcapid, ]
+data2_clean <- data2[data2$redcapid %in% pptlist_pilot3_2$redcapid, ]
+prolific2_clean <- prolific2[prolific2$redcapid %in% pptlist_pilot2$redcapid, ]
+
+rowSums(is.na(prolific2_clean[prolific2_clean$prolificpid == "5d6f02d4e0207600167e2317", ]))
+
+
+```
+
+```{r merge prolific3}
+length(unique(data1_clean$prolificpid))
+length(unique(data2_clean$prolificpid))
+
+intersect_name_3 <- intersect(colnames(data1_clean), colnames(data2_clean))
+colnames(data1_clean)[!colnames(data1_clean) %in% intersect_name_3]
+colnames(data2_clean)[!colnames(data2_clean) %in% intersect_name_3]
+
+154+62
+306+16+2
+
+prolific3_clean <- merge(data1_clean, data2_clean, all.x = T, all.y = T)
+```
+
+```{r merge pilot 2 and 3}
+prolific2_clean$pilot <- 2
+prolific3_clean$pilot <- 3
+intersec_name_2_3 <- intersect(colnames(prolific2_clean), colnames(prolific3_clean))
+colnames(prolific2_clean)[!colnames(prolific2_clean) %in% intersec_name_2_3]
+colnames(prolific3_clean)[!colnames(prolific3_clean) %in% intersec_name_2_3]
+299 + 216
+184+49+141
+
+prolific_2_3 <- merge(prolific2_clean, prolific3_clean, all.x = T, all.y = T, by = c("prolificpid", "pilot", intersec_name_2_3[!intersec_name_2_3 %in% c("prolificpid", "pilot")]))
+```
+
+```{r number of attention check failures}
+data <- prolific_2_3
+
+data <- mutate(data, att1_success = ifelse(data$att_check1___1 %in% 1 & data$att_check1___4 %in% 1 & data$att_check1___5 %in% 1, 1, 0))
+select(data, starts_with("att_check1"), att1_success)
+select(data, starts_with("att_check1"), att1_success) %>% summary
+
+table(data$att_check2, data$last_30_ecig_yn, useNA = "ifany")
+data <- mutate(data, att2_success = ifelse(data$last_30_ecig_yn %in% 1 & data$att_check2 %in% 3, 1, ifelse(data$last_30_ecig_yn %in% 1, 0, NA))) # people who are not asked the second question are marked as NA
+table(data$att2_success, useNA = "ifany")
+
+table(data$att_check3a, data$att_check3b, useNA = "ifany")
+data <- mutate(data, att3_success = ifelse(data$att_check3a %in% 4 & grepl("decision making", data$att_check3b, ignore.case = T), 1, 0))
+table(data$att3_success, useNA = "ifany")
+
+data$att2_replaceNA <- data$att2_success
+data$att2_replaceNA[is.na(data$att2_replaceNA)] <- 1 # people who are not asked are marked as success
+table(data$att2_replaceNA, useNA = "ifany")
+
+data$sum_att_success <- apply(data[, c("att1_success", "att2_replaceNA", "att3_success")], 1, sum)
+
+data$sum_att_failure <- 3 - data$sum_att_success
+
+# data$att1.success <- factor(data$att1.success, levels = c(0, 1), labels = c("fail", "success"))
+# data$att2.success <- factor(data$att2.success, levels = c(0, 1), labels = c("fail", "success"))
+# data$att3.success <- factor(data$att3.success, levels = c(0,1), labels = c("fail", "success"))
+
+select(data, att1_success, att2_success, att3_success, sum_att_failure)
+
+newdata <- select(data, -att2_replaceNA, -sum_att_success)
+
+length(unique(newdata$redcapid))
+```
+
+```{r save datasets}
+write.csv(newdata, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07282020/EVOC_pilot2_3/EVOC_pilot2_3.csv", na = "")
+
+write_sav(newdata, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07282020/EVOC_pilot2_3/EVOC_pilot2_3.sav")
+
+write_dta(newdata, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07282020/EVOC_pilot2_3/EVOC_pilot2_3.dta")
+
+```
+
