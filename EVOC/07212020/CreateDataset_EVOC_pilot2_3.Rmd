@@ -96,6 +96,12 @@ select(data, att1_success, att2_success, att3_success, sum_att_failure)
 newdata <- select(data, -att2_replaceNA, -sum_att_success)
 
 length(unique(newdata$redcapid))
+sort(sapply(colnames(newdata), nchar))
+
+newdata <- rename(newdata, "ecig_use_patterns_complete" = ecigarette_use_patterns_complete, "ecig_use_patterns_timestamp" = ecigarette_use_patterns_timestamp)
+newdata <- rename(newdata, "substance_use_hist_complete" = substance_use_history_complete, "substance_use_hist_timestamp" = substance_use_history_timestamp)
+sort(sapply(colnames(newdata), nchar))
+
 ```
 
 ```{r save datasets}
