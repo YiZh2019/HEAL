@@ -31,7 +31,7 @@ time_invariant <- c("statereside", "gender", "maritalstatusD1", "maritalstatusD2
 
 All time-invariant variables would be merged to one variable, whose value is consistent with the baseline's value. For the missing value in baseline, it would be filled with the value with the maximum count in the following up waves. 
 ```{r}
-AlldataWide <- select(alldata, c("uasid", "wave", varlist)) %>% group_by(uasid) %>% gather(., key = variable, value = value, varlist) %>% unite(., newvariable, variable, wave, sep = "_") %>% spread(., newvariable, value)
+AlldataWide <- select(alldata, c("uasid", "wave", all_of(varlist))) %>% group_by(uasid) %>% gather(., key = variable, value = value, all_of(varlist)) %>% unite(., newvariable, variable, wave, sep = "_") %>% spread(., newvariable, value)
 
 # write_sav(AlldataWide, "/Users/zhan039/Desktop/USC_HEAL/UAS/07232020/covid_wide_all.sav")
 
@@ -47,13 +47,55 @@ age.all <- age.all[age.all$rank == 1, ]  # values of age for imputing
 age.all <- age.all %>% rename("age_max_count" = age)
 summary(age.all$age_max_count)
 
-AlldataWide <- left_join(AlldataWide, age.all[, 1:2], by = "uasid")
+test <- left_join(AlldataWide, age.all[, 1:2], by = "uasid")
 select(AlldataWide, uasid, starts_with("age_"))
 
-AlldataWide <- mutate(AlldataWide, age = ifelse(is.na(age_1), age_max_count, age_1)) # keep the baseline value of age 
-colSums(is.na(AlldataWide[, startsWith(colnames(AlldataWide), "age")]))
+test <- mutate(test, age = ifelse(is.na(age_1), age_max_count, age_1)) # keep the baseline value of age 
+colSums(is.na(test[, startsWith(colnames(test), "age")]))
+summary(test$age)
 
+select(test, age, starts_with("age_"))
+```
 
+```{r}
 
+newdata <- AlldataWide
+
+impute <- function(varname){
+  
+  var.all <- alldata %>% group_by(uasid, get(varname)) %>% summarise(n = n()) %>% arrange(., uasid, n) %>% mutate(., rank = row_number(desc(n)))  # get the count of age for each participant 
+  
+  var.all <- var.all[var.all$rank == 1, ]  # values of age for imputing
+  
+  newname <- paste(varname, "max_count", sep = "_")
+  colnames(var.all)[colnames(var.all) == "get(varname)"] <- newname
+  
+  newdata <- left_join(newdata, var.all[, 1:2], by = "uasid")
+
+  basevar <- paste(varname, "_1", sep = "")
+  
+  newdata <- mutate(newdata, x = ifelse(is.na(get(basevar)), get(newname), get(basevar)))  # keep the baseline value of age 
+  colnames(newdata)[colnames(newdata) == "x"] <- varname
+
+  return(newdata)
+}
+
+for (i in 1:length(time_invariant)) {
+  varname <- time_invariant[i]
+  newdata <- impute(varname)
+}
+
+select(newdata, age, starts_with("age_"))
+select(newdata, statereside, starts_with("statereside_"))
+select(newdata, gender, starts_with("gender_"))
+
+delete <- paste(time_invariant, "_", sep = "")
+newdata <- select(newdata, -starts_with(delete))
+
+```
+
+```{r}
+write.csv(newdata, "/Users/zhan039/Desktop/USC_HEAL/UAS/07232020/covid_panal_imputed.csv", na = "")
+write_sav(newdata, "/Users/zhan039/Desktop/USC_HEAL/UAS/07232020/covid_panal_imputed.sav")
 ```
 

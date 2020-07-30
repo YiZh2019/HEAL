@@ -1,0 +1,93 @@
+---
+title: "Clean Pilot1"
+author: "Yi"
+date: "7/21/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+Prolific <- read.csv('/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/Prolific.csv', na.strings = "")
+MTself <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/MTself.csv", na.strings = "")
+TPMT <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/TPMT.csv", na.strings = "")
+MTconc <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/MTconc.csv", na.strings = "")
+PP <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/PP.csv", na.strings = "")
+
+bot <- readRDS("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04232020/MaxDiff_Pilot1_BotFit.rds")
+```
+
+```{r explore id}
+Prolific_MTself <- intersect(colnames(Prolific), colnames(MTself))
+colnames(Prolific)[!colnames(Prolific) %in% Prolific_MTself]
+colnames(MTself)[!colnames(MTself) %in% Prolific_MTself]
+colnames(TPMT)[!colnames(TPMT) %in% Prolific_MTself]
+colnames(MTconc)[!colnames(MTconc) %in% Prolific_MTself]
+colnames(PP)[!colnames(PP) %in% Prolific_MTself]
+Prolific_MTself[!Prolific_MTself %in% colnames(PP)]
+
+length(unique(Prolific$prolificid))
+length(unique(MTself$mturkid))
+length(unique(TPMT$tpmturkid))
+length(unique(MTconc$mturkidcon))
+length(unique(PP$aid))
+
+table(bot$project_type)
+Prolific$prolificid
+```
+
+```{r explore datasets redcap Maxdiff Log}
+library(xlsx2dfs)
+Log.Prolific <- read.xlsx("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/EVOC Pilot 1 - Approved Participant List.xlsx", sheet = 1)
+Log.MTconc <- read.xlsx("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/EVOC Pilot 1 - Approved Participant List.xlsx", sheet = 5)
+Log.PP <- read.xlsx("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/EVOC Pilot 1 - Approved Participant List.xlsx", sheet = 4)
+Log.MTself <- read.xlsx("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/EVOC Pilot 1 - Approved Participant List.xlsx", sheet = 2)
+Log.TPMT <- read.xlsx("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/EVOC Pilot 1 - Approved Participant List.xlsx", sheet = 3)
+
+
+
+nrow(Prolific[Prolific$prolificid %in% Log.Prolific$prolificid, ])
+Prolific[!Prolific$prolificid %in% Log.Prolific$prolificid, c("redcapid", "prolificid")]
+nrow(MTconc[MTconc$mturkidcon %in% Log.MTconc$mturkidcon, ])
+
+length(intersect(Log.MTconc, MTconc$redcapid))
+length(intersect(Log.MTconc$REDCap.ID, bot[bot$project_type == "MTCo", ]$redcapid))
+
+Prolific %>% group_by(prolificid) %>% summarise(n = n()) %>% filter(., n > 1)
+dup.ppt <- MTconc[MTconc$mturkidcon %in% Log.MTconc$mturkidcon, ] %>% group_by(mturkidcon) %>% summarise(n = n()) %>% filter(., n > 1) %>% select(., mturkidcon)
+
+MTconc$num.na <- rowSums(is.na(MTconc))
+MTconc[MTconc$mturkidcon == "A1BWO4ZG5OB68S", c("redcapid", "mturkidcon", "num.na")]
+MTconc[MTconc$mturkidcon == "A1K0S514CEY1UG", c("redcapid", "mturkidcon", "num.na")]
+MTconc[MTconc$mturkidcon == "A1K5ILJMG439M5", c("redcapid", "mturkidcon", "num.na")]
+
+```
+
+```{r}
+Prolific_clean <- Prolific[Prolific$redcapid %in% Log.Prolific$REDCap.ID, ]
+MTconc_clean <- MTconc[MTconc$redcapid %in% Log.MTconc$REDCap.ID, ]
+PP_clean <- PP[PP$redcapid %in% Log.PP$REDCap.ID, ]
+MTself_clean <- MTself[MTself$redcapid %in% Log.MTself$REDCap.ID, ]
+TPMT_clean <- TPMT[TPMT$redcapid %in% Log.TPMT$REDCap.ID, ]
+
+colnames(Prolific_clean)[colnames(Prolific_clean) == "prolificid"] <- "Participant.id"
+colnames(MTconc_clean)[colnames(MTconc_clean) == "mturkidcon"] <- "Participant.id"
+colnames(PP_clean)[colnames(PP_clean) == "aid" ] <- "Participant.id"
+colnames(MTself_clean)[colnames(MTself_clean) == "mturkid" ] <- "Participant.id"
+colnames(TPMT_clean)[colnames(TPMT_clean) == "tpmturkid"] <- "Participant.id"
+
+PP_clean$worker_id_timestamp <- NA
+PP_clean$worker_id_complete <- NA
+data <- rbind(Prolific_clean, MTconc_clean, PP_clean, MTself_clean, TPMT_clean)
+```
+
+```{r}
+
+```
+
