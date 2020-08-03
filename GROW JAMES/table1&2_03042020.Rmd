@@ -77,6 +77,7 @@ Mean.sd.n(analysis.data$FTND_SUM)
 # WSWS craving
 Mean.sd.n(analysis.data$D_WSWS_Craving_Mean)
 Mean.sd.n(analysis.data$ND_WSWS_Craving_Mean)
+Mean.sd.n(analysis.data$DIFF_WSWS_Craving_Mean)
 cronbach(analysis.data[, c("d_wsws_7", "d_wsws_9", "d_wsws_17", "d_wsws_21")])
 cronbach(analysis.data[, c("nd_wsws_7", "nd_wsws_9", "nd_wsws_17", "nd_wsws_21")])
 t.test(analysis.data$D_WSWS_Craving_Mean, analysis.data$ND_WSWS_Craving_Mean, paired = T)
@@ -87,6 +88,7 @@ cohen.d(analysis.data$D_WSWS_Craving_Mean, analysis.data$ND_WSWS_Craving_Mean, p
 # QSU Total
 Mean.sd.n(analysis.data$D_QSU_Mean)
 Mean.sd.n(analysis.data$ND_QSU_Mean)
+Mean.sd.n(analysis.data$DIFF_QSU_Mean)
 cronbach(analysis.data[, c("d_qsu_1", "d_qsu_2", "d_qsu_3", "d_qsu_4", "d_qsu_5", "d_qsu_6", "d_qsu_7", "d_qsu_8", "d_qsu_9", "d_qsu_10")])
 cronbach(analysis.data[, c("nd_qsu_1", "nd_qsu_2", "nd_qsu_3", "nd_qsu_4", "nd_qsu_5", "nd_qsu_6", "nd_qsu_7", "nd_qsu_8", "nd_qsu_9", "nd_qsu_10")])
 cohen.d(analysis.data$D_QSU_Mean, analysis.data$ND_QSU_Mean, paired = T, na.rm = T, within = F)
@@ -97,6 +99,7 @@ t.test(analysis.data$D_QSU_Mean, analysis.data$ND_QSU_Mean, paired = T)
 # QSU Factor 1
 Mean.sd.n(analysis.data$D_QSU_Factor1_Mean)
 Mean.sd.n(analysis.data$ND_QSU_Factor1_Mean)
+Mean.sd.n(analysis.data$DIFF_QSU_Factor1_Mean)
 cronbach(analysis.data[, c("d_qsu_1", "d_qsu_3", "d_qsu_6", "d_qsu_7", "d_qsu_10")])
 cronbach(analysis.data[, c("nd_qsu_1", "nd_qsu_3", "nd_qsu_6", "nd_qsu_7", "nd_qsu_10")])
 cohen.d(analysis.data$D_QSU_Factor1_Mean, analysis.data$ND_QSU_Factor1_Mean, paired = T, na.rm = T, within = F)
@@ -107,6 +110,7 @@ t.test(analysis.data$D_QSU_Factor1_Mean, analysis.data$ND_QSU_Factor1_Mean, pair
 #QSU Fctor 2
 Mean.sd.n(analysis.data$D_QSU_Factor2_Mean)
 Mean.sd.n(analysis.data$ND_QSU_Factor2_Mean)
+Mean.sd.n(analysis.data$DIFF_QSU_Factor2_Mean)
 cronbach(analysis.data[, c("d_qsu_2", "d_qsu_4", "d_qsu_5", "d_qsu_8", "d_qsu_9")])
 cronbach(analysis.data[, c("nd_qsu_2", "nd_qsu_4", "nd_qsu_5", "nd_qsu_8", "nd_qsu_9")])
 cohen.d(analysis.data$D_QSU_Factor2_Mean, analysis.data$ND_QSU_Factor2_Mean, paired = T, na.rm = T, within = F)
@@ -117,6 +121,7 @@ t.test(analysis.data$D_QSU_Factor2_Mean, analysis.data$ND_QSU_Factor2_Mean, pair
 # POMS - Negative Affect
 Mean.sd.n(analysis.data$D_POMS_NM_Mean)
 Mean.sd.n(analysis.data$ND_POMS_NM_Mean)
+Mean.sd.n(analysis.data$DIFF_POMS_NM_Mean)
 analysis.data <- mutate(analysis.data, nd_poms_38_reverse = 4 - nd_poms_38, nd_poms_66_reverse = 4 - nd_poms_66, d_poms_38_reverse = 4 - d_poms_38, d_poms_66_reverse = 4 - d_poms_66)
 cronbach(analysis.data[, c("d_poms_4", "d_poms_14", "d_poms_19", "d_poms_24", "d_poms_30", "d_poms_33", "d_poms_39", "d_poms_42", "d_poms_47", "d_poms_53", "d_poms_57", "d_poms_71", "d_poms_2", "d_poms_11", "d_poms_18", "d_poms_66_reverse", "d_poms_69", "d_poms_43", "d_poms_48", "d_poms_60", "d_poms_27", "d_poms_7", "d_poms_9", "d_poms_21", "d_poms_67", "d_poms_38_reverse", "d_poms_52", "d_poms_58", "d_poms_6", "d_poms_10", "d_poms_16", "d_poms_22", "d_poms_25", "d_poms_29", "d_poms_35", "d_poms_36", "d_poms_37", "d_poms_45", "d_poms_46", "d_poms_49", "d_poms_59", "d_poms_62", "d_poms_64", "d_poms_5", "d_poms_12", "d_poms_20", "d_poms_32", "d_poms_68", "d_poms_50", "d_poms_65")])
 cronbach(analysis.data[, c("nd_poms_4", "nd_poms_14", "nd_poms_19", "nd_poms_24", "nd_poms_30", "nd_poms_33", "nd_poms_39", "nd_poms_42", "nd_poms_47", "nd_poms_53", "nd_poms_57", "nd_poms_71", "nd_poms_2", "nd_poms_11", "nd_poms_18", "nd_poms_66_reverse", "nd_poms_69", "nd_poms_43", "nd_poms_48", "nd_poms_60", "nd_poms_27", "nd_poms_7", "nd_poms_9", "nd_poms_21", "nd_poms_67", "nd_poms_38_reverse", "nd_poms_52", "nd_poms_58", "nd_poms_6", "nd_poms_10", "nd_poms_16", "nd_poms_22", "nd_poms_25", "nd_poms_29", "nd_poms_35", "nd_poms_36", "nd_poms_37", "nd_poms_45", "nd_poms_46", "nd_poms_49", "nd_poms_59", "nd_poms_62", "nd_poms_64", "nd_poms_5", "nd_poms_12", "nd_poms_20", "nd_poms_32", "nd_poms_68", "nd_poms_50", "nd_poms_65")])
@@ -128,6 +133,7 @@ t.test(analysis.data$D_POMS_NM_Mean, analysis.data$ND_POMS_NM_Mean, paired = T)
 # WSWS Anger
 Mean.sd.n(analysis.data$D_WSWS_Anger_Mean)
 Mean.sd.n(analysis.data$ND_WSWS_Anger_Mean)
+Mean.sd.n(analysis.data$DIFF_WSWS_Anger_Mean)
 cronbach(analysis.data[, c("d_wsws_11", "d_wsws_13", "d_wsws_15")])
 cronbach(analysis.data[, c("nd_wsws_11", "nd_wsws_13", "nd_wsws_15")])
 cohen.d(analysis.data$D_WSWS_Anger_Mean, analysis.data$ND_WSWS_Anger_Mean, paired = T, na.rm = T, within = F)
@@ -139,6 +145,7 @@ t.test(analysis.data$D_WSWS_Anger_Mean, analysis.data$ND_WSWS_Anger_Mean, paired
 # POMS Anger
 Mean.sd.n(analysis.data$D_POMS_Anger_Mean)
 Mean.sd.n(analysis.data$ND_POMS_Anger_Mean)
+Mean.sd.n(analysis.data$DIFF_POMS_Anger_Mean)
 cronbach(analysis.data[, c("d_poms_4", "d_poms_14", "d_poms_19", "d_poms_24", "d_poms_30", "d_poms_33", "d_poms_39", "d_poms_42", "d_poms_47", "d_poms_53", "d_poms_57", "d_poms_71")])
 cronbach(analysis.data[, c("nd_poms_4", "nd_poms_14", "nd_poms_19", "nd_poms_24", "nd_poms_30", "nd_poms_33", "nd_poms_39", "nd_poms_42", "nd_poms_47", "nd_poms_53", "nd_poms_57", "nd_poms_71")])
 cohen.d(analysis.data$D_POMS_Anger_Mean, analysis.data$ND_POMS_Anger_Mean, paired = T, na.rm = T, within = F)
@@ -149,6 +156,7 @@ t.test(analysis.data$D_POMS_Anger_Mean, analysis.data$ND_POMS_Anger_Mean, paired
 # WSWS Anxiety
 Mean.sd.n(analysis.data$D_WSWS_Anxiety_Mean)
 Mean.sd.n(analysis.data$ND_WSWS_Anxiety_Mean)
+Mean.sd.n(analysis.data$DIFF_WSWS_Anxiety_Mean)
 analysis.data <- mutate(analysis.data, d_wsws_8_reverse = 4 - d_wsws_8, nd_wsws_8_reverse = 4 - nd_wsws_8)
 cronbach(analysis.data[, c("d_wsws_2", "d_wsws_4", "d_wsws_6", "d_wsws_8_reverse")])
 cronbach(analysis.data[, c("nd_wsws_2", "nd_wsws_4", "nd_wsws_6", "nd_wsws_8_reverse")])
@@ -160,6 +168,7 @@ t.test(analysis.data$D_WSWS_Anxiety_Mean, analysis.data$ND_WSWS_Anxiety_Mean, pa
 # POMS Anxiety
 Mean.sd.n(analysis.data$D_POMS_Anxiety_Mean)
 Mean.sd.n(analysis.data$ND_POMS_Anxiety_Mean)
+Mean.sd.n(analysis.data$DIFF_POMS_Anxiety_Mean)
 analysis.data <- mutate(analysis.data, d_poms_66_reverse = 4 - d_poms_66, nd_poms_66_reverse = 4 - nd_poms_66)
 cronbach(analysis.data[, c("d_poms_2", "d_poms_11", "d_poms_18", "d_poms_66_reverse", "d_poms_69", "d_poms_43", "d_poms_48", "d_poms_60", "d_poms_27")])
 cronbach(analysis.data[, c("nd_poms_2", "nd_poms_11", "nd_poms_18", "nd_poms_66_reverse", "nd_poms_69", "nd_poms_43", "nd_poms_48", "nd_poms_60", "nd_poms_27")])
@@ -171,6 +180,7 @@ t.test(analysis.data$D_POMS_Anxiety_Mean, analysis.data$ND_POMS_Anxiety_Mean, pa
 # WSWS Sadness
 Mean.sd.n(analysis.data$D_WSWS_Sadness_Mean)
 Mean.sd.n(analysis.data$ND_WSWS_Sadness_Mean)
+Mean.sd.n(analysis.data$DIFF_WSWS_Sadness_Mean)
 analysis.data <- mutate(analysis.data, d_wsws_5_reverse = 4 - d_wsws_5, nd_wsws_5_reverse = 4 - nd_wsws_5, d_wsws_20_reverse = 4 - d_wsws_20, nd_wsws_20_reverse = 4 - nd_wsws_20)
 cronbach(analysis.data[, c("d_wsws_5_reverse", "d_wsws_10", "d_wsws_16", "d_wsws_20_reverse")])
 cronbach(analysis.data[, c("nd_wsws_5_reverse", "nd_wsws_10", "nd_wsws_16", "nd_wsws_20_reverse")])
@@ -182,6 +192,7 @@ t.test(analysis.data$D_WSWS_Sadness_Mean, analysis.data$ND_WSWS_Sadness_Mean, pa
 # POMS Depression
 Mean.sd.n(analysis.data$D_POMS_Depression_Mean)
 Mean.sd.n(analysis.data$ND_POMS_Depression_Mean)
+Mean.sd.n(analysis.data$DIFF_POMS_Depression_Mean)
 cronbach(analysis.data[, c("d_poms_6", "d_poms_10", "d_poms_16", "d_poms_22", "d_poms_25", "d_poms_29", "d_poms_35", "d_poms_36", "d_poms_37", "d_poms_45", "d_poms_46", "d_poms_49", "d_poms_59", "d_poms_62", "d_poms_64")])
 cronbach(analysis.data[, c("nd_poms_6", "nd_poms_10", "nd_poms_16", "nd_poms_22", "nd_poms_25", "nd_poms_29", "nd_poms_35", "nd_poms_36", "nd_poms_37", "nd_poms_45", "nd_poms_46", "nd_poms_49", "nd_poms_59", "nd_poms_62", "nd_poms_64")])
 cohen.d(analysis.data$D_POMS_Depression_Mean, analysis.data$ND_POMS_Depression_Mean, paired = T, na.rm = T, within = F)
@@ -193,6 +204,7 @@ t.test(analysis.data$D_POMS_Depression_Mean, analysis.data$ND_POMS_Depression_Me
 # POMS Positive Affect
 Mean.sd.n(analysis.data$D_POMS_PM_Mean)
 Mean.sd.n(analysis.data$ND_POMS_PM_Mean)
+Mean.sd.n(analysis.data$DIFF_POMS_PM_Mean)
 cronbach(analysis.data[, c("d_poms_3", "d_poms_13", "d_poms_26", "d_poms_40", "d_poms_51", "d_poms_72", "d_poms_8", "d_poms_17", "d_poms_23", "d_poms_31", "d_poms_41", "d_poms_54", "d_poms_56", "d_poms_61", "d_poms_1", "d_poms_15", "d_poms_28", "d_poms_34", "d_poms_44", "d_poms_55", "d_poms_63", "d_poms_70")])
 cronbach(analysis.data[, c("nd_poms_3", "nd_poms_13", "nd_poms_26", "nd_poms_40", "nd_poms_51", "nd_poms_72", "nd_poms_8", "nd_poms_17", "nd_poms_23", "nd_poms_31", "nd_poms_41", "nd_poms_54", "nd_poms_56", "nd_poms_61", "nd_poms_1", "nd_poms_15", "nd_poms_28", "nd_poms_34", "nd_poms_44", "nd_poms_55", "nd_poms_63", "nd_poms_70")])
 cohen.d(analysis.data$D_POMS_PM_Mean, analysis.data$ND_POMS_PM_Mean, paired = T, na.rm = T, within = F)
@@ -203,6 +215,7 @@ t.test(analysis.data$D_POMS_PM_Mean, analysis.data$ND_POMS_PM_Mean, paired = T)
 # POMS Elation
 Mean.sd.n(analysis.data$D_POMS_Elation_Mean)
 Mean.sd.n(analysis.data$ND_POMS_Elation_Mean)
+Mean.sd.n(analysis.data$DIFF_POMS_Elation_Mean)
 cronbach(analysis.data[, c("d_poms_3", "d_poms_13", "d_poms_26", "d_poms_40", "d_poms_51", "d_poms_72")])
 cronbach(analysis.data[, c("nd_poms_3", "nd_poms_13", "nd_poms_26", "nd_poms_40", "nd_poms_51", "nd_poms_72")])
 cohen.d(analysis.data$D_POMS_Elation_Mean, analysis.data$ND_POMS_Elation_Mean, paired = T, na.rm = T, within = F)
@@ -213,6 +226,7 @@ t.test(analysis.data$D_POMS_Elation_Mean, analysis.data$ND_POMS_Elation_Mean, pa
 # POMS Friendliness
 Mean.sd.n(analysis.data$D_POMS_Friendliness_Mean)
 Mean.sd.n(analysis.data$ND_POMS_Friendliness_Mean)
+Mean.sd.n(analysis.data$DIFF_POMS_Friendliness_Mean)
 cronbach(analysis.data[, c("d_poms_1", "d_poms_15", "d_poms_28", "d_poms_34", "d_poms_44", "d_poms_55", "d_poms_63", "d_poms_70")])
 cronbach(analysis.data[, c("nd_poms_1", "nd_poms_15", "nd_poms_28", "nd_poms_34", "nd_poms_44", "nd_poms_55", "nd_poms_63", "nd_poms_70")])
 cohen.d(analysis.data$D_POMS_Friendliness_Mean, analysis.data$ND_POMS_Friendliness_Mean, paired = T, na.rm = T, within = F)
@@ -223,6 +237,7 @@ t.test(analysis.data$D_POMS_Friendliness_Mean, analysis.data$ND_POMS_Friendlines
 # POMS Vigor
 Mean.sd.n(analysis.data$D_POMS_Vigor_Mean)
 Mean.sd.n(analysis.data$ND_POMS_Vigor_Mean)
+Mean.sd.n(analysis.data$DIFF_POMS_Vigor_Mean)
 cronbach(analysis.data[, c("d_poms_8", "d_poms_17", "d_poms_23", "d_poms_31", "d_poms_41", "d_poms_54", "d_poms_56", "d_poms_61")])
 cronbach(analysis.data[, c("nd_poms_8", "nd_poms_17", "nd_poms_23", "nd_poms_31", "nd_poms_41", "nd_poms_54", "nd_poms_56", "nd_poms_61")])
 cohen.d(analysis.data$D_POMS_Vigor_Mean, analysis.data$ND_POMS_Vigor_Mean, paired = T, na.rm = T, within = F)
@@ -233,17 +248,19 @@ t.test(analysis.data$D_POMS_Vigor_Mean, analysis.data$ND_POMS_Vigor_Mean, paired
 # SHAPS Anhedonia
 Mean.sd.n(analysis.data$D_SHAPS_RC_Mean)
 Mean.sd.n(analysis.data$ND_SHAPS_RC_Mean)
+Mean.sd.n(analysis.data$DIFF_SHAPS_RC_Mean)
 analysis.data <- mutate(analysis.data, nd_shaps_1_reverse = 5 - nd_shaps_1, nd_shaps_2_reverse = 5 - nd_shaps_2, nd_shaps_3_reverse = 5 - nd_shaps_3, nd_shaps_4_reverse = 5 - nd_shaps_4, nd_shaps_5_reverse = 5 - nd_shaps_5, nd_shaps_6_reverse = 5 - nd_shaps_6, nd_shaps_7_reverse = 5 - nd_shaps_7, nd_shaps_8_reverse = 5 - nd_shaps_8, nd_shaps_9_reverse = 5 - nd_shaps_9, nd_shaps_10_reverse = 5 - nd_shaps_10, nd_shaps_11_reverse = 5 - nd_shaps_11, nd_shaps_12_reverse = 5 - nd_shaps_12, nd_shaps_13_reverse = 5 - nd_shaps_13, nd_shaps_14_reverse = 5 - nd_shaps_14, d_shaps_1_reverse = 5 - d_shaps_1, d_shaps_2_reverse = 5 - d_shaps_2, d_shaps_3_reverse = 5 - d_shaps_3, d_shaps_4_reverse = 5 - d_shaps_4, d_shaps_5_reverse = 5 - d_shaps_5, d_shaps_6_reverse = 5 - d_shaps_6, d_shaps_7_reverse = 5 - d_shaps_7, d_shaps_8_reverse = 5 - d_shaps_8, d_shaps_9_reverse = 5 - d_shaps_9, d_shaps_10_reverse = 5 - d_shaps_10, d_shaps_11_reverse = 5 - d_shaps_11, d_shaps_12_reverse = 5 - d_shaps_12, d_shaps_13_reverse = 5 - d_shaps_13, d_shaps_14_reverse = 5 - d_shaps_14)
 cronbach(analysis.data[, c("d_shaps_1_reverse", "d_shaps_2_reverse", "d_shaps_3_reverse", "d_shaps_4_reverse", "d_shaps_5_reverse", "d_shaps_6_reverse", "d_shaps_7_reverse", "d_shaps_8_reverse", "d_shaps_9_reverse", "d_shaps_10_reverse", "d_shaps_11_reverse", "d_shaps_12_reverse", "d_shaps_13_reverse", "d_shaps_14_reverse")])
 cronbach(analysis.data[, c("nd_shaps_1_reverse", "nd_shaps_2_reverse", "nd_shaps_3_reverse", "nd_shaps_4_reverse", "nd_shaps_5_reverse", "nd_shaps_6_reverse", "nd_shaps_7_reverse", "nd_shaps_8_reverse", "nd_shaps_9_reverse", "nd_shaps_10_reverse", "nd_shaps_11_reverse", "nd_shaps_12_reverse", "nd_shaps_13_reverse", "nd_shaps_14_reverse")])
 cohen.d(analysis.data$D_SHAPS_RC_Mean, analysis.data$ND_SHAPS_RC_Mean, paired = T, na.rm = T, within = F)
-t.test(analysis.data$D_SHAPS_Mean, analysis.data$ND_SHAPS_Mean, paired = T)
--7.332597/sqrt(521)
--0.167407/0.521115
+t.test(analysis.data$D_SHAPS_RC_Mean, analysis.data$ND_SHAPS_RC_Mean, paired = T)
+7.332597/sqrt(521)
+0.167407/0.521115
 
 # POMS Confusion
 Mean.sd.n(analysis.data$D_POMS_Confusion_Mean)
 Mean.sd.n(analysis.data$ND_POMS_Confusion_Mean)
+Mean.sd.n(analysis.data$DIFF_POMS_Confusion_Mean)
 analysis.data <- mutate(analysis.data, d_poms_38_reverse = 4 - d_poms_38, nd_poms_38_reverse = 4 - nd_poms_38)
 cronbach(analysis.data[, c("d_poms_7", "d_poms_9", "d_poms_21", "d_poms_67", "d_poms_38_reverse", "d_poms_52", "d_poms_58")])
 cronbach(analysis.data[, c("nd_poms_7", "nd_poms_9", "nd_poms_21", "nd_poms_67", "nd_poms_38_reverse", "nd_poms_52", "nd_poms_58")])
@@ -255,6 +272,7 @@ t.test(analysis.data$D_POMS_Confusion_Mean, analysis.data$ND_POMS_Confusion_Mean
 # WSWS Concentration
 Mean.sd.n(analysis.data$D_WSWS_Concentration_Mean)
 Mean.sd.n(analysis.data$ND_WSWS_Concentration_Mean)
+Mean.sd.n(analysis.data$DIFF_WSWS_Concentration_Mean)
 analysis.data <- mutate(analysis.data, d_wsws_3_reverse = 4 - d_wsws_3, nd_wsws_3_reverse = 4 - nd_wsws_3)
 cronbach(analysis.data[, c("d_wsws_3_reverse", "d_wsws_19", "d_wsws_22")])
 cronbach(analysis.data[, c("nd_wsws_3_reverse", "nd_wsws_19", "nd_wsws_22")])
@@ -266,6 +284,7 @@ t.test(analysis.data$D_WSWS_Concentration_Mean, analysis.data$ND_WSWS_Concentrat
 # CIS Impulsivity
 Mean.sd.n(analysis.data$D_CIS_Mean)
 Mean.sd.n(analysis.data$ND_CIS_Mean)
+Mean.sd.n(analysis.data$DIFF_CIS_Mean)
 analysis.data <- mutate(analysis.data, d_cis_4_reverse = 4 - d_cis_4, d_cis_5_reverse = 4 - d_cis_5, d_cis_6_reverse = 4 - d_cis_6, d_cis_8_reverse = 4 - d_cis_8, d_cis_10_reverse = 4 - d_cis_10, d_cis_12_reverse = 4 - d_cis_12, d_cis_15_reverse = 4 - d_cis_15, d_cis_18_reverse = 4 - d_cis_18, d_cis_19_reverse = 4 - d_cis_19, nd_cis_4_reverse = 4 - nd_cis_4, nd_cis_5_reverse = 4 - nd_cis_5, nd_cis_6_reverse = 4 - nd_cis_6, nd_cis_8_reverse = 4 - nd_cis_8, nd_cis_10_reverse = 4 - nd_cis_10, nd_cis_12_reverse = 4 - nd_cis_12, nd_cis_15_reverse = 4 - nd_cis_15, nd_cis_18_reverse = 4 - nd_cis_18, nd_cis_19_reverse = 4 - nd_cis_19)
 cronbach(analysis.data[, c("d_cis_1", "d_cis_2", "d_cis_3", "d_cis_4_reverse", "d_cis_5_reverse", "d_cis_6_reverse", "d_cis_7", "d_cis_8_reverse", "d_cis_9", 
   "d_cis_10_reverse", "d_cis_11", "d_cis_12_reverse", "d_cis_13", "d_cis_14", "d_cis_15_reverse", "d_cis_16", "d_cis_17", "d_cis_18_reverse", "d_cis_19_reverse")])
@@ -279,6 +298,7 @@ t.test(analysis.data$D_CIS_Mean, analysis.data$ND_CIS_Mean, paired = T)
 # WSWS Hunger
 Mean.sd.n(analysis.data$D_WSWS_Hunger_Mean)
 Mean.sd.n(analysis.data$ND_WSWS_Hunger_Mean)
+Mean.sd.n(analysis.data$DIFF_WSWS_Hunger_Mean)
 analysis.data <- mutate(analysis.data, d_wsws_1_reverse = 4 - d_wsws_1, nd_wsws_1_reverse = 4 - nd_wsws_1)
 cronbach(analysis.data[, c("d_wsws_1_reverse", "d_wsws_12", "d_wsws_14", "d_wsws_18", "d_wsws_23")])
 cronbach(analysis.data[, c("nd_wsws_1_reverse", "nd_wsws_12", "nd_wsws_14", "nd_wsws_18", "nd_wsws_23")])
@@ -292,6 +312,7 @@ analysis.data <- mutate(analysis.data, d_rat_delay_time_fixed = ifelse(is.na(red
 
 Mean.sd.n(analysis.data$d_rat_delay_time_fixed)
 Mean.sd.n(analysis.data$nd_rat_delay_time)
+Mean.sd.n(analysis.data$DIFF_RAT_time_delayed)
 cohen.d(analysis.data$d_rat_delay_time_fixed, analysis.data$nd_rat_delay_time, paired = T, na.rm = T, within = F)
 t.test(analysis.data$d_rat_delay_time_fixed, analysis.data$nd_rat_delay_time, paired = T)
 -17.264016/sqrt(522)
@@ -301,8 +322,11 @@ t.test(analysis.data$d_rat_delay_time_fixed, analysis.data$nd_rat_delay_time, pa
 analysis.data <- mutate(analysis.data, d_rat_num_cigs = d_rat_num_cigs_start - d_rat_num_cigs_end, nd_rat_num_cigs = nd_rat_num_cigs_start - nd_rat_num_cigs_end, D_RAT_num_cigs_T = D_RAT_cigs_in_box - D_RAT_cigs_in_box_end, d_rat_num_cigs_fixed = ifelse(is.na(redcap_id), D_RAT_num_cigs_T, d_rat_num_cigs))
 
 analysis.data <- mutate(analysis.data, d_rat_num_cigs_fixed = ifelse(d_rat_num_cigs_fixed >= 0, d_rat_num_cigs_fixed, NA), nd_rat_num_cigs_fixed = ifelse(nd_rat_num_cigs >= 0, nd_rat_num_cigs, NA))
+
+analysis.data <- mutate(analysis.data, diff_rat_num_cigs_fixed = d_rat_num_cigs_fixed - nd_rat_num_cigs_fixed)
 Mean.sd.n(analysis.data$d_rat_num_cigs_fixed)
 Mean.sd.n(analysis.data$nd_rat_num_cigs_fixed)
+Mean.sd.n(analysis.data$diff_rat_num_cigs_fixed)
 cohen.d(analysis.data$d_rat_num_cigs_fixed, analysis.data$nd_rat_num_cigs_fixed, paired = T, na.rm = T, within = F)
 t.test(analysis.data$d_rat_num_cigs_fixed, analysis.data$nd_rat_num_cigs, paired = T)
 5.403900/sqrt(504)
