@@ -16,7 +16,7 @@ library(xlsx2dfs)
 ```
 
 ```{r}
-alldata <- read_sav("/Users/zhan039/Desktop/USC_HEAL/UAS/07232020/covid_panal_07232020.sav")
+alldata <- read_sav("/Users/zhan039/Desktop/USC_HEAL/UAS/08032020/covid_panal_07232020_weighted.sav")
 
 varlist <- read.xlsx("/Users/zhan039/Desktop/USC_HEAL/UAS/07232020/variable list.xlsx", colNames = F)
 
@@ -95,7 +95,7 @@ newdata <- select(newdata, -starts_with(delete))
 ```
 
 ```{r}
-write.csv(newdata, "/Users/zhan039/Desktop/USC_HEAL/UAS/07232020/covid_panal_imputed.csv", na = "")
-write_sav(newdata, "/Users/zhan039/Desktop/USC_HEAL/UAS/07232020/covid_panal_imputed.sav")
+write.csv(newdata, "/Users/zhan039/Desktop/USC_HEAL/UAS/08032020/covid_panal_weighted_imputed.csv", na = "")
+write_sav(newdata, "/Users/zhan039/Desktop/USC_HEAL/UAS/08032020/covid_panal_weighted_imputed.sav")
 ```
 
