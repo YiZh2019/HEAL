@@ -1,0 +1,85 @@
+---
+title: "check_maxdiff"
+author: "Yi"
+date: "8/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+Max_diff_combined_valid <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/08032020/JB/Max_diff_combined_valid.csv", na.strings = c("", "NA"))
+
+Max_diff_combined <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/08032020/JB/Max_diff__combined.csv", na.strings = c("", "NA"))
+
+Vaping_Maxdiff_full <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/08032020/JB/VapingMaxDiffFullCombined.csv", na.strings = c("", "NA"))
+
+completers <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Participant_list/EVOC Pilot 1 Approved REDCap IDs.csv")
+```
+
+```{r}
+length(unique(Vaping_Maxdiff_full$redcapid))
+length(unique(Max_diff_combined_valid$redcapid))
+
+sum(is.na(Vaping_Maxdiff_full$redcapid))
+
+sum(Max_diff_combined_valid$redcapid %in% Vaping_Maxdiff_full$redcapid)
+
+sum(Vaping_Maxdiff_full$redcapid %in% Max_diff_combined_valid$redcapid)
+
+test <- Vaping_Maxdiff_full[Vaping_Maxdiff_full$redcapid %in% Max_diff_combined_valid$redcapid, ]
+
+length(unique(test$redcapid))
+
+test %>% group_by(redcapid) %>% summarise(n = n()) %>% filter(., n > 1)
+
+test[test$redcapid == 2077, ]
+test[test$redcapid == 3017, ]
+test[test$redcapid == 7164, ]
+
+```
+
+```{r}
+newdata <- Vaping_Maxdiff_full[Vaping_Maxdiff_full$redcapid %in% completers$redcapid, ]
+rownames(newdata) <- 1:nrow(newdata)
+newdata
+
+sum(completers$redcapid %in% Vaping_Maxdiff_full$redcapid) # 4 repeated records
+
+newdata$num.missing <- rowSums(is.na(newdata))
+
+newdata %>% group_by(redcapid) %>% summarise(n = n()) %>% filter(., n > 1) # redcapid: 2077, 3017, 7164
+
+newdata[newdata$redcapid == 2077, c("redcapid", "platform", "project", "num.missing")] # remove 369
+newdata[newdata$redcapid == 3017, c("redcapid", "platform", "project", "num.missing")] # remove 638
+newdata[newdata$redcapid == 7164, c("redcapid", "platform", "project", "num.missing")] # remove 198, 199
+
+a <- newdata[-c(369, 638, 198, 199), ]
+a %>% group_by(redcapid) %>% summarise(n = n()) %>% filter(., n > 1)
+
+newdata.nomissing <- a
+rownames(newdata.nomissing) <- 1:nrow(newdata.nomissing)
+table(a$num.missing)
+
+newdata.nomissing[newdata.nomissing$num.missing > 30, c("redcapid", "num.missing")]
+
+newdata.clean <- newdata.nomissing[newdata.nomissing$num.missing <= 30, ]
+rownames(newdata.clean) <- 1:nrow(newdata.clean)
+table(newdata.clean$num.missing, useNA = "ifany")
+
+```
+
+```{r}
+write.csv(newdata, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/08032020/Vaping_Maxdiff_merged.csv", na = "")
+
+write.csv(newdata.nomissing, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/08032020/Vaping_Maxdiff_merged_uniqueID.csv", na = "")
+
+write.csv(newdata.clean, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/08032020/Vaping_Maxdiff_clean.csv", na = "")
+```
+
