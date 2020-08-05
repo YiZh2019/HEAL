@@ -1,0 +1,47 @@
+---
+title: "test_trasfer_long_wide"
+author: "Yi"
+date: "8/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/PRISM/05182020/PRISMCompleters_w_Menthol_Status_24Apr2020.csv", na.strings = c("", "."))
+```
+
+```{r}
+select(data, sid, blinding_condn, contains("mnws")) %>% arrange(sid, blinding_condn)
+```
+
+
+```{r check variables}
+length(unique(data$sid))
+table(data$blinding_condn, useNA = "always")
+data %>% group_by(sid, menthol_status)  %>% summarise(n = n()) %>% arrange(n) 
+sum(is.na(data$sid))
+
+
+```
+
+```{r}
+session1 <- data[data$blinding_condn == 1, ]
+session2 <- data[data$blinding_condn == 2, ]
+session3 <- data[data$blinding_condn == 3, ]
+session4 <- data[data$blinding_condn == 4, ]
+
+
+axtvar <- colnames(data)[startsWith(colnames(data), "axt")]
+
+session1_long <- session1 %>% select(., c(sid, axtvar)) %>% gather(., key = variable, value = value, axtvar) %>% separate(variable, c("axt", "variable"), sep = "_", extra = "merge") %>% spread(., variable, value) %>% select(., sid, axt, contains("mnws")) %>% arrange(sid, axt)
+
+
+```
+
