@@ -336,6 +336,10 @@ Ttest <- function(var){
   return(t.test(var[filter.data$shq_8 == 1], var[filter.data$shq_8 == 2], var.equal = LeveneTest$result[1]))
 }
 
+OneSampleTtest <- function(var){
+  return(t.test(var, mu = 0, alternative = "two.sided"))
+}
+
 CohensD <- function(var) {
   d <- cohen.d(var[filter.data$shq_8 == 1], var[filter.data$shq_8 == 2], paired = F, na.rm = T, within = F, hedges.correction = F)
   return(d)
@@ -401,6 +405,9 @@ diff_vars <- colnames(filter.data)[grepl("diff_", colnames(filter.data), ignore.
 
 apply(filter.data[, diff_vars], 2, CohensD)
 apply(filter.data[, diff_vars], 2, Ttest)
+
+apply(menthol.data[, diff_vars], 2, OneSampleTtest)
+apply(unmenthol.data[, diff_vars], 2, OneSampleTtest)
 
 ```
 
