@@ -21,7 +21,7 @@ TPMT <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/TPMT.
 MTconc <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/MTconc.csv", na.strings = "")
 PP <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/PP.csv", na.strings = "")
 
-completers <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/EVOC Pilot 1 Approved REDCap IDs.csv")
+completers <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Participant_list/EVOC Pilot 1 Approved REDCap IDs.csv")
 ```
 
 ```{r explore id}
@@ -64,6 +64,10 @@ PP_clean <- PP[PP$redcapid %in% Log.PP$redcapid, ]
 MTself_clean <- MTself[MTself$redcapid %in% Log.MTself$redcapid, ]
 TPMT_clean <- TPMT[TPMT$redcapid %in% Log.TPMT$redcapid, ]
 
+# add two ppts who are dropped in the completer list
+PP_clean <- rbind(PP_clean, PP[PP$redcapid == 6162, ])
+TPMT_clean <- rbind(TPMT_clean, TPMT[TPMT$redcapid == 3048, ])
+
 colnames(Prolific_clean)[colnames(Prolific_clean) == "prolificid"] <- "Participant_id"
 colnames(MTconc_clean)[colnames(MTconc_clean) == "mturkidcon"] <- "Participant_id"
 colnames(PP_clean)[colnames(PP_clean) == "aid" ] <- "Participant_id"
@@ -81,14 +85,21 @@ TPMT_clean$project_type <- "tpmturk"
 
 data <- rbind(Prolific_clean, MTconc_clean, PP_clean, MTself_clean, TPMT_clean)
 
+# rename the variables to accomodate SAS dataset
 data <- rename(data, "ecig_use_patterns_complete" = ecigarette_use_patterns_complete, "ecig_use_patterns_timestamp" = ecigarette_use_patterns_timestamp)
 sort(sapply(colnames(data), nchar))
 ```
 
 ```{r number of attention check}
+table(data$attention_check, useNA = "always")
+
+data <- mutate(data, att_success = ifelse(is.na(attention_check), 0, ifelse(attention_check <= 25, 1, 0)))
+table(data$att_success, useNA = "always")
+
 data <- mutate(data, att1_success = ifelse(data$att_check1___1 %in% 1 & data$att_check1___4 %in% 1 & data$att_check1___5 %in% 1, 1, 0))
 select(data, starts_with("att_check1"), att1_success)
 select(data, starts_with("att_check1"), att1_success) %>% summary
+table(data$att1_success, useNA = "always")
 
 table(data$att_check2, data$last_30_ecig_yn, useNA = "ifany")
 data <- mutate(data, att2_success = ifelse(data$last_30_ecig_yn %in% 1 & data$att_check2 %in% 3, 1, ifelse(data$last_30_ecig_yn %in% 1, 0, NA))) # people who are not asked the second question are marked as NA
@@ -102,29 +113,37 @@ data$att2_replaceNA <- data$att2_success
 data$att2_replaceNA[is.na(data$att2_replaceNA)] <- 1 # people who are not asked are marked as success
 table(data$att2_replaceNA, useNA = "ifany")
 
-data$sum_att_success <- apply(data[, c("att1_success", "att2_replaceNA", "att3_success")], 1, sum)
+data$sum_att_success_4item <- apply(data[, c("att_success", "att1_success", "att2_replaceNA", "att3_success")], 1, sum)
+data$sum_att_success_3item <- apply(data[, c("att_success", "att1_success", "att3_success")], 1, sum)
 
-data$sum_att_failure <- 3 - data$sum_att_success
+data$sum_att_failure_4item <- 4 - data$sum_att_success_4item
+data$sum_att_failure_3item <- 3 - data$sum_att_success_3item
 
 # data$att1.success <- factor(data$att1.success, levels = c(0, 1), labels = c("fail", "success"))
 # data$att2.success <- factor(data$att2.success, levels = c(0, 1), labels = c("fail", "success"))
 # data$att3.success <- factor(data$att3.success, levels = c(0,1), labels = c("fail", "success"))
 
-select(data, att1_success, att2_success, att3_success, sum_att_failure)
+select(data, att_success, att1_success, att2_success, att3_success, sum_att_failure_3item, sum_att_failure_4item)
 
-newdata <- select(data, -att2_replaceNA, -sum_att_success)
+newdata <- select(data, -att2_replaceNA, -sum_att_success_4item, -sum_att_success_3item)
 
 length(unique(newdata$Participant_id))
 ```
 
+```{r check the new dataset}
+table(newdata$sum_att_failure_3item, useNA = "always")
+table(newdata$sum_att_failure_4item, useNA = "always")
+
+newdata[newdata$sum_att_failure_3item == 3, ]
+newdata <- newdata[newdata$sum_att_failure_3item != 3, ]
+```
+
+
 ```{r save datasets}
-write.csv(newdata, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07282020/EVOC_pilot1.csv", na = "")
+write.csv(newdata, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07282020/EVOC_pilot1_08072020.csv", na = "")
 
-write_sav(newdata, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07282020/EVOC_pilot1.sav")
+write_sav(newdata, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07282020/EVOC_pilot1_08072020.sav")
 
-library(foreign)
-write.foreign(newdata, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07282020/EVOC_pilot1.txt", "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07282020/EVOC_pilot1.sas", package = "SAS")
-
-write_dta(newdata, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07282020/EVOC_pilot1.dta")
+write_dta(newdata, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07282020/EVOC_pilot1_08072020.dta")
 ```
 
