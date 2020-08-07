@@ -1,0 +1,95 @@
+---
+title: "check_completers"
+author: "Yi"
+date: "8/6/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+Prolific <- read.csv('/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/Prolific.csv', na.strings = "")
+MTself <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/MTself.csv", na.strings = "")
+TPMT <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/TPMT.csv", na.strings = "")
+MTconc <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/MTconc.csv", na.strings = "")
+PP <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/PP.csv", na.strings = "")
+```
+
+```{r}
+colnames(Prolific)[colnames(Prolific) == "prolificid"] <- "Participant_id"
+colnames(MTconc)[colnames(MTconc) == "mturkidcon"] <- "Participant_id"
+colnames(PP)[colnames(PP) == "aid" ] <- "Participant_id"
+colnames(MTself)[colnames(MTself) == "mturkid" ] <- "Participant_id"
+colnames(TPMT)[colnames(TPMT) == "tpmturkid"] <- "Participant_id"
+
+PP$worker_id_timestamp <- NA
+PP$worker_id_complete <- NA
+
+Prolific$project_type <- "prolific"
+MTconc$project_type <- "mturkcon"
+PP$project_type <- "pp"
+MTself$project_type <- "mturkself"
+TPMT$project_type <- "tpmturk"
+
+data <- rbind(Prolific, MTconc, PP, MTself, TPMT)
+data[data$redcapid %in% c(3048, 6162), c("redcapid", "Participant_id", "project_type")]
+```
+
+
+```{r number of attention check}
+table(data$attention_check, useNA = "always")
+
+data <- mutate(data, att_success = ifelse(is.na(attention_check), 0, ifelse(attention_check <= 25, 1, 0)))
+table(data$att_success, useNA = "always")
+
+data <- mutate(data, att1_success = ifelse(data$att_check1___1 %in% 1 & data$att_check1___4 %in% 1 & data$att_check1___5 %in% 1, 1, 0))
+select(data, starts_with("att_check1"), att1_success)
+select(data, starts_with("att_check1"), att1_success) %>% summary
+table(data$att1_success, useNA = "always")
+
+table(data$att_check2, data$last_30_ecig_yn, useNA = "ifany")
+data <- mutate(data, att2_success = ifelse(data$last_30_ecig_yn %in% 1 & data$att_check2 %in% 3, 1, ifelse(data$last_30_ecig_yn %in% 1, 0, NA))) # people who are not asked the second question are marked as NA
+table(data$att2_success, useNA = "ifany")
+
+table(data$att_check3a, data$att_check3b, useNA = "ifany")
+data <- mutate(data, att3_success = ifelse(data$att_check3a %in% 4 & grepl("decision making", data$att_check3b, ignore.case = T), 1, 0))
+table(data$att3_success, useNA = "ifany")
+
+data$att2_replaceNA <- data$att2_success
+data$att2_replaceNA[is.na(data$att2_replaceNA)] <- 1 # people who are not asked are marked as success
+table(data$att2_replaceNA, useNA = "ifany")
+
+data$sum_att_success_4item <- apply(data[, c("att_success", "att1_success", "att2_replaceNA", "att3_success")], 1, sum)
+data$sum_att_success_3item <- apply(data[, c("att_success", "att1_success", "att3_success")], 1, sum)
+
+data$sum_att_failure_4item <- 4 - data$sum_att_success_4item
+data$sum_att_failure_3item <- 3 - data$sum_att_success_3item
+
+# data$att1.success <- factor(data$att1.success, levels = c(0, 1), labels = c("fail", "success"))
+# data$att2.success <- factor(data$att2.success, levels = c(0, 1), labels = c("fail", "success"))
+# data$att3.success <- factor(data$att3.success, levels = c(0,1), labels = c("fail", "success"))
+
+select(data, att_success, att1_success, att2_success, att3_success, sum_att_failure_3item, sum_att_failure_4item)
+
+newdata <- select(data, -att2_replaceNA, -sum_att_success_4item, -sum_att_success_3item)
+
+length(unique(newdata$Participant_id))
+```
+
+```{r}
+newdata[newdata$sum_att_failure_3item == 3,]
+```
+
+
+```{r}
+summary(newdata$age1)
+
+newdata %>% filter(., project_type == "mturkcon") %>% filter(., age1 < 18 | age1 > 30) %>% select(., redcapid, Participant_id, project_type) %>% group_by(Participant_id) %>% summarise(n = n())
+```
+
