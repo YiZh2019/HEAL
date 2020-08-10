@@ -337,7 +337,8 @@ Ttest <- function(var){
 }
 
 OneSampleTtest <- function(var){
-  return(t.test(var, mu = 0, alternative = "two.sided"))
+  a <- t.test(var, mu = 0, alternative = "two.sided")
+  return(a$p.value)
 }
 
 CohensD <- function(var) {
