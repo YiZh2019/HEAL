@@ -1,0 +1,32 @@
+---
+title: "abstract"
+author: "Yi"
+date: "8/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07282020/EVOC_pilot1_08072020.csv", na.strings = "")
+```
+
+```{r}
+table(data$project_type)
+```
+
+```{r}
+table(data$project_type, data$last_30_ecig_yn, useNA = "always")
+prop.table(table(data$project_type, data$last_30_ecig_yn, useNA = "always"), margin = 1)
+
+table(data$project_type, data$sum_att_failure_3item, useNA = "always")
+prop.table(table(data$project_type, data$sum_att_failure_3item, useNA = "always"), margin = 1)
+
+```
+
