@@ -57,7 +57,7 @@ ChiSqFisher <- function(var){
 
 # Hedges's g
 CohensD <- function(var){
-  d <- cohen.d(var[filter.data$shq_8 == 1], var[filter.data$shq_8 == 2], paired = F, na.rm = T, within = F, hedges.correction = T)
+  d <- cohen.d(var[filter.data$shq_8 == 1], var[filter.data$shq_8 == 2], paired = F, na.rm = T, within = F, hedges.correction = F)
   return(d)
 }
 
@@ -139,7 +139,7 @@ ValidN(filter.data.cleanshq1$shq_1)
 shq_1.levene <- leveneTest(filter.data.cleanshq1$shq_1, group = as.factor(filter.data.cleanshq1$shq_8), center = mean)
 shq_1.levene$result[1] <- ifelse(shq_1.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
 t.test(filter.data.cleanshq1[filter.data.cleanshq1$shq_8 == 1, ]$shq_1, filter.data.cleanshq1[filter.data.cleanshq1$shq_8 == 2, ]$shq_1, var.equal = shq_1.levene$result[1])
-cohen.d(filter.data.cleanshq1[filter.data.cleanshq1$shq_8 == 1, ]$shq_1, filter.data.cleanshq1[filter.data.cleanshq1$shq_8 == 2, ]$shq_1, paired = F, na.rm = T, within = F, hedges.correction = T)
+cohen.d(filter.data.cleanshq1[filter.data.cleanshq1$shq_8 == 1, ]$shq_1, filter.data.cleanshq1[filter.data.cleanshq1$shq_8 == 2, ]$shq_1, paired = F, na.rm = T, within = F, hedges.correction = F)
 
 
 # combine shq_9___ to calculate the count of products
@@ -169,7 +169,7 @@ apply(filter.data.combineshq9[, "shq_9"], 2, ValidN)
 shq_9.levene <- leveneTest(filter.data.combineshq9$shq_9, group = as.factor(filter.data.combineshq9$shq_8), center = mean)
 shq_9.levene$result[1] <- ifelse(shq_9.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
 t.test(filter.data.combineshq9[filter.data.combineshq9$shq_8 == 1, ]$shq_9, filter.data.combineshq9[filter.data.combineshq9$shq_8 == 2, ]$shq_9, var.equal = shq_9.levene$result[1])
-cohen.d(filter.data.combineshq9[filter.data.combineshq9$shq_8 == 1, ]$shq_9, filter.data.combineshq9[filter.data.combineshq9$shq_8 == 2, ]$shq_9, paired = F, na.rm = T, within = F, hedges.correction = T)
+cohen.d(filter.data.combineshq9[filter.data.combineshq9$shq_8 == 1, ]$shq_9, filter.data.combineshq9[filter.data.combineshq9$shq_8 == 2, ]$shq_9, paired = F, na.rm = T, within = F, hedges.correction = F)
 
 
 # combine shq_16 to shq_27 to calculate the count of withdraw symptoms
@@ -204,7 +204,7 @@ withdraw.levene <- leveneTest(filter.data.withdraw$withdraw.count, group = as.fa
 
 withdraw.levene$result[1] <- ifelse(withdraw.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
 t.test(filter.data.withdraw[filter.data.withdraw$shq_8 == 1, ]$withdraw.count, filter.data.withdraw[filter.data.withdraw$shq_8 == 2, ]$withdraw.count, var.equal = withdraw.levene$result[1])
-cohen.d(filter.data.withdraw[filter.data.withdraw$shq_8 == 1, ]$withdraw.count, filter.data.withdraw[filter.data.withdraw$shq_8 == 2, ]$withdraw.count, paired = F, na.rm = T, within = F, hedges.correction = T)
+cohen.d(filter.data.withdraw[filter.data.withdraw$shq_8 == 1, ]$withdraw.count, filter.data.withdraw[filter.data.withdraw$shq_8 == 2, ]$withdraw.count, paired = F, na.rm = T, within = F, hedges.correction = F)
 
 
 
@@ -315,7 +315,7 @@ sibling.levene <- leveneTest(filter.data.siblings$sibling.prop, group = as.facto
 
 sibling.levene$result[1] <- ifelse(sibling.levene$`Pr(>F)`[1] < 0.05, FALSE, TRUE)
 t.test(filter.data.siblings[filter.data.siblings$shq_8 == 1, ]$sibling.prop, filter.data.siblings[filter.data.siblings$shq_8 == 2, ]$sibling.prop, var.equal = sibling.levene$result[1])
-cohen.d(filter.data.siblings[filter.data.siblings$shq_8 == 1, ]$sibling.prop, filter.data.siblings[filter.data.siblings$shq_8 == 2, ]$sibling.prop, paired = F, na.rm = T, within = F, hedges.correction = T)
+cohen.d(filter.data.siblings[filter.data.siblings$shq_8 == 1, ]$sibling.prop, filter.data.siblings[filter.data.siblings$shq_8 == 2, ]$sibling.prop, paired = F, na.rm = T, within = F, hedges.correction = F)
 
 
 ```
@@ -482,11 +482,11 @@ apply(filter.data[, "IDAS_su_MEAN"], 2, ValidN)
 apply(filter.data[, "IDAS_su_MEAN"], 2, Ttest)
 
 # SHAPS
-apply(menthol.data[, "SHAPS_Mean"], 2, Mean.SD.N)
-apply(unmenthol.data[, "SHAPS_Mean"], 2, Mean.SD.N)
-apply(filter.data[, "SHAPS_Mean"], 2, ValidN)
-apply(filter.data[, "SHAPS_Mean"], 2, Ttest)
-apply(filter.data[, "SHAPS_Mean"], 2, CohensD)
+apply(menthol.data[, "SHAPS_RC_Mean"], 2, Mean.SD.N)
+apply(unmenthol.data[, "SHAPS_RC_Mean"], 2, Mean.SD.N)
+apply(filter.data[, "SHAPS_RC_Mean"], 2, ValidN)
+apply(filter.data[, "SHAPS_RC_Mean"], 2, Ttest)
+apply(filter.data[, "SHAPS_RC_Mean"], 2, CohensD)
 
 # ASI
 apply(menthol.data[, "ASI_Mean"], 2, Mean.SD.N)
