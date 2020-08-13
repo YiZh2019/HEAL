@@ -1,0 +1,62 @@
+---
+title: "merge_blood_suppression"
+author: "Yi"
+date: "8/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(tidyverse)
+```
+
+```{r}
+blood <- read_sav("/Users/zhan039/Desktop/USC_HEAL/P4/suppression/P4 Pilot Blood Data_BLOOD MERGE.sav")
+suppression <- read_sav("/Users/zhan039/Desktop/USC_HEAL/P4/suppression/P4Suppression_LongFormatData_BLOOD MERGE.sav")
+
+blood <- blood[c(1: 90), c(1: (ncol(blood)-3))]
+blood <- rename(blood, "session" = Session)
+blood <- rename(blood, "date_blood" = Date)
+```
+
+```{r check and clean sid and session}
+intersect(colnames(blood), colnames(suppression))
+
+length(unique(suppression$sid))
+length(unique(blood$sid))
+
+intersect.name <- intersect(suppression$sid, blood$sid)
+
+suppression[!suppression$sid %in% intersect.name, ]
+blood[!blood$sid %in% intersect.name, ]
+
+blood %>% group_by(sid, session) %>% summarise(n = n()) %>% filter(., n > 1)
+suppression %>% group_by(sid, session) %>% summarise(n = n()) %>% filter(., n > 1)
+
+blood[blood$sid == "18-00839-035", ]
+
+blood <- blood[!(blood$sid == "18-00839-035" & blood$session == 3 & blood$date_blood == "2019-10-28"), ]
+
+blood %>% group_by(sid, session) %>% summarise(n = n()) %>% filter(., n > 1)
+
+
+
+```
+
+```{r merge datasets}
+newdata <- merge(suppression, blood, all.x = T, all.y = T, by = c("sid", "session")) 
+
+newdata[newdata$sid %in% suppression$sid, ]
+newdata[newdata$sid %in% suppression$sid, ] %>% group_by(sid) %>% summarise(n = n()) 
+
+newdata[!newdata$date %in% newdata$date_blood, c("sid", "session", "date", "date_blood")]
+```
+
+```{r}
+write_sav(newdata, "/Users/zhan039/Desktop/USC_HEAL/P4/suppression/P4_Suppression_Blood.sav")
+```
+
