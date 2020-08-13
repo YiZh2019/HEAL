@@ -1,0 +1,27 @@
+---
+title: "HH_W10_transform"
+author: "Yi"
+date: "8/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+```
+
+```{r}
+hh_w1_to_w10_0804 <- read_sas("/Users/zhan039/Desktop/USC_HEAL/HH/HH W10 COVID DATA/hh_w1_to_w10_0804.sas7bdat")
+
+w10_covid_081020 <- read_sas("/Users/zhan039/Desktop/USC_HEAL/HH/HH W10 COVID DATA/w10_covid_081020.sas7bdat")
+```
+
+```{r}
+write_sav(hh_w1_to_w10_0804, "/Users/zhan039/Desktop/USC_HEAL/HH/HH W10 COVID DATA/Yi/hh_w1_to_w10_0804.sav")
+
+write_sav(w10_covid_081020, "/Users/zhan039/Desktop/USC_HEAL/HH/HH W10 COVID DATA/Yi/w10_covid_081020.sav")
+```
+
