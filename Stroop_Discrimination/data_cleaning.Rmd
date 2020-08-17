@@ -1,0 +1,85 @@
+---
+title: "catch_up"
+author: "Yi"
+date: "8/13/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(tidyverse)
+```
+
+```{r}
+origin <- read_sav("/Users/zhan039/Desktop/USC_HEAL/Stroop/Stroop Discrimination Task Paper - August 2017/Finalized Stroop Dataset & Syntax 7.24.18_USE THIS/Original Dataset (Wide Format)/Stroop Discrimination Dataset MERGED (ORIGINAL) 7.24.18.sav")
+
+grow <- read_sav("/Users/zhan039/Desktop/USC_HEAL/GROW/GROW DATA/REDCap_wTeleform_Merged (scored + sorted)_06212018 (No 2nd survey) with DIFF.sav")
+```
+
+```{r}
+# merge origin with grow
+summary(origin$SID)
+summary(grow$cleaned_SID)
+
+origin.formerge <- mutate(origin, cleaned_SID = 50000 + SID)
+select(origin.formerge, SID, cleaned_SID, everything()) %>% arrange(desc(SID))
+
+grow.formerge <- grow[, c("cleaned_SID", "piq_1", "piq_2", "piq_5", "PIQ_6a_T", "PIQ_6b_T", "PIQ_6c_T", "PIQ_6d_T", "PIQ_6e_T", "PIQ_6f_T")]
+
+mergedata <- merge(origin.formerge, grow.formerge, all.x = T, by = "cleaned_SID")
+```
+
+
+```{r}
+# create the word length & group
+mergedata$Target.length <- nchar(mergedata$Target)
+select(mergedata, Target.length, Target)
+table(mergedata$Target.length, useNA = "always")
+
+mergedata$Target.group <- factor(mergedata$Target.length, levels = c(4, 6, 7, 8, 9,10, 11, 14), labels = c(1:8))
+select(mergedata, Target, Target.length, Target.group)
+table(mergedata$Target.group, useNA = "always")
+table(mergedata[mergedata$Target.group == 1, "Target"])
+table(mergedata[mergedata$Target.group == 2, "Target"])
+table(mergedata[mergedata$Target.group == 3, "Target"])
+table(mergedata[mergedata$Target.group == 4, "Target"])
+table(mergedata[mergedata$Target.group == 5, "Target"])
+table(mergedata[mergedata$Target.group == 6, "Target"])
+table(mergedata[mergedata$Target.group == 7, "Target"])
+table(mergedata[mergedata$Target.group == 8, "Target"])
+
+# remove unmatched trial
+mergedata[mergedata$Target == "ALWAYS", ]
+MERge
+
+data <- mergedata[mergedata$Trial < 40, ]
+
+table(mergedata[mergedata$Trial >= 40, "Target"])
+
+# complete both sessions
+table(data$Session, useNA = "always")
+data %>% group_by(cleaned_SID, Session) %>% summarise(n = n())
+
+table(data[data$Wordtype_RC == 1, "Target"])
+table(data[data$Wordtype_RC == 2, "Target"])
+table(data[data$Trial == 1, "Target"])
+
+# Accuracy
+table(data$Accuracy, useNA = "always")
+data <- data[data$Accuracy == 1, ]
+
+# outliers (DEFFERENT!!!)
+m.RTime <- mean(data$Reaction_Time)  # 812.0108 without errors
+sd.RTime <- sd(data$Reaction_Time)  # 327.0331 without errors
+mean(origin$Reaction_Time)  # 805.7887 with errors
+sd(origin$Reaction_Time)  # 342.1528 with errors
+upp.RTime <- m.RTime + 2*sd.RTime  
+low.RTime <- m.RTime - 2*sd.RTime  
+
+
+```
+
