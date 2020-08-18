@@ -1,0 +1,119 @@
+---
+title: "EVOC_Methods_Paper"
+author: "Yi"
+date: "8/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Final_Data/EVOC_pilot1_08072020.csv", na.strings = "")
+```
+
+```{r}
+FreqPerc <- function(varname){
+  freq <- table(varname, data$project_type, useNA = "always")
+  perct <- round(prop.table(table(varname, data$project_type, useNA = "always"), margin = 2) * 100, 1)
+  nperct <- paste(freq, " ", "(", perct, "%", ")", sep = "")
+  
+  nperct <- as.data.frame(matrix(nperct, ncol = 6))
+  
+  colnames(nperct) <- c(colnames(freq)[1:length(colnames(freq)) - 1], "Missing")
+  rownames(nperct) <- c(rownames(freq)[1:length(rownames(freq)) - 1], "Missing")
+
+  return(nperct)
+}
+
+```
+
+
+```{r Demographics prepare variables}
+# gender
+table(data$gender, useNA = "always")
+
+data <- mutate(data, gender_3c = ifelse(gender == 1, 1, ifelse(gender == 2, 2, 3)))
+table(data$gender_3c, useNA = "always")
+
+# eth
+table(data$eth, useNA = "always")
+
+# race
+apply(data[, startsWith(colnames(data), "race")], 2, table, useNA = "always")
+
+data$sum.race <- rowSums(data[, startsWith(colnames(data), "race")], na.rm = T)
+
+data[data$sum.race > 1, c("sum.race", colnames(data)[startsWith(colnames(data), "race")])]
+table(data$sum.race, useNA = "always")
+
+data <- mutate(data, race_new = ifelse(sum.race > 1 | race___6 %in% 1, 5, 
+                                       ifelse(race___1 %in% 1, 1, 
+                                              ifelse(race___2 %in% 1, 2, 
+                                                     ifelse(race___3 %in% 1, 3,
+                                                            ifelse(race___4 %in% 1, 6,
+                                                                   ifelse(race___5 %in% 1, 4,
+                                                                                 ifelse(race___7 %in% 1, 6, NA))))))))
+
+apply(data[, startsWith(colnames(data), "race")], 2, table, useNA = "always")
+apply(data[data$sum.race == 1, startsWith(colnames(data), "race")], 2, table, useNA = "always")
+apply(data[data$sum.race > 1, startsWith(colnames(data), "race")], 2, table, useNA = "always")
+nrow(data[data$sum.race > 1, ])
+
+22 + 115
+table(data$race_new, useNA = "always")
+
+# College Degree
+table(data$degree_program, useNA = "always") # no "Don't Know"
+data <- mutate(data, college_degree = ifelse(degree_program > 5, 1, 0))
+table(data$college_degree, useNA = "always")
+
+# Highest Level of Education
+data <- mutate(data, highest_edu = ifelse(degree_program < 6, degree_program,
+                                          ifelse(degree_program > 7, degree_program - 1,
+                                                 ifelse(degree_program %in% 6 | degree_program %in% 7, 6, NA))))
+table(data$highest_edu, useNA = "always")
+
+# currently enrolled in a degree program
+table(data$current_degree_program, useNA = "always")
+
+# own or rent home
+table(data$own_rent, useNA = "always")
+
+# current financial situation
+table(data$overall_income, useNA = "always")
+
+# childhood financial situation
+table(data$family_income, useNA = "always")
+
+# number of attention checks failed
+table(data$sum_att_failure_3item, useNA = "always")
+```
+
+```{r Demographics Analysis}
+varlist <- c("gender_3c", "eth", "race_new", "college_degree", "highest_edu", "current_degree_program", "own_rent", "overall_income", "family_income", "sum_att_failure_3item")
+
+Demo <- data.frame(matrix(nrow = 0, ncol = 6))
+colnames(Demo) <- c(levels(data$project_type), "Missing")
+
+for (i in 1:length(varlist)) {
+  var <- data[, varlist[i]]
+  tempt.tab <- FreqPerc(var)
+  rownames(tempt.tab) <- paste(varlist[i], "=", rownames(tempt.tab), sep = "")
+  Demo <- rbind(Demo, tempt.tab)
+}
+
+Demo
+
+write.csv(Demo, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Pilot1_Methods_Paper/Demo.csv")
+```
+
+```{r E-cig Use}
+
+```
+
