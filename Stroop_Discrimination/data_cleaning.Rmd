@@ -53,8 +53,7 @@ table(mergedata[mergedata$Target.group == 7, "Target"])
 table(mergedata[mergedata$Target.group == 8, "Target"])
 
 # remove unmatched trial
-remove.list <- c("ALWAYS", "ELEMENT", "FEBRUARY", "INJUSTICE", "INEQUALITY")
-data <- mergedata[!mergedata$Target %in% remove.list, ]
+data <- mergedata[mergedata$Target != "ALWAYS", ]
 length(unique(data$cleaned_SID))
 
 table(data[data$Target.group == 1, "Target"])
@@ -66,8 +65,13 @@ table(data[data$Target.group == 6, "Target"])
 table(data[data$Target.group == 7, "Target"])
 table(data[data$Target.group == 8, "Target"])
 
+table(data$Trial, useNA = "always")
+
 # complete both sessions
 table(data$Session, useNA = "always")
+
+data %>% group_by(cleaned_SID, Session) %>% summarise(n = length(unique(Target)))
+
 remove.session <- data %>% group_by(cleaned_SID) %>% summarise(n = length(unique(Session))) %>% filter(n < 2)
 
 data[data$cleaned_SID %in% remove.session$cleaned_SID, c("cleaned_SID", "Session", "Target")]
@@ -79,9 +83,6 @@ length(unique(data$cleaned_SID))
 table(data$Accuracy, useNA = "always")
 data <- data[data$Accuracy == 1, ]
 length(unique(data$cleaned_SID))
-
-# 
-origin %>% filter(., Session == 2) %>% group_by(SID, Wordtype_RC, Target) %>% summarise(n = n()) %>% filter(., n != 3)
 
 # outliers (DEFFERENT!!!)
 m.RTime <- mean(data$Reaction_Time)  # 812.0108 without errors
