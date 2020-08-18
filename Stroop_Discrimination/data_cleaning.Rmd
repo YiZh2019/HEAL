@@ -28,7 +28,7 @@ summary(grow$cleaned_SID)
 origin.formerge <- mutate(origin, cleaned_SID = 50000 + SID)
 select(origin.formerge, SID, cleaned_SID, everything()) %>% arrange(desc(SID))
 
-grow.formerge <- grow[, c("cleaned_SID", "piq_1", "piq_2", "piq_5", "PIQ_6a_T", "PIQ_6b_T", "PIQ_6c_T", "PIQ_6d_T", "PIQ_6e_T", "PIQ_6f_T")]
+grow.formerge <- grow[, c("cleaned_SID", "piq_1", "piq_2", "piq_5", "PIQ_6a_T", "PIQ_6b_T", "PIQ_6c_T", "PIQ_6d_T", "PIQ_6e_T", "PIQ_6f_T", "piq_6___1", "piq_6___2", "piq_6___3", "piq_6___4", "piq_6___5", "piq_6___6", "piq_6___7")]  # gender age ethnicity race
 
 mergedata <- merge(origin.formerge, grow.formerge, all.x = T, by = "cleaned_SID")
 ```
@@ -53,24 +53,35 @@ table(mergedata[mergedata$Target.group == 7, "Target"])
 table(mergedata[mergedata$Target.group == 8, "Target"])
 
 # remove unmatched trial
-mergedata[mergedata$Target == "ALWAYS", ]
-MERge
+remove.list <- c("ALWAYS", "ELEMENT", "FEBRUARY", "INJUSTICE", "INEQUALITY")
+data <- mergedata[!mergedata$Target %in% remove.list, ]
+length(unique(data$cleaned_SID))
 
-data <- mergedata[mergedata$Trial < 40, ]
-
-table(mergedata[mergedata$Trial >= 40, "Target"])
+table(data[data$Target.group == 1, "Target"])
+table(data[data$Target.group == 2, "Target"])
+table(data[data$Target.group == 3, "Target"])
+table(data[data$Target.group == 4, "Target"])
+table(data[data$Target.group == 5, "Target"])
+table(data[data$Target.group == 6, "Target"])
+table(data[data$Target.group == 7, "Target"])
+table(data[data$Target.group == 8, "Target"])
 
 # complete both sessions
 table(data$Session, useNA = "always")
-data %>% group_by(cleaned_SID, Session) %>% summarise(n = n())
+remove.session <- data %>% group_by(cleaned_SID) %>% summarise(n = length(unique(Session))) %>% filter(n < 2)
 
-table(data[data$Wordtype_RC == 1, "Target"])
-table(data[data$Wordtype_RC == 2, "Target"])
-table(data[data$Trial == 1, "Target"])
+data[data$cleaned_SID %in% remove.session$cleaned_SID, c("cleaned_SID", "Session", "Target")]
+
+data <- data[!data$cleaned_SID %in% remove.session$cleaned_SID, ]
+length(unique(data$cleaned_SID))
 
 # Accuracy
 table(data$Accuracy, useNA = "always")
 data <- data[data$Accuracy == 1, ]
+length(unique(data$cleaned_SID))
+
+# 
+origin %>% filter(., Session == 2) %>% group_by(SID, Wordtype_RC, Target) %>% summarise(n = n()) %>% filter(., n != 3)
 
 # outliers (DEFFERENT!!!)
 m.RTime <- mean(data$Reaction_Time)  # 812.0108 without errors
