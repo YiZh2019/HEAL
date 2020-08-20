@@ -139,8 +139,13 @@ ever.use <- ever.use.all[1:6]  # remove "other"
 last.30.all <- colnames(data)[startsWith(colnames(data), "last_30_ecig_")]
 last.30 <- last.30.all[2:7]  # remove "last_30_ecig_yn" "last_30_ecig_other"
 
+days.last.30.all <- colnames(data)[endsWith(colnames(data), "_30_days")]
+days.last.30 <- days.last.30.all[1:6]
+
 apply(data[, ever.use], 2, table, useNA = "always")
 apply(data[, last.30], 2, table, useNA = "always")
+apply(data[, days.last.30], 2, table, useNA = "always")
+table(data$last_30_ecig_yn, useNA = "always")
 
 table(data[data$ever_disp == 2, "last_30_ecig_dispose"], useNA = "always")
 table(data[data$ever_pen == 2, "last_30_ecig_pen"], useNA = "always")
@@ -148,6 +153,20 @@ table(data[data$ever_mod == 2, "last_30_ecig_mod"], useNA = "always")
 table(data[data$ever_box_mod == 2, "last_30_ecig_box_mod"], useNA = "always")
 table(data[data$ever_juul == 2, "last_30_ecig_juul"], useNA = "always")
 table(data[data$ever_pod == 2, "last_30_ecig_pod"], useNA = "always")
+
+data[data$last_30_ecig_dispose %in% 1 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_dispose", "last_30_ecig_yn", "disp_30_days")]
+data[data$last_30_ecig_pen %in% 1 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_pen", "last_30_ecig_yn", "pen_30_days")] 
+data[data$last_30_ecig_mod %in% 1 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_mod", "last_30_ecig_yn", "mod_30_days")]
+data[data$last_30_ecig_box_mod %in% 1 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_box_mod", "last_30_ecig_yn", "box_30_days")]
+data[data$last_30_ecig_juul %in% 1 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_juul", "last_30_ecig_yn", "box_30_days")]
+data[data$last_30_ecig_pod %in% 1 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_pod", "last_30_ecig_yn", "pod_30_days")]
+
+data[data$last_30_ecig_dispose %in% 9 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_dispose", "last_30_ecig_yn", "disp_30_days")]
+data[data$last_30_ecig_pen %in% 9 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_pen", "last_30_ecig_yn", "pen_30_days")] 
+data[data$last_30_ecig_mod %in% 9 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_mod", "last_30_ecig_yn", "mod_30_days")]
+data[data$last_30_ecig_box_mod %in% 9 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_box_mod", "last_30_ecig_yn", "box_30_days")]
+data[data$last_30_ecig_juul %in% 9 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_juul", "last_30_ecig_yn", "box_30_days")]
+data[data$last_30_ecig_pod %in% 9 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_pod", "last_30_ecig_yn", "pod_30_days")]
 
 ## create variables 
 EverUse <- function(var.ever, var.last){
