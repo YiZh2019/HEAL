@@ -46,6 +46,19 @@ FreqPerc.Sub <- function(varname, subset){
 
   return(nperct)  
 }
+
+MeanSD <- function(varname, subset){
+  m <- round(tapply(subset[, varname], subset[, "project_type"], mean, na.rm = T), 1)
+  sd <- round(tapply(subset[, varname], subset[, "project_type"], sd, na.rm = T), 1)
+  m.sd <- paste(m, " ", "(", sd, ")", sep = "")
+  
+  m.sd <- as.data.frame(matrix(m.sd, ncol = 5))
+  colnames(m.sd) <- rownames(m)
+  rownames(m.sd) <- varname
+  
+  return(m.sd)
+}
+
 ```
 
 
@@ -266,6 +279,13 @@ table(data$ecig_2, useNA = "always")
 ### Among JUUL users
 juul.use <- colnames(data)[startsWith(colnames(data), "juul_usage_")]
 apply(data[data$ever_juul %in% 2, juul.use], 2, table, useNA = "always")
+
+boxplot(data$juul_usage_day ~ data$project_type)
+boxplot(data$juul_usage_week ~ data$project_type)
+boxplot(data$juul_usage_month ~ data$project_type)
+
+data[data$juul_usage_month %in% 900, ]
+data.juul <- data[!data$juul_usage_month %in% 900, ]
 ```
 
 ```{r E-cig use Analysis tab1}
@@ -313,7 +333,7 @@ prop.table(table(data[data$ever_pen > 0, "first_pen"], data[data$ever_pen > 0, "
 ```
 
 ```{r save results of tab2}
-write.csv(tab2_fist_device, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Pilot1_Methods_Paper/E_cig_use_tab2.csv")
+# write.csv(tab2_fist_device, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Pilot1_Methods_Paper/E_cig_use_tab2.csv")
 ```
 
 ```{r E-cig use Analysis tab3}
@@ -341,7 +361,7 @@ prop.table(table(data[data$last_30_ecig_pen %in% 1, "pen_most"], data[data$last_
 ```
 
 ```{r save results of tab3}
-write.csv(tab3_most_device, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Pilot1_Methods_Paper/E_cig_use_tab3.csv")
+# write.csv(tab3_most_device, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Pilot1_Methods_Paper/E_cig_use_tab3.csv")
 ```
 
 ```{r E-cig use Analysis tab4}
@@ -362,6 +382,24 @@ tab4_flavor_nic
 ```
 
 ```{r save results of tab4}
-write.csv(tab4_flavor_nic, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Pilot1_Methods_Paper/E_cig_use_tab4.csv")
+# write.csv(tab4_flavor_nic, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Pilot1_Methods_Paper/E_cig_use_tab4.csv")
 ```
+
+```{r E-cig use Analysis tab5}
+tab5_own_device <- FreqPerc(data[, "ecig_2"])
+```
+
+```{r save results of tab5}
+#write.csv(tab5_own_device, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Pilot1_Methods_Paper/E_cig_use_tab5.csv")
+```
+
+```{r E-cig use Analysis tab6}
+juul.use
+
+MeanSD("juul_usage_day", data[data$ever_juul %in% 2, ])
+MeanSD("juul_usage_week", data[data$ever_juul %in% 2, ])
+MeanSD("juul_usage_month", data.juul[data.juul$ever_juul %in% 2, ])
+
+```
+
 
