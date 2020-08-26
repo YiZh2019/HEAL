@@ -458,7 +458,38 @@ MeanSD("juul_usage_month", data.juul[data.juul$ever_juul %in% 2, ])
 
 ```
 
+```{r prepare variables create the redcap survey time}
+# create the redcap survey time
+time.ncol <- ends_with("timestamp", vars = colnames(data))
+start <- time.ncol[2]
+end <- time.ncol[length(time.ncol)]
+
+data$start.time <- strptime(data[, start], format = "%Y-%m-%d %H:%M:%S") 
+data$end.time <- strptime(data[, end], format = "%Y-%m-%d %H:%M:%S")
+
+data$diff.time <- difftime(data$end.time, data$start.time, units = "secs")
+data$diff.time <- as.numeric(data$diff.time)
+```
+
 ```{r}
+boxplot(data$diff.time ~ data$project_type)
+```
+
+```{r}
+table(data[data$project_type == "pp", ]$diff.time, useNA = "always")
+data[data$diff.time == 20338, ]  # remove redcapid 6035
+
+rc.time <- data[!data$redcapid %in% 6035, ]
+boxplot(rc.time$diff.time ~ rc.time$project_type)
+```
+
+```{r}
+hist(rc.time$diff.time, breaks = 100)
+```
+
+```{r}
+tapply(rc.time$diff.time, rc.time$project_type, summary)
+tapply(rc.time$diff.time, rc.time$project_type, IQR)
 
 ```
 
