@@ -2,16 +2,20 @@
 title: "catch_up"
 author: "Yi"
 date: "8/13/2020"
-output: html_document
+output:
+  html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, include = FALSE)
 ```
 
 ```{r}
 library(haven)
 library(tidyverse)
+library(texreg)
+library(nlme)
 ```
 
 ```{r}
@@ -70,7 +74,7 @@ table(data$Trial, useNA = "always")
 # complete both sessions
 table(data$Session, useNA = "always")
 
-data %>% group_by(cleaned_SID, Session) %>% summarise(n = length(unique(Target)))
+data %>% group_by(cleaned_SID) %>% summarise(n = length(unique(Session)))
 
 remove.session <- data %>% group_by(cleaned_SID) %>% summarise(n = length(unique(Session))) %>% filter(n < 2)
 
@@ -84,14 +88,81 @@ table(data$Accuracy, useNA = "always")
 data <- data[data$Accuracy == 1, ]
 length(unique(data$cleaned_SID))
 
+# white
+data <- filter(data, piq_5 %in% 0 & (PIQ_6c_T %in% 1 | piq_6___3 %in% 1))
+length(unique(data$cleaned_SID))
+
 # outliers (DEFFERENT!!!)
-m.RTime <- mean(data$Reaction_Time)  # 812.0108 without errors
-sd.RTime <- sd(data$Reaction_Time)  # 327.0331 without errors
-mean(origin$Reaction_Time)  # 805.7887 with errors
-sd(origin$Reaction_Time)  # 342.1528 with errors
+m.RTime <- mean(data$Reaction_Time)  # 831.4634
+sd.RTime <- sd(data$Reaction_Time)  # 332.475
+m.RTime  # 805.7887 with errors
+sd.RTime  # 342.1528 with errors
 upp.RTime <- m.RTime + 2*sd.RTime  
 low.RTime <- m.RTime - 2*sd.RTime  
 
+data.rm.outliers <- filter(data, Reaction_Time >= low.RTime & Reaction_Time <= upp.RTime)
 
+boxplot(data$Reaction_Time)
+hist(data$Reaction_Time, breaks = 100)
+
+boxplot(data.rm.outliers$Reaction_Time)
+hist(data.rm.outliers$Reaction_Time, breaks = 100)
+
+# write_sav(data.rm.outliers, "/Users/zhan039/Desktop/USC_HEAL/Stroop/Yi/Stroop_NoOutliers_YZ.sav")
+# write_sav(data, "/Users/zhan039/Desktop/USC_HEAL/Stroop/Yi/Stroop_YZ.sav")
+```
+
+```{r Mixed Model full data, include=TRUE}
+data$fWordtype <- factor(data$Wordtype_RC, levels = c(2, 1)) # REF: 2
+data$fAbstinence <- factor(data$Abstinence, levels = c(2, 1))  # REF: 2
+
+# Model 1 - Random Intercept
+model1 <- lme(Reaction_Time ~ fWordtype * fAbstinence, random = ~ 1 | cleaned_SID, data = data, method = "REML")
+summary(model1)
+
+# Model 2 - Random Intercept + Random Slope (Wordtype)
+model2 <- lme(Reaction_Time ~ fWordtype * fAbstinence, random = ~ 1 + fWordtype | cleaned_SID, data = data, method = "REML")
+summary(model2)
+
+# Model 3 - Random Intercept + Random Slope (Abstinence)
+model3 <- lme(Reaction_Time ~ fWordtype * fAbstinence, random = ~ 1 + fAbstinence | cleaned_SID, data = data, method = "REML", control = lmeControl(opt = "optim"))
+summary(model3)
+
+# Model 4 - Random Intercept + Random Slope (Wordtype + Abstinence)
+model4 <- lme(Reaction_Time ~ fWordtype * fAbstinence, random = ~ 1 + fWordtype + fAbstinence | cleaned_SID, data = data, method = "REML")
+summary(model4)
+
+# Model 5 - Random Intercept + Random Slope (Wordtype + Abstinence + Wordtype * Abstinence)
+model5 <- lme(Reaction_Time ~ fWordtype * fAbstinence, random = ~ 1 + fWordtype + fAbstinence + fWordtype * fAbstinence| cleaned_SID, data = data, method = "REML")
+summary(model5)
+
+texreg::screenreg(list(model1, model2, model3, model4, model5))
+```
+
+```{r Mixed Model removed outliers, include=TRUE}
+data.rm.outliers$fWordtype <- factor(data.rm.outliers$Wordtype_RC, levels = c(2, 1))
+data.rm.outliers$fAbstinence <- factor(data.rm.outliers$Abstinence, levels = c(2, 1))
+
+# Model 1 - Random Intercept
+rm.model1 <- lme(Reaction_Time ~ fWordtype * fAbstinence, random = ~ 1 | cleaned_SID, data = data.rm.outliers, method = "REML")
+summary(rm.model1)  
+
+# Model 2 - Random Intercept + Random Slope (Wordtype)
+rm.model2 <- lme(Reaction_Time ~ fWordtype * fAbstinence, random = ~ 1 + fWordtype | cleaned_SID, data = data.rm.outliers, method = "REML", control = lmeControl(opt = "optim"))
+summary(rm.model2)
+
+# Model 3 - Random Intercept + Random Slope (Abstinence)
+rm.model3 <- lme(Reaction_Time ~ fWordtype * fAbstinence, random = ~ 1 + fAbstinence | cleaned_SID, data = data.rm.outliers, method = "REML")
+summary(rm.model3)
+
+# Model 4 - Random Intercept + Random Slope (Wordtype + Abstinence)
+rm.model4 <- lme(Reaction_Time ~ fWordtype * fAbstinence, random = ~ 1 + fWordtype + fAbstinence | cleaned_SID, data = data.rm.outliers, method = "REML")
+summary(rm.model4)
+
+# Model 5 - Random Intercept + Random Slope (Wordtype + Abstinence + Wordtype * Abstinence)
+rm.model5 <- lme(Reaction_Time ~ fWordtype * fAbstinence, random = ~ 1 + fWordtype + fAbstinence + fWordtype * fAbstinence| cleaned_SID, data = data.rm.outliers, method = "REML")
+summary(rm.model5)
+
+texreg::screenreg(list(rm.model1, rm.model2, rm.model3, rm.model4, rm.model5))
 ```
 
