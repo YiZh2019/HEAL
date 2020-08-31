@@ -1,0 +1,36 @@
+---
+title: "MCQ_score"
+author: "Yi"
+date: "8/31/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+w5 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Komal/w5.csv")
+w5_outcome <- read.csv("/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w5_outcome.csv")
+
+w7 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Komal/w7.csv")
+w7_outcome <- read.csv("/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w7_outcome.csv")
+```
+
+```{r}
+w5_new <- merge(w5, w5_outcome, by = "SID", all.x = T)
+sum(is.na(w5_new$Overall.k))
+
+w7_new <- merge(w7, w7_outcome, by = "SID", all.x = T)
+sum(is.na(w7_new$Overall.k))
+```
+
+```{r}
+write.csv(w5_new, file = "/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w5_08312020.csv")
+write.csv(w7_new, file = "/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w7_08312020.csv")
+
+library(haven)
+write_sav(w5_new, "/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w5_08312020.sav")
+write_sav(w7_new, "/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w7_08312020.sav")
+```
+
