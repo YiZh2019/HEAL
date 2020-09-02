@@ -11,26 +11,56 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 w5 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Komal/w5.csv")
-w5_outcome <- read.csv("/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w5_outcome.csv")
+w5_outcome1 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w5_1_1000.csv")
+w5_outcome2 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w5_1000_2000.csv")
+w5_outcome3 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w5_2000_2340.csv")
 
 w7 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Komal/w7.csv")
-w7_outcome <- read.csv("/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w7_outcome.csv")
+w7_outcome1 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w7_1_1000.csv")
+w7_outcome2 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w7_1000_2000.csv")
+w7_outcome3 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w7_2000_2004.csv")
+
+w5_outcome3 <- w5_outcome3[!is.na(w5_outcome3$SID), ]
+w7_outcome3 <- w7_outcome3[!is.na(w7_outcome3$SID), ]
 ```
 
 ```{r}
+w5_outcome <- rbind(w5_outcome1, w5_outcome2, w5_outcome3)
 w5_new <- merge(w5, w5_outcome, by = "SID", all.x = T)
 sum(is.na(w5_new$Overall.k))
 
+w7_outcome <- rbind(w7_outcome1, w7_outcome2, w7_outcome3)
 w7_new <- merge(w7, w7_outcome, by = "SID", all.x = T)
 sum(is.na(w7_new$Overall.k))
 ```
 
 ```{r}
-write.csv(w5_new, file = "/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w5_08312020.csv")
-write.csv(w7_new, file = "/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w7_08312020.csv")
+write.csv(w5_new, file = "/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w5_09012020.csv")
+write.csv(w7_new, file = "/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w7_09012020.csv")
 
 library(haven)
-write_sav(w5_new, "/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w5_08312020.sav")
-write_sav(w7_new, "/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w7_08312020.sav")
+write_sav(w5_new, "/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w5_09012020.sav")
+write_sav(w7_new, "/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/w7_09012020.sav")
+```
+
+```{r}
+hh <- read_sav("/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/H_H W1-W9 DATA/HH_W1_to_W9_Scored_06272020.sav")
+```
+
+```{r}
+w5_colname <- colnames(w5_outcome)[c(2:length(colnames(w5_outcome)))]
+colnames(w5_outcome)[c(2:length(colnames(w5_outcome)))] <- paste("W5_", w5_colname, sep = "")
+
+hh_w5 <- merge(hh, w5_outcome, by = "SID", all.x = T)
+
+w7_colname <- colnames(w7_outcome)[c(2:length(colnames(w7_outcome)))]
+colnames(w7_outcome)[c(2:length(colnames(w7_outcome)))] <- paste("W7_", w7_colname, sep = "")
+
+hh_w5_w7 <- merge(hh_w5, w7_outcome, by = "SID", all.x = T)
+```
+
+```{r}
+write.csv(hh_w5_w7, "/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/HH_09012020.csv")
+write_sav(hh_w5_w7, "/Users/zhan039/Desktop/USC_HEAL/Delay_Discounting/Yi/HH_09012020.sav")
 ```
 
