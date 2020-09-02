@@ -29,34 +29,6 @@ prolific2 <- read.csv('/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/04292020/
 
 ```{r}
 # eth gender race
-colnames(Prolific)[colnames(Prolific) == "prolificid"] <- "Participant_id"
-colnames(MTconc)[colnames(MTconc) == "mturkidcon"] <- "Participant_id"
-colnames(PP)[colnames(PP) == "aid" ] <- "Participant_id"
-colnames(MTself)[colnames(MTself) == "mturkid" ] <- "Participant_id"
-colnames(TPMT)[colnames(TPMT) == "tpmturkid"] <- "Participant_id"
-
-colnames(data1)[colnames(data1) == "prolificid"] <- "Participant_id"
-colnames(data2)[colnames(data2) == "prolificid"] <- "Participant_id"
-colnames(prolific2)[colnames(prolific2) == "prolificid"] <- "Participant_id"
-
-Prolific_a <- select(Prolific, redcapid, Participant_id, eth, gender, starts_with("race___"))
-MTself_a <- select(MTself, redcapid, Participant_id, eth, gender, starts_with("race___"))
-TPMT_a <- select(TPMT, redcapid, Participant_id, eth, gender, starts_with("race___"))
-MTconc_a <- select(MTconc, redcapid, Participant_id, eth, gender, starts_with("race___"))
-PP_a <- select(PP, redcapid, Participant_id, eth, gender, starts_with("race___"))
-
-Prolific_a %>% group_by(Participant_id) %>% summarise(n = n()) %>% arrange(desc(n))
-
-MTself_a %>% group_by(Participant_id) %>% summarise(n = n()) %>% arrange(desc(n))
-MTself_a[MTself_a$Participant_id == "A1E77HZO63E334", ]
-MTself_a <- MTself_a[!MTself_a$redcapid %in% c(2047, 2049), ]
-
-TPMT_a %>% group_by(Participant_id) %>% summarise(n = n()) %>% arrange(desc(n))
-TPMT_a[TPMT_a$Participant_id %in% c("A3GW6PLPCEO892", "A33YQ7GA9Q4SDB", "A3HRAENO5FF6BC"), ]
-TPMT_a <- TPMT_a[!TPMT_a$redcapid %in% c(3090, 3099, 3100, 3101, 3123), ]
-
-MTconc_a %>% group_by(Participant_id) %>% summarise(n = n()) %>% arrange(desc(n))
-MTconc_a[MTconc_a$Participant_id %in% c("A1BHINLXH3E2GJ", "A1BWO4ZG5OB68S", "A1K0S514CEY1UG", "A1K5ILJMG439M5", "A30YR5TPOKQYXJ", "A3180VXVP8MOIH", "A3ZUQODR46SC4", "APZQ9ADUXTS7N"), ] %>% arrange(Participant_id)
 ```
 
 ```{r}
