@@ -115,3 +115,14 @@ impute.Y15 <- CHS[is.na(CHS$Y15_SurveyDate_New_date), ] %>% select(., record_id,
 
 ```
 
+```{r}
+CHS[, c((ncol(CHS) - 18) : ncol(CHS))]
+remove <- c("dobkid_date", "Y12_SurveyDate_New_date", "Y13_SurveyDate_New_date", "Y14_SurveyDate_New_date", "Y15_SurveyDate_New_date", "Y12_Age_Calc_new", "Y13_Age_Calc_new", "Y14_Age_Calc_new", "Y15_Age_Calc_new")
+CHS <- CHS[, !colnames(CHS) %in% remove]
+```
+
+```{r}
+write.csv(CHS, file = "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/09022020/CHS_09022020.csv")
+write_sav(CHS, "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/09022020/CHS_09022020.sav")
+```
+
