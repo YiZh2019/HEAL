@@ -1,0 +1,117 @@
+---
+title: "compare ages"
+author: "Yi"
+date: "9/2/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+CHS <- read.csv("/Users/zhan039/Desktop/USC_HEAL/CHS/Temp/CHS_Merged_06182020.csv", stringsAsFactors = F, na.strings = c("NA", " "))
+```
+
+```{r}
+CalcAge <- function(surveydate, birthdate) {
+  age <- round(as.numeric(difftime(CHS[, surveydate], CHS[, birthdate], units = "days")/365.2422), 4)
+  return(age)
+}
+
+CHS$dobkid_date <- as.Date(CHS$dobkid, format = "%m/%d/%y")
+CHS$Y12_SurveyDate_New_date <- as.Date(CHS$Y12_SurveyDate_New)
+CHS$Y13_SurveyDate_New_date <- as.Date(CHS$Y13_SurveyDate_New)
+CHS$Y14_SurveyDate_New_date <- as.Date(CHS$Y14_SurveyDate_New)
+CHS$Y15_SurveyDate_New_date <- as.Date(CHS$Y15_SurveyDate_New)
+
+select(CHS, dobkid, dobkid_date, contains("SurveyDate_New")) %>% select(., order(colnames(.)))
+```
+
+```{r Y12}
+CHS$Y12_Age_Calc_new <- CalcAge("Y12_SurveyDate_New_date", "dobkid_date")
+CHS$Y12_Age_Calc_int <- trunc(CHS$Y12_Age_Calc_new)
+CHS$Y12_Age_Calc_1 <- round(CHS$Y12_Age_Calc_new, 1)
+
+select(CHS, record_id, Y12_SurveyDate_New, dobkid, Y12_Age, Y12_Age_Calc_new, Y12_Age_Calc_int, Y12_Age_Calc_1)
+
+incon.Y12 <- CHS[CHS$Y12_Age != CHS$Y12_Age_Calc_1, ] %>% select(., record_id, dobkid, Y12_SurveyDate_New, Y12_Age, Y12_Age_Calc_1)
+
+# write.csv(incon.Y12, "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/09022020/incon_Y12.csv")
+```
+
+```{r Y13}
+CHS$Y13_Age_Calc_new <- CalcAge("Y13_SurveyDate_New_date", "dobkid_date")
+
+CHS <- mutate(CHS, Y13_Age_Calc_new = ifelse(is.na(Y13_Age_Calc_new), Y12_Age_Calc_new + 1.5, Y13_Age_Calc_new))
+
+CHS$Y13_Age_Calc_int <- trunc(CHS$Y13_Age_Calc_new)
+CHS$Y13_Age_Calc_1 <- round(CHS$Y13_Age_Calc_new, 1)
+
+select(CHS, record_id, Y13_SurveyDate_New, dobkid, Y13_Age, Y13_Age_Calc_new,Y13_Age_Calc_int, Y13_Age_Calc_1)
+
+incon.Y13_1 <- filter(CHS, Y13_Age != Y13_Age_Calc_int) %>% select(., record_id, dobkid, Y13_SurveyDate_New, Y13_Age, Y13_Age_Calc_int)
+incon.Y13_2 <- CHS[!is.na(CHS$Y13_SurveyDate_New_date) & is.na(CHS$Y13_Age), ] %>% select(., record_id, dobkid, Y13_SurveyDate_New, Y13_Age, Y13_Age_Calc_int) 
+incon.Y13 <- rbind(incon.Y13_1, incon.Y13_2)
+
+impute.Y13 <- CHS[is.na(CHS$Y13_SurveyDate_New_date), ] %>% select(., record_id, dobkid, Y13_SurveyDate_New, Y13_Age, Y13_Age_Calc_int)
+
+# write.csv(incon.Y13, "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/09022020/incon_Y13.csv")
+
+# write.csv(impute.Y13, "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/09022020/impute_Y13.csv")
+```
+
+```{r Y14}
+CHS$Y14_Age_Calc_new <- CalcAge("Y14_SurveyDate_New_date", "dobkid_date")
+
+sum(is.na(CHS$Y14_SurveyDate_New))
+sum(is.na(CHS$Y14_Age))
+
+CHS <- mutate(CHS, Y14_Age_Calc_new = ifelse(is.na(Y14_Age_Calc_new), Y12_Age_Calc_new + 3, Y14_Age_Calc_new))
+
+CHS$Y14_Age_Calc_int <- trunc(CHS$Y14_Age_Calc_new)
+CHS$Y14_Age_Calc_1 <- round(CHS$Y14_Age_Calc_new, 1)
+
+select(CHS, record_id, Y14_SurveyDate_New, dobkid, Y14_Age, Y14_Age_Calc_new,Y14_Age_Calc_int, Y14_Age_Calc_1)
+
+incon.Y14_1 <- filter(CHS, Y14_Age != Y14_Age_Calc_int) %>% select(., record_id, dobkid, Y14_SurveyDate_New, Y14_Age, Y14_Age_Calc_int)
+incon.Y14_2 <- CHS[!is.na(CHS$Y14_SurveyDate_New_date) & is.na(CHS$Y14_Age), ] %>% select(., record_id, dobkid, Y14_SurveyDate_New, Y14_Age, Y14_Age_Calc_int) 
+incon.Y14 <- rbind(incon.Y14_1, incon.Y14_2)
+
+impute.Y14 <- CHS[is.na(CHS$Y14_SurveyDate_New_date), ] %>% select(., record_id, dobkid, Y14_SurveyDate_New, Y14_Age, Y14_Age_Calc_int)
+
+# write.csv(incon.Y14, "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/09022020/incon_Y14.csv")
+
+# write.csv(impute.Y14, "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/09022020/impute_Y14.csv")
+```
+
+```{r Y15}
+CHS$Y15_Age_Calc_new <- CalcAge("Y15_SurveyDate_New_date", "dobkid_date")
+
+sum(is.na(CHS$Y15_SurveyDate_New_date))
+sum(is.na(CHS$Y15_Age))
+
+CHS <- mutate(CHS, Y15_Age_Calc_new = ifelse(is.na(Y15_Age_Calc_new), Y12_Age_Calc_new + 4.5, Y15_Age_Calc_new))
+
+CHS$Y15_Age_Calc_int <- trunc(CHS$Y15_Age_Calc_new)
+CHS$Y15_Age_Calc_1 <- round(CHS$Y15_Age_Calc_new, 1)
+
+select(CHS, record_id, Y15_SurveyDate_New, dobkid, Y15_Age, Y15_Age_Calc_new,Y15_Age_Calc_int, Y15_Age_Calc_1)
+
+incon.Y15_1 <- filter(CHS, Y15_Age != Y15_Age_Calc_int) %>% select(., record_id, dobkid, Y15_SurveyDate_New, Y15_Age, Y15_Age_Calc_int)
+incon.Y15_2 <- CHS[!is.na(CHS$Y15_SurveyDate_New_date) & is.na(CHS$Y15_Age), ] %>% select(., record_id, dobkid, Y15_SurveyDate_New, Y15_Age, Y15_Age_Calc_int) 
+incon.Y15 <- rbind(incon.Y15_1, incon.Y15_2)
+
+impute.Y15 <- CHS[is.na(CHS$Y15_SurveyDate_New_date), ] %>% select(., record_id, dobkid, Y15_SurveyDate_New, Y15_Age, Y15_Age_Calc_int)
+
+# write.csv(incon.Y15, "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/09022020/incon_Y15.csv")
+
+# write.csv(impute.Y15, "/Users/zhan039/Desktop/USC_HEAL/CHS/Yi/09022020/impute_Y15.csv")
+
+```
+
