@@ -14,7 +14,7 @@ library(tidyverse)
 ```
 
 ```{r}
-data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/PRISM/05182020/PRISMCompleters_w_Menthol_Status_24Apr2020.csv", na.strings = c("", "."))
+data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/PRISM/08312020_Christie/PRISMCompleters_w_Menthol_Status_31Aug2020.csv", na.strings = c("", "."))
 ```
 
 ```{r}
@@ -40,8 +40,8 @@ session4 <- data[data$blinding_condn == 4, ]
 
 axtvar <- colnames(data)[startsWith(colnames(data), "axt")]
 
-session1_long <- session1 %>% select(., c(sid, axtvar)) %>% gather(., key = variable, value = value, axtvar) %>% separate(variable, c("axt", "variable"), sep = "_", extra = "merge") %>% spread(., variable, value) %>% select(., sid, axt, contains("mnws")) %>% arrange(sid, axt)
+session1_long <- session1 %>% select(., c(sid, all_of(axtvar))) %>% gather(., key = variable, value = value, axtvar) %>% separate(variable, c("axt", "variable"), sep = "_", extra = "merge") %>% spread(., variable, value) %>% select(., sid, axt, contains("mnws")) %>% arrange(sid, axt)
 
-
+session2_long <- session2 %>% select(., c(sid, all_of(axtvar))) %>% gather(., key = variable, value = value, axtvar) %>% separate(variable, c("axt", "variable"), sep = "_", extra = "merge") %>% spread(., variable, value) %>% select(., sid, axt, contains("mnws")) %>% arrange(sid, axt)
 ```
 
