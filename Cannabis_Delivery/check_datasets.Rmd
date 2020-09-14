@@ -1,0 +1,228 @@
+---
+title: "Check_datasets"
+author: "Yi"
+date: "9/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+library(gmodels)
+library(car)
+```
+
+```{r}
+data_0804 <- read_sas("/Users/zhan039/Desktop/USC_HEAL/HH/HH W10 COVID DATA/hh_w1_to_w10_0804.sas7bdat")
+data_0810 <- read_sas("/Users/zhan039/Desktop/USC_HEAL/HH/HH W10 COVID DATA/w10_covid_081020.sas7bdat")
+
+```
+
+```{r}
+a <- intersect(colnames(data_0804), colnames(data_0810))
+
+colnames(data_0804)[!colnames(data_0804) %in% a]
+colnames(data_0810)[!colnames(data_0810) %in% a]
+
+data <- data_0804
+```
+
+```{r define analytical dataset}
+select(data, w10_mj_use_last30, w10_mjfood_use_last30, w10_emj_use_last30, w10_smj_use_last30, w10_dabbing_use_last30, w10_mjconc_use_last30) %>% apply(., 2, table, useNA = "always")
+length(unique(data$SID))
+
+# create row max of cannibis use in last 30 dyas
+data$w10_all_mj_use_last30 = apply(data[, c("w10_mj_use_last30", "w10_mjfood_use_last30", "w10_emj_use_last30", "w10_smj_use_last30", "w10_dabbing_use_last30", "w10_mjconc_use_last30")], 1, max, na.rm = T)
+
+select(data, w10_mj_use_last30, w10_mjfood_use_last30, w10_emj_use_last30, w10_smj_use_last30, w10_dabbing_use_last30, w10_mjconc_use_last30, w10_all_mj_use_last30) 
+table(data$w10_all_mj_use_last30, useNA = "always")
+
+# recode to days and in numeric
+data$w10_all_mj_use_last30_n <- as.numeric(as.character(factor(data$w10_all_mj_use_last30, levels = c(-99, 1:7), labels = c(NA, 0, 2, 4, 8, 15, 25, 30))))
+
+select(data, w10_mj_use_last30, w10_mjfood_use_last30, w10_emj_use_last30, w10_smj_use_last30, w10_dabbing_use_last30, w10_mjconc_use_last30, w10_all_mj_use_last30, w10_all_mj_use_last30_n) 
+
+table(data$w10_all_mj_use_last30_n, useNA = "always")
+
+# ever use any cannaibis products in past 30 days
+data <- mutate(data, w10_ever_any_mj_last30 = ifelse(w10_all_mj_use_last30_n %in% 0, 0, ifelse(w10_all_mj_use_last30_n > 0, 1, NA)))
+
+table(data$w10_ever_any_mj_last30, useNA = "always")
+
+# Analytical Data
+ana.data <- data[data$w10_ever_any_mj_last30 %in% 1, ]
+```
+
+```{r mj supply}
+# w10
+select(ana.data, starts_with("w10_mj_supply__")) %>% apply(., 1, sum)
+
+ana.data <- mutate(ana.data, w10_mj_supply_n_selfgrown = w10_mj_supply___1, 
+                   w10_mj_supply_n_share = w10_mj_supply___2, 
+                   w10_mj_supply_n_bfperson = w10_mj_supply___3, 
+                   w10_mj_supply_n_bfdisp_card = w10_mj_supply___4, 
+                   w10_mj_supply_n_bfdisp_nocard = w10_mj_supply___6)
+
+ana.data$w10_mj_supply_n_online_deliv <- apply(ana.data[, c("w10_mj_supply___7", "w10_mj_supply___8")], 1, max, na.rm = T)
+
+ana.data %>% select(., starts_with("w10_mj_supply__")) %>% apply(., 2, table, useNA = "always")
+ana.data %>% select(., starts_with("w10_mj_supply_n_")) %>% apply(., 2, table, useNA = "always")
+
+# w9
+select(ana.data, starts_with("W9_Mj_Supply_"))
+
+ana.data <- mutate(ana.data, w9_mj_supply_n_selfgrown = W9_Mj_Supply_1, 
+                   w9_mj_supply_n_share = W9_Mj_Supply_2, 
+                   w9_mj_supply_n_bfperson = W9_Mj_Supply_3, 
+                   w9_mj_supply_n_bfdisp_card = W9_Mj_Supply_4, 
+                   w9_mj_supply_n_bfdisp_nocard = W9_Mj_Supply_9)
+
+ana.data$w9_mj_supply_n_online_deliv <- apply(ana.data[, c("W9_Mj_Supply_6", "W9_Mj_Supply_8")], 1, max, na.rm = T)
+
+ana.data %>% select(., starts_with("W9_Mj_Supply_")) %>% apply(., 2, table, useNA = "always")
+ana.data %>% select(., starts_with("w9_mj_supply_n_")) %>% apply(., 2, table, useNA = "always")
+```
+
+```{r covid_64j order delivery of mj in past two weeks}
+table(ana.data$covid_64j, useNA = "always")
+
+ana.data <- mutate(ana.data, covid_mj_deliv_past2weeks = ifelse(covid_64j %in% 1, 0, 
+                                                                ifelse(covid_64j > 1, 1, NA)))
+
+table(ana.data$covid_mj_deliv_past2weeks, useNA = "always")
+```
+
+
+```{r table 1 mj_supply by waves}
+# transform the dataset
+mj.supply.waves <- ana.data %>% select(., SID, starts_with("w9_mj_supply_n"), starts_with("w10_mj_supply_n"))
+mj_supply_var <- colnames(mj.supply.waves)[-1]
+
+mj.supply.waves.long <- mj.supply.waves %>% gather(., key = variable, value = value, all_of(mj_supply_var)) %>% separate(variable, c("wave", "mj_supply"), sep = "_", extra = "merge") %>% spread(mj_supply, value)
+
+mj.supply.waves.long$wave <- factor(mj.supply.waves.long$wave, levels = c("w9", "w10"), labels = c(9, 10))
+table(mj.supply.waves.long$mj_supply_n_bfdisp_nocard, mj.supply.waves.long$wave, useNA = "always")
+
+# create the table
+mj_supply_var_long <- colnames(mj.supply.waves.long)[-c(1, 2)]
+
+apply(mj.supply.waves.long[, mj_supply_var_long], 2, CrossTable, mj.supply.waves.long$wave, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(mj.supply.waves.long$mj_supply_n_selfgrown, mj.supply.waves.long$wave, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(mj.supply.waves.long$mj_supply_n_share, mj.supply.waves.long$wave, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(mj.supply.waves.long$mj_supply_n_bfperson, mj.supply.waves.long$wave, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(mj.supply.waves.long$mj_supply_n_bfdisp_card, mj.supply.waves.long$wave, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(mj.supply.waves.long$mj_supply_n_bfdisp_nocard, mj.supply.waves.long$wave, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(mj.supply.waves.long$mj_supply_n_online_deliv, mj.supply.waves.long$wave, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+```
+
+```{r table 2}
+# didn't find the age variable
+
+# gender
+table(ana.data$w10_dem_gender, useNA = "always")
+ana.data$w10_dem_gender_f <- factor(ana.data$w10_dem_gender, levels = c(-99, 1, 2), labels = c(NA, "male", "female"))
+
+CrossTable(ana.data$w10_dem_gender, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w10_dem_gender_f, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+# race
+table(ana.data$w10_dem_latino_yn, useNA = "always")
+ana.data %>% select(., starts_with("w10_dem_race")) %>% apply(., 2, table, useNA = "always")
+
+ana.data <- mutate(ana.data, w10_dem_race_5c = ifelse(w10_dem_latino_yn %in% 1, 1, 
+                                                      ifelse(w10_dem_latino_yn %in% 2 & w10_dem_race___5 %in% 1, 2, 
+                                                             ifelse())))
+
+# pre-Covid cannabis use (times per week) & during-Covid cannabis use (times per week)
+
+select(ana.data, W9_Mj_Use_Last30, W9_MjFood_Use_Last30, W9_eMj_Use_Last30, W9_sMj_Use_Last30, W9_Dabbing_Use_Last30) %>% apply(., 2, table, useNA = "always")
+
+# create row max of cannibis use in last 30 dyas
+ana.data$w9_all_mj_use_last30 <- apply(ana.data[, c("W9_Mj_Use_Last30", "W9_MjFood_Use_Last30", "W9_eMj_Use_Last30", "W9_sMj_Use_Last30", "W9_Dabbing_Use_Last30")], 1, max, na.rm = T)
+
+select(ana.data, W9_Mj_Use_Last30, W9_MjFood_Use_Last30, W9_eMj_Use_Last30, W9_sMj_Use_Last30, W9_Dabbing_Use_Last30, w9_all_mj_use_last30) 
+table(ana.data$w9_all_mj_use_last30, useNA = "always")
+
+# recode to days and in numeric
+ana.data$w9_all_mj_use_last30_n <- as.numeric(as.character(factor(ana.data$w9_all_mj_use_last30, levels = c(-99, 1:7), labels = c(NA, 0, 2, 4, 8, 15, 25, 30))))
+
+select(ana.data, W9_Mj_Use_Last30, W9_MjFood_Use_Last30, W9_eMj_Use_Last30, W9_sMj_Use_Last30, W9_Dabbing_Use_Last30, w9_all_mj_use_last30, w9_all_mj_use_last30_n) 
+
+table(ana.data$w9_all_mj_use_last30_n, useNA = "always")
+table(ana.data$w10_all_mj_use_last30_n, useNA = "always")
+
+# ever use any cannaibis products in past 30 days
+ana.data <- mutate(ana.data, w9_n_mj_use_perweek = w9_all_mj_use_last30_n/4, w10_n_mj_use_perweek = w10_all_mj_use_last30_n/4)
+
+table(ana.data$w9_n_mj_use_perweek, useNA = "always")
+table(ana.data$w10_n_mj_use_perweek, useNA = "always")
+
+ana.data %>% group_by(covid_mj_deliv_past2weeks) %>% summarise(w9_mean = mean(w9_n_mj_use_perweek, na.rm = T), w9_sd = sd(w9_n_mj_use_perweek, na.rm = T))
+
+ana.data %>% group_by(covid_mj_deliv_past2weeks) %>% summarise(w10_mean = mean(w10_n_mj_use_perweek, na.rm = T), w10_sd = sd(w10_n_mj_use_perweek, na.rm = T))
+
+leveneTest(ana.data$w9_n_mj_use_perweek, group = as.factor(ana.data$covid_mj_deliv_past2weeks), center = mean)
+t.test(ana.data[ana.data$covid_mj_deliv_past2weeks %in% 0, "w9_n_mj_use_perweek"], ana.data[ana.data$covid_mj_deliv_past2weeks %in% 1, "w9_n_mj_use_perweek"], var.equal = F)
+
+leveneTest(ana.data$w10_n_mj_use_perweek, group = as.factor(ana.data$covid_mj_deliv_past2weeks), center = mean)
+t.test(ana.data[ana.data$covid_mj_deliv_past2weeks %in% 0, "w10_n_mj_use_perweek"], ana.data[ana.data$covid_mj_deliv_past2weeks %in% 1, "w10_n_mj_use_perweek"], var.equal = T)
+
+# increase in cannabis use during covid
+ana.data <- mutate(ana.data, increase_n_mj_use_perweek = w10_n_mj_use_perweek - w9_n_mj_use_perweek)
+select(ana.data, w9_n_mj_use_perweek, w10_n_mj_use_perweek, increase_n_mj_use_perweek)
+
+ana.data %>% group_by(covid_mj_deliv_past2weeks) %>% summarise(increase_mean = mean(increase_n_mj_use_perweek, na.rm = T), increase_sd = sd(increase_n_mj_use_perweek, na.rm = T))
+
+leveneTest(ana.data$increase_n_mj_use_perweek, group = as.factor(ana.data$covid_mj_deliv_past2weeks), center = mean)
+t.test(ana.data[ana.data$covid_mj_deliv_past2weeks %in% 0, "increase_n_mj_use_perweek"], ana.data[ana.data$covid_mj_deliv_past2weeks %in% 1, "increase_n_mj_use_perweek"], var.equal = F)
+
+```
+
+```{r another table 1}
+# Max Cannabis Use Frequency in Past 30 days
+mean(ana.data$w9_all_mj_use_last30_n, na.rm = T)
+sd(ana.data$w9_all_mj_use_last30_n, na.rm = T)
+
+mean(ana.data$w10_all_mj_use_last30_n, na.rm = T)
+sd(ana.data$w10_all_mj_use_last30_n, na.rm = T)
+
+ana.data <- mutate(ana.data, increase_n_mj_use_last30 = w10_all_mj_use_last30_n - w9_all_mj_use_last30_n)
+select(ana.data, w9_all_mj_use_last30_n, w10_all_mj_use_last30_n, increase_n_mj_use_last30)
+
+mean(ana.data$increase_n_mj_use_last30, na.rm = T)
+sd(ana.data$increase_n_mj_use_last30, na.rm = T)
+
+ana.data %>% group_by(covid_mj_deliv_past2weeks) %>% summarise(w9_mean = mean(w9_all_mj_use_last30_n, na.rm = T), w9_sd = sd(w9_all_mj_use_last30_n, na.rm = T), w10_mean = mean(w10_all_mj_use_last30_n, na.rm = T), w10_sd = sd(w10_all_mj_use_last30_n, na.rm = T), inc_mean = mean(increase_n_mj_use_last30, na.rm = T), inc_sd = sd(increase_n_mj_use_last30, na.rm = T))
+
+# where usually get cannabis
+table(ana.data$w10_mj_supply___7, useNA = "always")
+prop.table(table(ana.data$w10_mj_supply___7, useNA = "always"))
+
+table(ana.data$w10_mj_supply___8, useNA = "always")
+prop.table(table(ana.data$w10_mj_supply___8, useNA = "always"))
+
+table(ana.data$w10_mj_supply___7, ana.data$w10_mj_supply___8, useNA = "always")
+
+table(ana.data$W9_Mj_Supply_6, useNA = "always")
+prop.table(table(ana.data$W9_Mj_Supply_6, useNA = "always"))
+
+table(ana.data$W9_Mj_Supply_8, useNA = "always")
+prop.table(table(ana.data$W9_Mj_Supply_8, useNA = "always"))
+
+# Use cannabis to cope isolation & distancing due to pandemic
+table(ana.data$covid_69___11, useNA = "always")
+prop.table(table(ana.data$covid_69___11, useNA = "always"))
+```
+
