@@ -20,6 +20,7 @@ library(car)
 data_0804 <- read_sas("/Users/zhan039/Desktop/USC_HEAL/HH/HH W10 COVID DATA/hh_w1_to_w10_0804.sas7bdat")
 data_0810 <- read_sas("/Users/zhan039/Desktop/USC_HEAL/HH/HH W10 COVID DATA/w10_covid_081020.sas7bdat")
 
+data_age_race <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/HH W10 COVID DATA/w10_covid_081020_JC_B.sav")
 ```
 
 ```{r}
@@ -29,6 +30,10 @@ colnames(data_0804)[!colnames(data_0804) %in% a]
 colnames(data_0810)[!colnames(data_0810) %in% a]
 
 data <- data_0804
+
+age_race <- data_age_race[, c("SID", "W10_Age_Calc_new_2", "RACEa")]
+
+data <- merge(data, age_race, by = "SID", all.x = T)
 ```
 
 ```{r define analytical dataset}
@@ -60,6 +65,7 @@ ana.data <- data[data$w10_ever_any_mj_last30 %in% 1, ]
 ```{r mj supply}
 # w10
 select(ana.data, starts_with("w10_mj_supply__")) %>% apply(., 1, sum)
+table(ana.data$w10_mj_supply___5, useNA = "always")
 
 ana.data <- mutate(ana.data, w10_mj_supply_n_selfgrown = w10_mj_supply___1, 
                    w10_mj_supply_n_share = w10_mj_supply___2, 
@@ -127,23 +133,22 @@ CrossTable(mj.supply.waves.long$mj_supply_n_online_deliv, mj.supply.waves.long$w
 ```
 
 ```{r table 2}
-# didn't find the age variable
+# age 
+ana.data %>% group_by(covid_mj_deliv_past2weeks) %>% summarise(mean = mean(W10_Age_Calc_new_2, na.rm = T), sd = sd(W10_Age_Calc_new_2, na.rm = T)) 
+
+leveneTest(ana.data$W10_Age_Calc_new_2, group = as.factor(ana.data$covid_mj_deliv_past2weeks), center = mean)
+t.test(ana.data[ana.data$covid_mj_deliv_past2weeks %in% 0, "W10_Age_Calc_new_2"], ana.data[ana.data$covid_mj_deliv_past2weeks %in% 1, "W10_Age_Calc_new_2"], var.equal = T)
+
 
 # gender
-table(ana.data$w10_dem_gender, useNA = "always")
-ana.data$w10_dem_gender_f <- factor(ana.data$w10_dem_gender, levels = c(-99, 1, 2), labels = c(NA, "male", "female"))
+table(ana.data$Gender, useNA = "always")
 
-CrossTable(ana.data$w10_dem_gender, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
-
-CrossTable(ana.data$w10_dem_gender_f, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+CrossTable(ana.data$Gender, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
 
 # race
-table(ana.data$w10_dem_latino_yn, useNA = "always")
-ana.data %>% select(., starts_with("w10_dem_race")) %>% apply(., 2, table, useNA = "always")
-
-ana.data <- mutate(ana.data, w10_dem_race_5c = ifelse(w10_dem_latino_yn %in% 1, 1, 
-                                                      ifelse(w10_dem_latino_yn %in% 2 & w10_dem_race___5 %in% 1, 2, 
-                                                             ifelse())))
+table(ana.data$RACEa, useNA = "always")
+attr(ana.data$RACEa, "label")
+CrossTable(ana.data$RACEa, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
 
 # pre-Covid cannabis use (times per week) & during-Covid cannabis use (times per week)
 
@@ -206,6 +211,15 @@ sd(ana.data$increase_n_mj_use_last30, na.rm = T)
 
 ana.data %>% group_by(covid_mj_deliv_past2weeks) %>% summarise(w9_mean = mean(w9_all_mj_use_last30_n, na.rm = T), w9_sd = sd(w9_all_mj_use_last30_n, na.rm = T), w10_mean = mean(w10_all_mj_use_last30_n, na.rm = T), w10_sd = sd(w10_all_mj_use_last30_n, na.rm = T), inc_mean = mean(increase_n_mj_use_last30, na.rm = T), inc_sd = sd(increase_n_mj_use_last30, na.rm = T))
 
+leveneTest(ana.data$w9_all_mj_use_last30_n, group = as.factor(ana.data$covid_mj_deliv_past2weeks), center = mean)
+t.test(ana.data[ana.data$covid_mj_deliv_past2weeks %in% 0, "w9_all_mj_use_last30_n"], ana.data[ana.data$covid_mj_deliv_past2weeks %in% 1, "w9_all_mj_use_last30_n"], var.equal = F)
+
+leveneTest(ana.data$w10_all_mj_use_last30_n, group = as.factor(ana.data$covid_mj_deliv_past2weeks), center = mean)
+t.test(ana.data[ana.data$covid_mj_deliv_past2weeks %in% 0, "w10_all_mj_use_last30_n"], ana.data[ana.data$covid_mj_deliv_past2weeks %in% 1, "w10_all_mj_use_last30_n"], var.equal = T)
+
+leveneTest(ana.data$increase_n_mj_use_last30, group = as.factor(ana.data$covid_mj_deliv_past2weeks), center = mean)
+t.test(ana.data[ana.data$covid_mj_deliv_past2weeks %in% 0, "increase_n_mj_use_last30"], ana.data[ana.data$covid_mj_deliv_past2weeks %in% 1, "increase_n_mj_use_last30"], var.equal = F)
+
 # where usually get cannabis
 table(ana.data$w10_mj_supply___7, useNA = "always")
 prop.table(table(ana.data$w10_mj_supply___7, useNA = "always"))
@@ -221,8 +235,70 @@ prop.table(table(ana.data$W9_Mj_Supply_6, useNA = "always"))
 table(ana.data$W9_Mj_Supply_8, useNA = "always")
 prop.table(table(ana.data$W9_Mj_Supply_8, useNA = "always"))
 
+CrossTable(ana.data$w9_mj_supply_n_selfgrown, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w9_mj_supply_n_share, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w9_mj_supply_n_bfperson, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w9_mj_supply_n_bfdisp_card, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w9_mj_supply_n_bfdisp_nocard, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w9_mj_supply_n_online_deliv, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$W9_Mj_Supply_6, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$W9_Mj_Supply_8, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w10_mj_supply_n_selfgrown, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w10_mj_supply_n_share, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w10_mj_supply_n_bfperson, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w10_mj_supply_n_bfdisp_card, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w10_mj_supply_n_bfdisp_nocard, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w10_mj_supply_n_online_deliv, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w10_mj_supply___7, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w10_mj_supply___8, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
 # Use cannabis to cope isolation & distancing due to pandemic
 table(ana.data$covid_69___11, useNA = "always")
 prop.table(table(ana.data$covid_69___11, useNA = "always"))
+
+CrossTable(ana.data$covid_69___11, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+```
+
+```{r descriptive statistics for abstracts and results}
+mean(ana.data$W10_Age_Calc_new_2)
+sd(ana.data$W10_Age_Calc_new_2)
+
+table(ana.data$Gender, useNA = "always")
+prop.table(table(ana.data$Gender, useNA = "always"))
+
+table(ana.data$RACEa, useNA = "always")
+attr(ana.data$RACEa, "label")
+prop.table(table(ana.data$RACEa, useNA = "always"))
+
+table(ana.data$w9_all_mj_use_last30_n, useNA = "always")
+pre.ana.data <- ana.data[!ana.data$w9_all_mj_use_last30_n %in% c(0, NA), ]
+table(pre.ana.data$w9_all_mj_use_last30_n, useNA = "always")
+487/761
+
+pre.w9.age <- data_age_race[, c("SID", "W9_Age_Calc_new_2")]
+pre.ana.data <- merge(pre.ana.data, pre.w9.age, by = "SID", all.x = T)
+
+mean(pre.w9.age$W9_Age_Calc_new_2, na.rm = T)
+
+prop.table(table(pre.ana.data$Gender, useNA = "always"))
+
+attr(pre.ana.data$RACEa, "label")
+prop.table(table(pre.ana.data$RACEa, useNA = "always"))
+
 ```
 
