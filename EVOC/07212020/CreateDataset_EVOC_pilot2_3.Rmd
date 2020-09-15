@@ -33,8 +33,13 @@ data1_clean <- data1[data1$redcapid %in% pptlist_pilot3_1$redcapid, ]
 data2_clean <- data2[data2$redcapid %in% pptlist_pilot3_2$redcapid, ]
 prolific2_clean <- prolific2[prolific2$redcapid %in% pptlist_pilot2$redcapid, ]
 
+length(unique(prolific2_clean$prolificpid))
+
 rowSums(is.na(prolific2_clean[prolific2_clean$prolificpid == "5d6f02d4e0207600167e2317", ]))
 
+prolific2_clean[prolific2_clean$prolificpid == "5d6f02d4e0207600167e2317", ]  # remove redcapid 8168
+
+prolific2_clean <- prolific2_clean[!prolific2_clean$redcapid %in% 8168, ]
 
 ```
 
@@ -64,12 +69,18 @@ colnames(prolific3_clean)[!colnames(prolific3_clean) %in% intersec_name_2_3]
 prolific_2_3 <- merge(prolific2_clean, prolific3_clean, all.x = T, all.y = T, by = c("prolificpid", "pilot", intersec_name_2_3[!intersec_name_2_3 %in% c("prolificpid", "pilot")]))
 ```
 
-```{r number of attention check failures}
+```{r number of attention check}
 data <- prolific_2_3
+
+table(data$attention_check, useNA = "always")
+
+data <- mutate(data, att_success = ifelse(is.na(attention_check), 0, ifelse(attention_check <= 25, 1, 0)))
+table(data$att_success, useNA = "always")
 
 data <- mutate(data, att1_success = ifelse(data$att_check1___1 %in% 1 & data$att_check1___4 %in% 1 & data$att_check1___5 %in% 1, 1, 0))
 select(data, starts_with("att_check1"), att1_success)
 select(data, starts_with("att_check1"), att1_success) %>% summary
+table(data$att1_success, useNA = "always")
 
 table(data$att_check2, data$last_30_ecig_yn, useNA = "ifany")
 data <- mutate(data, att2_success = ifelse(data$last_30_ecig_yn %in% 1 & data$att_check2 %in% 3, 1, ifelse(data$last_30_ecig_yn %in% 1, 0, NA))) # people who are not asked the second question are marked as NA
@@ -83,18 +94,21 @@ data$att2_replaceNA <- data$att2_success
 data$att2_replaceNA[is.na(data$att2_replaceNA)] <- 1 # people who are not asked are marked as success
 table(data$att2_replaceNA, useNA = "ifany")
 
-data$sum_att_success <- apply(data[, c("att1_success", "att2_replaceNA", "att3_success")], 1, sum)
+data$sum_att_success_4item <- apply(data[, c("att_success", "att1_success", "att2_replaceNA", "att3_success")], 1, sum)
+data$sum_att_success_3item <- apply(data[, c("att_success", "att1_success", "att3_success")], 1, sum)
 
-data$sum_att_failure <- 3 - data$sum_att_success
+data$sum_att_failure_4item <- 4 - data$sum_att_success_4item
+data$sum_att_failure_3item <- 3 - data$sum_att_success_3item
 
 # data$att1.success <- factor(data$att1.success, levels = c(0, 1), labels = c("fail", "success"))
 # data$att2.success <- factor(data$att2.success, levels = c(0, 1), labels = c("fail", "success"))
 # data$att3.success <- factor(data$att3.success, levels = c(0,1), labels = c("fail", "success"))
 
-select(data, att1_success, att2_success, att3_success, sum_att_failure)
+select(data, att_success, att1_success, att2_success, att3_success, sum_att_failure_3item, sum_att_failure_4item)
 
-newdata <- select(data, -att2_replaceNA, -sum_att_success)
+newdata <- select(data, -att2_replaceNA, -sum_att_success_4item, -sum_att_success_3item)
 
+length(unique(newdata$prolificpid))
 length(unique(newdata$redcapid))
 sort(sapply(colnames(newdata), nchar))
 
@@ -102,14 +116,16 @@ newdata <- rename(newdata, "ecig_use_patterns_complete" = ecigarette_use_pattern
 newdata <- rename(newdata, "substance_use_hist_complete" = substance_use_history_complete, "substance_use_hist_timestamp" = substance_use_history_timestamp)
 sort(sapply(colnames(newdata), nchar))
 
+table(newdata$sum_att_failure_4item, useNA = "always")
+table(newdata$sum_att_failure_3item, useNA = "always")
 ```
 
 ```{r save datasets}
-write.csv(newdata, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07282020/EVOC_pilot2_3/EVOC_pilot2_3.csv", na = "")
+write.csv(newdata, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Final_Data/EVOC_pilot2_3/EVOC_pilot2_3_09152020.csv", na = "")
 
-write_sav(newdata, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07282020/EVOC_pilot2_3/EVOC_pilot2_3.sav")
+write_sav(newdata, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Final_Data/EVOC_pilot2_3/EVOC_pilot2_3_09152020.sav")
 
-write_dta(newdata, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/07282020/EVOC_pilot2_3/EVOC_pilot2_3.dta")
+write_dta(newdata, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Final_Data/EVOC_pilot2_3/EVOC_pilot2_3_09152020.dta")
 
 ```
 
