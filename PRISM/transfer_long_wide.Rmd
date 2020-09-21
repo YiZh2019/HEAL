@@ -1,0 +1,94 @@
+---
+title: "test_trasfer_long_wide"
+author: "Yi"
+date: "8/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+library(lme4)
+```
+
+```{r}
+data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/PRISM/08312020_Christie/PRISMCompleters_w_Menthol_Status_31Aug2020.csv", na.strings = c("", "."))
+```
+
+```{r}
+select(data, sid, blinding_condn, contains("mnws")) %>% arrange(sid, blinding_condn)
+```
+
+
+```{r check variables}
+length(unique(data$sid))
+table(data$blinding_condn, useNA = "always")
+data %>% group_by(sid, menthol_status)  %>% summarise(n = n()) %>% arrange(n) 
+sum(is.na(data$sid))
+
+
+```
+
+```{r}
+# subset <- select(data, sid, blinding_condn, smoking_condition_check, patch_condition, menthol_status, contains(c("mnws", "qsu", "poms")))
+# select(subset, sid, axt1_poms_1, axt1_poms_sf_1)
+
+subset <- select(data, sid, blinding_condn, smoking_condition_check, patch_condition, menthol_status, contains(c("mnws", "qsu", "poms")))
+
+6 * 11 + 11 + 10 * 11 + 11 + 5
+
+axt.sub <- colnames(subset)[startsWith(colnames(subset), "axt")]
+time_invariant <- colnames(subset)[!colnames(subset) %in% axt.sub]
+
+# select(subset, contains("poms"))
+# grepl("poms_sf", colnames(subset))
+# colnames(subset)[grepl("poms_sf", colnames(subset))]<- gsub("poms_sf", "poms", colnames(subset))[grepl("poms_sf", colnames(subset))]
+# select(subset, contains("poms"))
+
+
+session1 <- subset[subset$blinding_condn == 1, ]
+session2 <- subset[subset$blinding_condn == 2, ]
+session3 <- subset[subset$blinding_condn == 3, ]
+session4 <- subset[subset$blinding_condn == 4, ]
+
+
+session1_long <- session1 %>% gather(., key = variable, value = value, all_of(axt.sub)) %>% separate(variable, c("axt", "variable"), sep = "_", extra = "merge") %>% spread(., variable, value)
+
+session2_long <- session2 %>% gather(., key = variable, value = value, all_of(axt.sub)) %>% separate(variable, c("axt", "variable"), sep = "_", extra = "merge") %>% spread(., variable, value)
+
+session3_long <- session3 %>% gather(., key = variable, value = value, all_of(axt.sub)) %>% separate(variable, c("axt", "variable"), sep = "_", extra = "merge") %>% spread(., variable, value)
+
+session4_long <- session4 %>% gather(., key = variable, value = value, all_of(axt.sub)) %>% separate(variable, c("axt", "variable"), sep = "_", extra = "merge") %>% spread(., variable, value)
+
+axt_long <- rbind(session1_long, session2_long, session3_long, session4_long)
+
+axt_long %>% group_by(sid, blinding_condn) %>% summarise(n1 = n()) %>% arrange(n1)
+axt_long %>% group_by(sid, axt) %>% summarise(n2 = n()) %>% arrange(n2)
+
+table(axt_long$smoking_condition_check, axt_long$patch_condition, axt_long$blinding_condn, useNA = "always")
+
+```
+
+```{r}
+summary(axt_long$axt)
+axt_long$axt_f <- factor(axt_long$axt, levels = unique(axt_long$axt), labels = c(1, 10, 11, 2:9))
+axt_long %>% select(sid, blinding_condn, smoking_condition_check, patch_condition, axt, axt_f, everything())
+
+# write_sav(axt_long, "/Users/zhan039/Desktop/USC_HEAL/PRISM/09112020/prism_0921.sav")
+```
+
+```{r poms}
+# poms anxiety
+summary(rowMeans(axt_long[, c("poms_sf_1", "poms_sf_10", "poms_sf_15", "poms_sf_16", "poms_sf_23", "poms_sf_28")], na.rm = T))
+```
+
+
+```{r}
+model1 <- lmer(mnws_mean ~ menthol_status + smoking_condition_check + (1 + smoking_condition_check|sid), data = axt_long)
+summary(model1)
+```
+
