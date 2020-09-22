@@ -1,0 +1,117 @@
+---
+title: "Smoking Type in Prescreen X Smoking History in Redcap"
+author: "Yi"
+date: "9/16/2020"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, include = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(gmodels)
+library(pander)
+```
+
+```{r}
+pilot2 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Christie/Prolific Pilot 2 Ppt Smoking Status.csv", stringsAsFactors = F)
+pilot3_1 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Christie/Prolific Pilot 3 (wave 1) Smoking Status.csv", stringsAsFactors = F)
+pilot3_2 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Christie/Prolific Pilot 3 (wave 2) Smoking Status.csv", stringsAsFactors = F)
+
+data_pilot2_3 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Final_Data/EVOC_pilot2_3/EVOC_pilot2_3_09152020.csv")
+data_pilot2_3 <- data_pilot2_3[, -1]
+```
+
+```{r prepare prescreener data}
+length(unique(pilot2$participant_id))
+length(unique(pilot3_2$participant_id))
+length(intersect(unique(pilot2$participant_id), unique(pilot3_2$participant_id)))
+
+pilot2_type <- pilot2[, c("participant_id", "Smoking..Tobacco.or.e.cigarettes")]
+pilot2_type$pilot <- 2
+
+pilot3_2_type <- pilot3_2[, c("participant_id", "Smoking..Tobacco.or.e.cigarettes")]
+pilot3_2_type$pilot <- 3
+
+data_type <- rbind(pilot2_type, pilot3_2_type)
+
+data <- merge(data_pilot2_3, data_type, by.x = c("prolificpid", "pilot"), by.y = c("participant_id", "pilot"), all.x = T)
+```
+
+```{r}
+# Ever use: 0 No, 1 Yes but not in the last 6 months, 2 Yes in the last 6 months but not in the last 30 days, 3 Yes in the last 30 days, 9 Yes in the last 6 months but don't know whether 30 days
+
+EverUse <- function(var.ever, var.30.last){
+  temp.data <- mutate(data, temp_ever_use_new = ifelse(get(var.ever) %in% 0, 0,
+                                                   ifelse(get(var.ever) %in% 1, 1,
+                                                          ifelse(get(var.ever) %in% 2 & get(var.30.last) %in% 0, 2,
+                                                                 ifelse(get(var.ever) %in% 2 & get(var.30.last) %in% 1, 3, 
+                                                                        ifelse(get(var.ever) %in% 2 & get(var.30.last) %in% 9, 9, NA))))))
+  
+}
+
+```
+
+```{r}
+# disposal
+ever_disp <- EverUse("ever_disp", "last_30_ecig_dispose")
+data <- rename(ever_disp, "ever_disp_new" = temp_ever_use_new)
+select(data, redcapid, ever_disp, last_30_ecig_dispose, ever_disp_new)
+
+# vape pen
+ever_pen <- EverUse("ever_pen", "last_30_ecig_pen")
+data <- rename(ever_pen, "ever_pen_new" = temp_ever_use_new)
+
+# Mod
+ever_mod <- EverUse("ever_mod", "last_30_ecig_mod")
+data <- rename(ever_mod, "ever_mod_new" = temp_ever_use_new)
+
+# Box Mod
+ever_box_mod <- EverUse("ever_box_mod", "last_30_ecig_box_mod")
+data <- rename(ever_box_mod, "ever_box_mod_new" = temp_ever_use_new)
+
+# JUUL
+ever_juul <- EverUse("ever_juul", "last_30_ecig_juul")
+data <- rename(ever_juul, "ever_juul_new" = temp_ever_use_new)
+
+# Other pod
+ever_pod <- EverUse("ever_pod", "last_30_ecig_pod")
+data <- rename(ever_pod, "ever_pod_new" = temp_ever_use_new)
+
+# Smoking type in the presreen data
+table(data$Smoking..Tobacco.or.e.cigarettes, useNA = "always")
+class(data$Smoking..Tobacco.or.e.cigarettes)
+
+data$Smoking_Type <- factor(data$Smoking..Tobacco.or.e.cigarettes, levels = sort(unique(data$Smoking..Tobacco.or.e.cigarettes)), labels = c(0:3))
+```
+
+**Ever_XXX_new:**
+<br>0: No
+<br>1: Yes, but not in the last 6 months 
+<br>2: Yes, in the last 6 months but not in the last 30 days 
+<br>3: Yes, in the last 30 days 
+<br>9: Yes, in the last 6 months but don't know whether in the last 30 days
+
+**Smoking Type in Prescreen:**
+<br>0: Do not use e-cigarettes or tobacco products
+<br>1: Only ever used e-cigarettes regularly (not tobacco products)
+<br>2: Previously smoked tobacco products. Now only use e-cigarettes
+<br>3: Regularly use both tobacco products and e-cigarettes         
+
+```{r include=TRUE}
+
+Tables <- function(varname){
+  
+pander(descr::CrossTable(data[, varname], data[, "Smoking_Type"], prop.r = T, prop.c = T, prop.t = F, prop.chisq = F, format = "SAS", dnn = c(varname, "Smoking Type in Prescreen")), digits = 1, split.table = Inf)
+
+}
+
+varlist <- data %>% select(., starts_with("ever") & ends_with("new")) %>% colnames()
+pander(sapply(varlist, Tables))
+```
+
