@@ -58,6 +58,18 @@ EverUse <- function(var.ever, var.30.last){
 ```
 
 ```{r}
+# Cigarette
+data <- mutate(data, ever_cig_new = ifelse(ever_cig %in% 0, 0, 
+                                           ifelse(ever_cig %in% 1, 1, 
+                                                  ifelse(ever_cig %in% 2 & last_30_cig %in% 1, 2,
+                                                         ifelse(ever_cig %in% 2 & last_30_cig > 1, 3, 
+                                                                ifelse(ever_cig %in% 2, 9, NA))))))
+table(data$ever_cig, useNA = "always")
+table(data$last_30_cig, data$ever_cig, useNA = "always")
+table(data$ever_cig_new, useNA = "always")
+table(data$ever_cig_new, data$Smoking..Tobacco.or.e.cigarettes, useNA = "always")
+table(data[data$pilot %in% 3, ]$ever_cig_new, data[data$pilot %in% 3, ]$Smoking..Tobacco.or.e.cigarettes, useNA = "always")
+
 # disposal
 ever_disp <- EverUse("ever_disp", "last_30_ecig_dispose")
 data <- rename(ever_disp, "ever_disp_new" = temp_ever_use_new)
@@ -90,7 +102,7 @@ class(data$Smoking..Tobacco.or.e.cigarettes)
 data$Smoking_Type <- factor(data$Smoking..Tobacco.or.e.cigarettes, levels = sort(unique(data$Smoking..Tobacco.or.e.cigarettes)), labels = c(0:3))
 ```
 
-**Ever_XXX_new:**
+**ever_XXX_new:**
 <br>0: No
 <br>1: Yes, but not in the last 6 months 
 <br>2: Yes, in the last 6 months but not in the last 30 days 
@@ -111,7 +123,11 @@ pander(descr::CrossTable(data[, varname], data[, "Smoking_Type"], prop.r = T, pr
 
 }
 
+pander(descr::CrossTable(data[data$pilot %in% 3, "ever_cig_new"], data[data$pilot %in% 3, "Smoking_Type"], prop.r = T, prop.c = T, prop.t = F, prop.chisq = F, format = "SAS", dnn = c("ever_cig_new", "Smoking Type in Prescreen")), digits = 1, split.table = Inf)
+
 varlist <- data %>% select(., starts_with("ever") & ends_with("new")) %>% colnames()
-pander(sapply(varlist, Tables))
+pander(sapply(varlist[-1], Tables))
+
+
 ```
 
