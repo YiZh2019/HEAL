@@ -1,0 +1,70 @@
+---
+title: "Smoking Type in Prescreen X Smoking History in Redcap"
+author: "Yi"
+date: "9/23/2020"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, include = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(gmodels)
+library(pander)
+```
+
+```{r}
+pilot2 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Christie/Prolific Pilot 2 Ppt Smoking Status.csv", stringsAsFactors = F)
+
+data_pilot2_3 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Final_Data/EVOC_pilot2_3/EVOC_pilot2_3_09152020.csv")
+data_pilot2_3 <- data_pilot2_3[, -1]
+```
+
+```{r prepare prescreener data}
+length(unique(pilot2$participant_id))
+
+Type_pilot2 <- pilot2[, c("participant_id", "Smoking..Tobacco.or.e.cigarettes")]
+RC_pilot3 <- data_pilot2_3[data_pilot2_3$pilot %in% 3, ]
+
+data <- merge(RC_pilot3, Type_pilot2, by.x = c("prolificpid"), by.y = c("participant_id"), all.x = T)
+```
+
+```{r}
+# Cigarette
+data <- mutate(data, ever_cig_new = ifelse(ever_cig %in% 0, 0, 
+                                           ifelse(ever_cig %in% 1, 1, 
+                                                  ifelse(ever_cig %in% 2 & last_30_cig %in% 1, 2,
+                                                         ifelse(ever_cig %in% 2 & last_30_cig > 1, 3,NA)))))
+table(data$ever_cig, useNA = "always")
+table(data$last_30_cig, data$ever_cig, useNA = "always")
+table(data$ever_cig_new, useNA = "always")
+table(data$ever_cig_new, data$Smoking..Tobacco.or.e.cigarettes, useNA = "always")
+
+data$Smoking_Type <- factor(data$Smoking..Tobacco.or.e.cigarettes, levels = sort(unique(data$Smoking..Tobacco.or.e.cigarettes)), labels = c(0:3))
+```
+
+**ever_XXX_new:**
+<br>0: No
+<br>1: Yes, but not in the last 6 months 
+<br>2: Yes, in the last 6 months but not in the last 30 days 
+<br>3: Yes, in the last 30 days 
+
+**Smoking Type in Prescreen:**
+<br>0: Do not use e-cigarettes or tobacco products
+<br>1: Only ever used e-cigarettes regularly (not tobacco products)
+<br>2: Previously smoked tobacco products. Now only use e-cigarettes
+<br>3: Regularly use both tobacco products and e-cigarettes         
+
+```{r include=TRUE}
+
+pander(descr::CrossTable(data[, "ever_cig_new"], data[, "Smoking_Type"], prop.r = T, prop.c = T, prop.t = F, prop.chisq = F, format = "SAS", dnn = c("ever_cig_new", "Smoking Type in Prescreen")), digits = 1, split.table = Inf)
+
+
+
+```
+
