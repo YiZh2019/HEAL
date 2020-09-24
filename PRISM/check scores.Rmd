@@ -1,0 +1,48 @@
+---
+title: "check scores"
+author: "Yi"
+date: "9/21/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+library(lme4)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/PRISM/09112020/prism_0921_scored.sav")
+
+# write.csv(data, file = "/Users/zhan039/Desktop/USC_HEAL/PRISM/09112020/prism_0921_scored.csv", na = "")
+```
+
+```{r}
+data %>% select(., mnws_mean, MNWS_Mean_new, qsu_mean, QSU_Mean_new) %>% apply(., 2, summary)
+
+```
+
+```{r}
+summary(data$POMS_Anxiety_Mean)
+summary(rowMeans(data[, c("qsu_1", "qsu_2", "qsu_3", "qsu_4", "qsu_5", "qsu_6", "qsu_7", "qsu_8", "qsu_9", "qsu_10")], na.rm = T))
+
+```
+
+```{r}
+data$axt_n <- as.numeric(as.character(factor(data$axt, levels = unique(data$axt), labels = c(1, 10, 11, 2:9))))
+```
+
+```{r}
+write.csv(data, file = "/Users/zhan039/Desktop/USC_HEAL/PRISM/09112020/prism_0923_scored.csv", na = "")
+write_sav(data, "/Users/zhan039/Desktop/USC_HEAL/PRISM/09112020/prism_0923_scored.sav")
+```
+
+```{r}
+model1 <- lmer(mnws_mean ~ menthol_status + smoking_condition_check + (1 + smoking_condition_check|sid), data = data)
+summary(model1)
+```
+
