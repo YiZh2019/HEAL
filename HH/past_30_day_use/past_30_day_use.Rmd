@@ -1,0 +1,138 @@
+---
+title: "past_30_day_use"
+author: "Yi"
+date: "9/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(tidyverse)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/Past_30/H_H W1-W9 DATA/HH_W1_to_W9_Scored_06272020.sav")
+```
+
+```{r}
+w1_8 <- c("W1_Alc_Use_Last30","W1_Cig_Use_Last30","W1_Mj_Use_Last30","W1_Stim_Use_Last30","W1_RxStim_Use_Last30","W1_RxPain_Use_Last30","W1_Other_Use_Last30","W2_Alc_Use_Last30","W2_Cig_Use_Last30","W2_Mj_Use_Last30","W2_Stim_Use_Last30","W2_RxStim_Use_Last30","W2_RxPain_Use_Last30","W2_Other_Use_Last30","W3_Alc_Use_Last30","W3_Cig_Use_Last30","W3_Mj_Use_Last30","W3_Stim_Use_Last30","W3_RxStim_Use_Last30","W3_RxPain_Use_Last30","W3_Other_Use_Last30","W3_eCig_Use_Last30","W4_Alc_Use_Last30","W4_Cig_Use_Last30","W4_Mj_Use_Last30","W4_Stim_Use_Last30","W4_RxStim_Use_Last30","W4_RxPain_Use_Last30","W4_Other_Use_Last30","W4_eCig_Use_Last30","W4_eMj_Use_Last30","W4_MjFood_Use_Last30","W5_Alc_Use_Last30","W5_Cig_Use_Last30","W5_Mj_Use_Last30","W5_Stim_Use_Last30","W5_RxStim_Use_Last30","W5_RxPain_Use_Last30","W5_eCig_Use_Last30","W5_eMj_Use_Last30","W5_MjFood_Use_Last30","W5_eCig_noNic_Use_Last30","W5_Hookah_Use_Last30","W5_Cigars_Use_Last30","W5_Blunts_Use_Last30","W6_Alc_Use_Last30","W6_Cig_Use_Last30","W6_Mj_Use_Last30","W6_Stim_Use_Last30","W6_RxStim_Use_Last30","W6_RxPain_Use_Last30","W6_eCig_Use_Last30","W6_eMj_Use_Last30","W6_MjFood_Use_Last30","W6_eCig_noNic_Use_Last30","W6_Hookah_Use_Last30","W6_Cigars_Use_Last30","W6_Blunts_Use_Last30","W6_Dabbing_Use_Last30","W7_Alc_Use_Last30","W7_Cig_Use_Last30","W7_Mj_Use_Last30","W7_Stim_Use_Last30","W7_RxStim_Use_Last30","W7_RxPain_Use_Last30","W7_eCig_Use_Last30","W7_eMj_Use_Last30","W7_MjFood_Use_Last30","W7_eCig_noNic_Use_Last30","W7_Hookah_Use_Last30","W7_Cigars_Use_Last30","W7_Blunts_Use_Last30","W7_Dabbing_Use_Last30","W8_Alc_Use_Last30","W8_Cig_Use_Last30","W8_Mj_Use_Last30","W8_Stim_Use_Last30","W8_RxStim_Use_Last30","W8_RxPain_Use_Last30","W8_eCig_Use_Last30","W8_eMj_Use_Last30","W8_MjFood_Use_Last30","W8_eCig_noNic_Use_Last30","W8_Hookah_Use_Last30","W8_Cigars_Use_Last30","W8_Blunts_Use_Last30","W8_Dabbing_Use_Last30")
+
+w9 <- c("W9_Alc_Use_Last30","W9_Cig_Use_Last30","W9_Mj_Use_Last30","W9_RxStim_Use_Last30","W9_RxPain_Use_Last30","W9_Other_Use_Last30","W9_Other_Use_Last30_Specify","W9_eCig_Use_Last30","W9_eMj_Use_Last30","W9_MjFood_Use_Last30","W9_eCig_noNic_Use_Last30","W9_Hookah_Use_Last30","W9_Cigar_Use_Last30","W9_Blunt_Use_Last30","W9_Dabbing_Use_Last30","W9_CigPuff_Use_Last30","W9_Juul_Use_Last30","W9_Other_Vape_Use_Last30","W9_Cigarillo_Use_Last30","W9_sMj_Use_Last30","W9_Inhale_Use_Last30","W9_Cocaine_Use_Last30","W9_Meth_Use_Last30","W9_Ecstacy_Use_Last30","W9_Sedative_Use_Last30","W9_Heroin_Use_Last30")
+```
+
+```{r last30c}
+w1_8_last30c <- function(varname){
+  newvar <- paste(varname, "c", sep = "")
+  temp.data <- mutate(temp.data, temp.var = ifelse(get(varname) %in% 0, 0,
+                                              ifelse(get(varname) %in% 1, 2,
+                                                     ifelse(get(varname) %in% 2, 4, 
+                                                            ifelse(get(varname) %in% 3, 8,
+                                                                   ifelse(get(varname) %in% 4, 12,
+                                                                          ifelse(get(varname) %in% 5, 17,
+                                                                                 ifelse(get(varname) %in% 6, 22,
+                                                                                        ifelse(get(varname) %in% 7, 27,
+                                                                                               ifelse(get(varname) %in% 8, 30, NA))))))))))
+  colnames(temp.data)[colnames(temp.data) == "temp.var"] <- newvar
+  
+  return(temp.data)
+}
+
+temp.data <- data
+
+for (i in 1:length(w1_8)) {
+  var <- w1_8[i]
+  temp.data <- w1_8_last30c(var)
+}
+
+select(temp.data, all_of(w1_8), ends_with("Last30c")) %>% select(sort(names(.)))
+
+```
+
+```{r last30c2}
+w1_8_last30c2 <- function(varname){
+  newvar <- paste(varname, "c2", sep = "")
+  temp.data <- mutate(temp.data, temp.var = ifelse(get(varname) %in% 0, 0,
+                                              ifelse(get(varname) %in% 1, 2,
+                                                     ifelse(get(varname) %in% 2, 4, 
+                                                            ifelse(get(varname) %in% 3, 8,
+                                                                   ifelse(get(varname) %in% 4 | get(varname) %in% 5, 15,
+                                                                          ifelse(get(varname) %in% 6 | get(varname) %in% 7, 25,
+                                                                                        ifelse(get(varname) %in% 8, 30, NA))))))))
+  colnames(temp.data)[colnames(temp.data) == "temp.var"] <- newvar
+  
+  return(temp.data)
+}
+
+for (i in 1:length(w1_8)) {
+  var <- w1_8[i]
+  temp.data <- w1_8_last30c2(var)
+}
+
+select(temp.data, all_of(w1_8), ends_with("Last30c2")) %>% select(sort(names(.))) %>% select(., 1:10) %>% apply(., 2, table, useNA = "always")
+
+```
+
+```{r last30d}
+w1_8_last30d <- function(varname){
+  newvar <- paste(varname, "d", sep = "")
+  temp.data <- mutate(temp.data, temp.var = ifelse(get(varname) %in% 0, 0,
+                                                   ifelse(get(varname) > 0, 1, NA)))
+  colnames(temp.data)[colnames(temp.data) == "temp.var"] <- newvar
+  
+  return(temp.data)
+}
+
+for (i in 1:length(w1_8)) {
+  var <- w1_8[i]
+  temp.data <- w1_8_last30d(var)
+}
+
+select(temp.data, all_of(w1_8), ends_with("Last30d")) %>% select(sort(names(.))) %>% select(., 1:10) %>% apply(., 2, table, useNA = "always")
+```
+
+```{r last30c3}
+w1_8_last30c3 <- function(varname){
+  newvar <- paste(varname, "c3", sep = "")
+  temp.data <- mutate(temp.data, temp.var = ifelse(get(varname) %in% 0, 0,
+                                                   ifelse(get(varname) %in% 1, 2, 
+                                                          ifelse(get(varname) %in% 2, 4,
+                                                                 ifelse(get(varname) %in% 3, 8, 
+                                                                        ifelse(get(varname) > 3, 10, NA))))))
+  colnames(temp.data)[colnames(temp.data) == "temp.var"] <- newvar
+  
+  return(temp.data)
+}
+
+for (i in 1:length(w1_8)) {
+  var <- w1_8[i]
+  temp.data <- w1_8_last30c3(var)
+}
+
+select(temp.data, all_of(w1_8), ends_with("Last30c3")) %>% select(sort(names(.))) %>% select(., 1:10) %>% apply(., 2, table, useNA = "always")
+```
+
+```{r}
+write_sav(temp.data, "/Users/zhan039/Desktop/USC_HEAL/HH/Past_30/09282020/HH_past30_09282020_YZ.sav")
+write.csv(temp.data, file = "/Users/zhan039/Desktop/USC_HEAL/HH/Past_30/09282020/HH_past30_09282020_YZ.csv")
+
+
+```
+
+
+```{r w9_last30c2}
+
+
+select(data, all_of(w1_8)) %>% apply(., 2, range, na.rm = T)
+select(data, all_of(w9)) %>% apply(., 2, range, na.rm = T)
+
+table(data$W9_Heroin_Use_Last30a)
+table(data$W9_Heroin_Use_Last30)
+table(data$W9_Alc_Use_Last30a)
+table(data$W9_Alc_Use_Last30)
+data[, c("W9_Alc_Use_Last30", "W9_Alc_Use_Last30a")]
+```
+
