@@ -1,0 +1,84 @@
+---
+title: "device_most"
+author: "Yi"
+date: "9/30/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+data.origin <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Final_Data/EVOC_pilot1_08072020.csv", na.strings = "")
+
+data <- data.origin
+```
+
+```{r}
+FreqPerc.Sub <- function(varname, subset){
+  freq <- table(subset[, varname], subset[, "project_type"], useNA = "always")
+  perct <- round(prop.table(freq, margin = 2) * 100, 1)
+  nperct <- paste(freq, " ", "(", perct, "%", ")", sep = "")
+  
+  nperct <- as.data.frame(matrix(nperct, ncol = 6))
+  
+  colnames(nperct) <- c(colnames(freq)[1:length(colnames(freq)) - 1], "Missing")
+  rownames(nperct) <- c(rownames(freq)[1:length(rownames(freq)) - 1], "Missing")
+
+  return(nperct)  
+}
+```
+
+```{r}
+### Device Used Most Often in the Past 30 Days
+last.30.all <- colnames(data)[startsWith(colnames(data), "last_30_ecig_")]
+last.30.device <- last.30.all[2:8]
+
+
+data$sum.last.30.device <- rowSums(data[, last.30.device], na.rm = T)  # count of devices used in last 30-day
+table(data$sum.last.30.device, useNA = "always")
+
+most.device <- colnames(data)[endsWith(colnames(data), "_most")]
+data$sum.most.device <- rowSums(data[, most.device], na.rm = T)  # count of devices used most often in the past 30 days
+table(data$sum.most.device, useNA = "always")
+
+table(data[data$last_30_ecig_dispose %in% 1, "sum.most.device"], useNA = "always")
+table(data[data$last_30_ecig_pen %in% 1, "sum.most.device"], useNA = "always")  # one missing 
+table(data[data$last_30_ecig_mod %in% 1, "sum.most.device"], useNA = "always")
+table(data[data$last_30_ecig_box_mod %in% 1, "sum.most.device"], useNA = "always")
+table(data[data$last_30_ecig_juul %in% 1, "sum.most.device"], useNA = "always")  # one missing
+table(data[data$last_30_ecig_pod %in% 1, "sum.most.device"], useNA = "always")
+table(data[data$last_30_ecig_other %in% 1, "sum.most.device"], useNA = "always")
+
+data[data$last_30_ecig_pen %in% 1 & data$sum.most.device %in% 0, c("redcapid", last.30.device, most.device)]  # redcapid 1001
+data[data$redcapid %in% 1001, "pen_most"] <- 1  # assume he used pen most often
+
+data[data$last_30_ecig_juul %in% 1 & data$sum.most.device %in% 0, c("redcapid", last.30.device, most.device)]  # redcapid 1111
+data[data$redcapid %in% 1111, "juul_most"] <- 1  # assume he used juul most often
+```
+
+```{r}
+most.device
+last.30.device
+
+tab3_most_device <- data.frame(matrix(nrow = 0, ncol = 6))
+colnames(tab3_most_device) <- c(levels(data$project_type), "Missing")
+
+for (i in 1:length(most.device)) {
+  var <- most.device[i]
+  sub <- data[data[, last.30.device[i]] %in% 1, ]
+  tempt.tab <- FreqPerc.Sub(var, sub)
+  rownames(tempt.tab) <- paste(most.device[i], "=", rownames(tempt.tab), sep = "")
+  tab3_most_device <- rbind(tab3_most_device, tempt.tab)
+}
+
+tab3_most_device
+
+write.csv(tab3_most_device, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Pilot1_Methods_Paper/updated09302020/device_most.csv")
+```
+
