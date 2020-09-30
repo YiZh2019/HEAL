@@ -169,7 +169,7 @@ table(data[data$ever_pod == 2, "last_30_ecig_pod"], useNA = "always")
 
 data[data$last_30_ecig_dispose %in% 1 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_dispose", "last_30_ecig_yn", "disp_30_days")]  # remove redcapid 1015, 1078, 2042 for Disposable
 data[data$last_30_ecig_dispose %in% 9 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_dispose", "last_30_ecig_yn", "disp_30_days")]
-data[data$last_30_ecig_dispose %in% 1 & data$disp_30_days %in% 1, c("redcapid", "last_30_ecig_dispose", "last_30_ecig_yn", "disp_30_days")]
+data[data$last_30_ecig_dispose %in% 1 & data$disp_30_days %in% 1, c("redcapid", "last_30_ecig_dispose", "last_30_ecig_yn", "disp_30_days")]  # remove redcapid 1130, 6075, 2114, 2119 for Disposable
 rm.dispose <- data[data$last_30_ecig_dispose %in% 1 & data$last_30_ecig_yn %in% 0, "redcapid"]
 
 
