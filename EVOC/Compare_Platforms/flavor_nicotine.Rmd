@@ -1,0 +1,77 @@
+---
+title: "flavor_nicotine"
+author: "Yi"
+date: "10/1/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+data.origin <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Final_Data/EVOC_pilot1_08072020.csv", na.strings = "")
+
+data <- data.origin
+```
+
+```{r}
+FreqPerc.Sub <- function(varname, subset){
+  freq <- table(subset[, varname], subset[, "project_type"], useNA = "always")
+  perct <- round(prop.table(freq, margin = 2) * 100, 1)
+  nperct <- paste(freq, " ", "(", perct, "%", ")", sep = "")
+  
+  nperct <- as.data.frame(matrix(nperct, ncol = 6))
+  
+  colnames(nperct) <- c(colnames(freq)[1:length(colnames(freq)) - 1], "Missing")
+  rownames(nperct) <- c(rownames(freq)[1:length(rownames(freq)) - 1], "Missing")
+
+  return(nperct)  
+}
+```
+
+```{r}
+###  First flavor used
+table(data[data$last_30_ecig_yn %in% 1, "flavor_first"], useNA = "always")
+
+### Most common flavor used in past 30 days
+table(data[data$last_30_ecig_yn %in% 1, "eliq_flavor2"], useNA = "always")
+
+### Type of nicotine usually used
+table(data[data$last_30_ecig_yn %in% 1, "nic_form"], useNA = "always")
+
+### Typical nicotine level
+nic.level <- colnames(data)[startsWith(colnames(data), "nic_level___")]
+apply(data[data$last_30_ecig_yn %in% 1, nic.level], 2, table, useNA = "always")
+
+nic.percent <- colnames(data)[startsWith(colnames(data), "nicotine_percent___")]
+apply(data[data$last_30_ecig_yn %in% 1, nic.percent], 2, table, useNA = "always")
+
+### Own device
+table(data$ecig_2, useNA = "always")
+```
+
+```{r}
+varlist_tab4 <- c("flavor_first", "eliq_flavor2", "nic_form", nic.level, nic.percent)
+
+tab4_flavor_nic <- data.frame(matrix(nrow = 0, ncol = 6))
+colnames(tab4_flavor_nic ) <- c(levels(data$project_type), "Missing")
+
+for (i in 1:length(varlist_tab4)) {
+  var <- varlist_tab4[i]
+  sub <- data[data$last_30_ecig_yn %in% 1, ]
+  tempt.tab <- FreqPerc.Sub(var, sub)
+  rownames(tempt.tab) <- paste(varlist_tab4[i], "=", rownames(tempt.tab), sep = "")
+  tab4_flavor_nic <- rbind(tab4_flavor_nic, tempt.tab)
+}
+
+tab4_flavor_nic
+write.csv(tab4_flavor_nic, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Pilot1_Methods_Paper/updated09302020/flavor_nicotine.csv")
+
+FreqPerc(data[, "ecig_2"])
+```
+
