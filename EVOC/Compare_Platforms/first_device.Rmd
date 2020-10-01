@@ -1,0 +1,73 @@
+---
+title: "first_device"
+author: "Yi"
+date: "10/1/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+data.origin <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Final_Data/EVOC_pilot1_08072020.csv", na.strings = "")
+
+data <- data.origin
+```
+
+```{r}
+FreqPerc <- function(varname){
+  freq <- table(varname, data$project_type, useNA = "always")
+  perct <- round(prop.table(table(varname, data$project_type, useNA = "always"), margin = 2) * 100, 1)
+  nperct <- paste(freq, " ", "(", perct, "%", ")", sep = "")
+  
+  nperct <- as.data.frame(matrix(nperct, ncol = 6))
+  
+  colnames(nperct) <- c(colnames(freq)[1:length(colnames(freq)) - 1], "Missing")
+  rownames(nperct) <- c(rownames(freq)[1:length(rownames(freq)) - 1], "Missing")
+
+  return(nperct)
+}
+
+```
+
+```{r}
+### First device use
+ever.use.all <- colnames(data)[startsWith(colnames(data), "ever_")]
+data$sum.ever.use.all <- rowSums(data[, ever.use.all])
+table(data$sum.ever.use.all, useNA = "always")
+
+first.device.all <- colnames(data)[startsWith(colnames(data), "first_")]
+apply(data[, first.device.all], 2, table, useNA = "always")
+data$sum.first.device.all <- rowSums(data[, first.device.all], na.rm = T)
+
+table(data[data$sum.ever.use.all > 0, "sum.first.device.all"], useNA = "always")  ## all ever users answer this question, i.e. no missing value for valid responsers
+
+nrow(data[data$sum.ever.use.all > 0, ])
+
+## create variables
+data <- mutate(data, first_device = ifelse(first_disp %in% 1, 1,
+                                           ifelse(first_pen %in% 1, 2,
+                                                  ifelse(first_mod %in% 1, 3,
+                                                         ifelse(first_box %in% 1, 4,
+                                                                ifelse(first_juul %in% 1, 5,
+                                                                       ifelse(first_otherpod %in% 1, 6,
+                                                                              ifelse(first_other %in% 1, 7, NA))))))))
+
+```
+
+```{r}
+tab2_fist_device  <- FreqPerc(data[, "first_device"])
+
+tab2_fist_device
+
+```
+
+```{r}
+write.csv(tab2_fist_device, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Pilot1_Methods_Paper/updated09302020/first_device.csv")
+```
+
