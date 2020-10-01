@@ -32,6 +32,18 @@ FreqPerc <- function(varname){
 
   return(nperct)
 }
+
+FreqPerc_overall <- function(varname){
+  freq <- table(varname, useNA = "always")
+  perct <- round(prop.table(freq) * 100, 1)
+  nperct <- paste(freq, " ", "(", perct, "%", ")", sep = "")
+  
+  nperct <- as.data.frame(matrix(nperct, ncol = 1))
+  
+  rownames(nperct) <- c(names(freq)[1:length(names(freq)) - 1], "Missing")
+  
+  return(nperct)
+}
 ```
 
 ```{r}
@@ -148,7 +160,21 @@ for (i in 1:length(E_cigarette_use)) {
 
 tab1_E_cig_use
 
+# overall
+tab1_E_cig_use_overall <- data.frame(matrix(nrow = 0, ncol = 1))
+
+for (i in 1:length(E_cigarette_use)) {
+  var <- data[, E_cigarette_use[i]]
+  tempt.tab <- FreqPerc_overall(var)
+  rownames(tempt.tab) <- paste(E_cigarette_use[i], "=", rownames(tempt.tab), sep = "")
+  tab1_E_cig_use_overall <- rbind(tab1_E_cig_use_overall, tempt.tab)
+}
+
+tab1_E_cig_use_overall
+ 
 write.csv(tab1_E_cig_use, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Pilot1_Methods_Paper/updated09302020/device_30_days.csv")
+
+write.csv(tab1_E_cig_use_overall, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Pilot1_Methods_Paper/updated09302020/device_30_days_overall.csv")
 ```
 
 ```{r}
@@ -159,5 +185,6 @@ select(data, redcapid, all_of(E_cigarette_use), max_use_all_dev)
 table(data$max_use_all_dev, useNA = "always")
 
 FreqPerc(data$max_use_all_dev)
+FreqPerc_overall(data[, "max_use_all_dev"])
 ```
 
