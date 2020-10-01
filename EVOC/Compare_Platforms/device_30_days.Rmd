@@ -1,0 +1,163 @@
+---
+title: "past_30_day_use"
+author: "Yi"
+date: "9/30/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+data.origin <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Final_Data/EVOC_pilot1_08072020.csv", na.strings = "")
+
+data <- data.origin
+```
+
+```{r}
+FreqPerc <- function(varname){
+  freq <- table(varname, data$project_type, useNA = "always")
+  perct <- round(prop.table(table(varname, data$project_type, useNA = "always"), margin = 2) * 100, 1)
+  nperct <- paste(freq, " ", "(", perct, "%", ")", sep = "")
+  
+  nperct <- as.data.frame(matrix(nperct, ncol = 6))
+  
+  colnames(nperct) <- c(colnames(freq)[1:length(colnames(freq)) - 1], "Missing")
+  rownames(nperct) <- c(rownames(freq)[1:length(rownames(freq)) - 1], "Missing")
+
+  return(nperct)
+}
+```
+
+```{r}
+### E-cigarette use
+## check missing
+ever.use.all <- colnames(data)[startsWith(colnames(data), "ever_")]
+ever.use <- ever.use.all[1:6]  # remove "other"  
+
+last.30.all <- colnames(data)[startsWith(colnames(data), "last_30_ecig_")]
+last.30 <- last.30.all[2:7]  # remove "last_30_ecig_yn" "last_30_ecig_other"
+
+days.last.30.all <- colnames(data)[endsWith(colnames(data), "_30_days")]
+days.last.30 <- days.last.30.all[1:6]  # remove "other_30_days"
+
+apply(data[, ever.use], 2, table, useNA = "always")
+apply(data[, last.30], 2, table, useNA = "always")
+apply(data[, days.last.30], 2, table, useNA = "always")
+table(data$last_30_ecig_yn, useNA = "always")
+
+table(data[data$ever_disp == 2, "last_30_ecig_dispose"], useNA = "always")
+table(data[data$ever_disp == 2, "disp_30_days"], useNA = "always")
+table(data[data$ever_pen == 2, "last_30_ecig_pen"], useNA = "always")
+table(data[data$ever_pen == 2, "pen_30_days"], useNA = "always")
+table(data[data$ever_mod == 2, "last_30_ecig_mod"], useNA = "always")
+table(data[data$ever_mod == 2, "mod_30_days"], useNA = "always")
+table(data[data$ever_box_mod == 2, "last_30_ecig_box_mod"], useNA = "always")
+table(data[data$ever_box_mod == 2, "box_30_days"], useNA = "always")
+table(data[data$ever_juul == 2, "last_30_ecig_juul"], useNA = "always")
+table(data[data$ever_juul == 2, "juul_30_days"], useNA = "always")
+table(data[data$ever_pod == 2, "last_30_ecig_pod"], useNA = "always")
+table(data[data$ever_pod == 2, "pod_30_days"], useNA = "always")
+
+## check inconsistent responses
+data[data$last_30_ecig_dispose %in% 1 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_dispose", "last_30_ecig_yn", "disp_30_days")]  # remove redcapid 1015, 1078, 2042 for Disposable
+data[data$last_30_ecig_dispose %in% 9 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_dispose", "last_30_ecig_yn", "disp_30_days")]
+data[data$last_30_ecig_dispose %in% 1 & data$disp_30_days %in% 1, c("redcapid", "last_30_ecig_dispose", "last_30_ecig_yn", "disp_30_days")]  # remove redcapid 1130, 6075, 2114, 2119 for Disposable
+rm.dispose <- data[data$last_30_ecig_dispose %in% 1 & data$last_30_ecig_yn %in% 0, "redcapid"]
+
+
+data[data$last_30_ecig_pen %in% 1 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_pen", "last_30_ecig_yn", "pen_30_days")]  # remove redcapid 1073, 7234, 6046, 6065, 6094, 6119, 6129, 6159, 3117 for Vape Pen
+data[data$last_30_ecig_pen %in% 9 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_pen", "last_30_ecig_yn", "pen_30_days")] 
+data[data$last_30_ecig_pen %in% 1 & data$pen_30_days %in% 1, c("redcapid", "last_30_ecig_pen", "last_30_ecig_yn", "pen_30_days")] 
+rm.pen <- data[data$last_30_ecig_pen %in% 1 & data$last_30_ecig_yn %in% 0, "redcapid"]  
+
+data[data$last_30_ecig_mod %in% 1 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_mod", "last_30_ecig_yn", "mod_30_days")]  # remove redcapid 7252, 6046, 6065, 6129
+data[data$last_30_ecig_mod %in% 9 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_mod", "last_30_ecig_yn", "mod_30_days")]
+data[data$last_30_ecig_mod %in% 1 & data$mod_30_days %in% 1, c("redcapid", "last_30_ecig_mod", "last_30_ecig_yn", "mod_30_days")]
+rm.mod <- data[data$last_30_ecig_mod %in% 1 & data$last_30_ecig_yn %in% 0, "redcapid"] 
+
+data[data$last_30_ecig_box_mod %in% 1 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_box_mod", "last_30_ecig_yn", "box_30_days")]  # remove redcapid 7252, 6040, 6159 for Box Mod
+data[data$last_30_ecig_box_mod %in% 9 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_box_mod", "last_30_ecig_yn", "box_30_days")]  # remove redcapid 2042 for Box Mod
+data[data$last_30_ecig_box_mod %in% 1 & data$box_30_days %in% 1, c("redcapid", "last_30_ecig_box_mod", "last_30_ecig_yn", "box_30_days")] 
+rm.box <- data[data$last_30_ecig_box_mod %in% 1 & data$last_30_ecig_yn %in% 0 | data$last_30_ecig_box_mod %in% 9 & data$last_30_ecig_yn %in% 0, "redcapid"] 
+
+data[data$last_30_ecig_juul %in% 1 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_juul", "last_30_ecig_yn", "juul_30_days")]  # remove redcapid 1015, 1092, 7258, 6040, 6066, 2148, 3022, 3116, 3117 for JUUL
+data[data$last_30_ecig_juul %in% 9 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_juul", "last_30_ecig_yn", "juul_30_days")]
+data[data$last_30_ecig_juul %in% 1 & data$juul_30_days %in% 1, c("redcapid", "last_30_ecig_juul", "last_30_ecig_yn", "juul_30_days")]
+rm.juul <- data[data$last_30_ecig_juul %in% 1 & data$last_30_ecig_yn %in% 0, "redcapid"]
+
+data[data$last_30_ecig_pod %in% 1 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_pod", "last_30_ecig_yn", "pod_30_days")]  # remove redcapid 7252, 2042 for pod
+data[data$last_30_ecig_pod %in% 9 & data$last_30_ecig_yn %in% 0, c("redcapid", "last_30_ecig_pod", "last_30_ecig_yn", "pod_30_days")]
+data[data$last_30_ecig_pod %in% 1 & data$pod_30_days %in% 1, c("redcapid", "last_30_ecig_pod", "last_30_ecig_yn", "pod_30_days")]
+rm.pod <- data[data$last_30_ecig_pod %in% 1 & data$last_30_ecig_yn %in% 0, "redcapid"]
+
+## create variables 
+EverUse <- function(var.ever, var.last, var.30.last){
+  temp.data <- mutate(data, temp_ever_use_new = ifelse(get(var.ever) %in% 0, 0, 
+                                            ifelse(get(var.ever) %in% 1, 1, 
+                                                   ifelse(get(var.ever) %in% 2 & get(var.last) %in% 0 | get(var.last) %in% 9 & get(var.30.last) %in% 1, 2, 
+                                                          ifelse(get(var.30.last) %in% 2, 3, 
+                                                                 ifelse(get(var.30.last) %in% c(3, 4, 5), 4,
+                                                                        ifelse(get(var.30.last) %in% c(6, 7), 5, NA)))))))
+  
+  return(temp.data)
+}
+
+dispose <- EverUse("ever_disp", "last_30_ecig_dispose", "disp_30_days")
+data <- rename(dispose, "ever_disp_new" = temp_ever_use_new)
+table(data$ever_disp_new, useNA = "always")
+
+pen <- EverUse("ever_pen", "last_30_ecig_pen", "pen_30_days")
+data <- rename(pen, "ever_pen_new"= temp_ever_use_new)
+table(data$ever_pen_new, useNA = "always")
+
+mod <- EverUse("ever_mod", "last_30_ecig_mod", "mod_30_days")
+data <- rename(mod, "ever_mod_new" = temp_ever_use_new)
+table(data$ever_mod_new, useNA = "always")
+
+box <- EverUse("ever_box_mod", "last_30_ecig_box_mod", "box_30_days")
+data <- rename(box, "ever_box_mod_new" = temp_ever_use_new)
+table(data$ever_box_mod_new, useNA = "always")
+
+juul <- EverUse("ever_juul", "last_30_ecig_juul", "juul_30_days")
+data <- rename(juul, "ever_juul_new" = temp_ever_use_new)
+table(data$ever_juul_new, useNA = "always")
+
+pod <- EverUse("ever_pod", "last_30_ecig_pod", "pod_30_days")
+data <- rename(pod, "ever_pod_new" = temp_ever_use_new)
+table(data$ever_pod_new, useNA = "always")
+```
+
+```{r E-cig Past 30 days use}
+E_cigarette_use <- colnames(data)[startsWith(colnames(data), "ever_") & endsWith(colnames(data), "new")]
+
+tab1_E_cig_use <- data.frame(matrix(nrow = 0, ncol = 6))
+colnames(tab1_E_cig_use) <- c(levels(data$project_type), "Missing")
+
+for (i in 1:length(E_cigarette_use)) {
+  var <- data[, E_cigarette_use[i]]
+  tempt.tab <- FreqPerc(var)
+  rownames(tempt.tab) <- paste(E_cigarette_use[i], "=", rownames(tempt.tab), sep = "")
+  tab1_E_cig_use <- rbind(tab1_E_cig_use, tempt.tab)
+}
+
+tab1_E_cig_use
+
+write.csv(tab1_E_cig_use, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Pilot1_Methods_Paper/updated09302020/device_30_days.csv")
+```
+
+```{r}
+E_cigarette_use
+
+data$max_use_all_dev <- apply(data[, E_cigarette_use], 1, max, na.rm = T)
+select(data, redcapid, all_of(E_cigarette_use), max_use_all_dev)
+table(data$max_use_all_dev, useNA = "always")
+
+FreqPerc(data$max_use_all_dev)
+```
+
