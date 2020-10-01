@@ -1,0 +1,56 @@
+---
+title: "Juul_users"
+author: "Yi"
+date: "10/1/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+data.origin <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Final_Data/EVOC_pilot1_08072020.csv", na.strings = "")
+
+data <- data.origin
+```
+
+```{r}
+MeanSD <- function(varname, subset){
+  m <- round(tapply(subset[, varname], subset[, "project_type"], mean, na.rm = T), 1)
+  sd <- round(tapply(subset[, varname], subset[, "project_type"], sd, na.rm = T), 1)
+  m.sd <- paste(m, " ", "(", sd, ")", sep = "")
+  
+  m.sd <- as.data.frame(matrix(m.sd, ncol = 5))
+  colnames(m.sd) <- rownames(m)
+  rownames(m.sd) <- varname
+  
+  return(m.sd)
+}
+```
+
+```{r}
+### Among JUUL users
+juul.use <- colnames(data)[startsWith(colnames(data), "juul_usage_")]
+apply(data[data$ever_juul %in% 2, juul.use], 2, table, useNA = "always")
+
+boxplot(data$juul_usage_day ~ data$project_type)
+boxplot(data$juul_usage_week ~ data$project_type)
+boxplot(data$juul_usage_month ~ data$project_type)
+
+data[data$juul_usage_month %in% 900, ]
+data.juul <- data[!data$juul_usage_month %in% 900, ]  # remove the outlier
+```
+
+```{r}
+juul.use
+
+MeanSD("juul_usage_day", data[data$ever_juul %in% 2, ])
+MeanSD("juul_usage_week", data[data$ever_juul %in% 2, ])
+MeanSD("juul_usage_month", data.juul[data.juul$ever_juul %in% 2, ])
+```
+
