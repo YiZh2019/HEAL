@@ -1,0 +1,50 @@
+---
+title: "complete time"
+author: "Yi"
+date: "10/1/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+data.origin <- read.csv("/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Final_Data/EVOC_pilot1_08072020.csv", na.strings = "")
+
+data <- data.origin
+```
+
+```{r}
+# create the redcap survey time
+time.ncol <- ends_with("timestamp", vars = colnames(data))
+start <- time.ncol[2]  # PP starts with demographic timestamp, while other surveys start with workerid timestamp
+end <- time.ncol[length(time.ncol)]
+
+data$start.time <- strptime(data[, start], format = "%Y-%m-%d %H:%M:%S") 
+data$end.time <- strptime(data[, end], format = "%Y-%m-%d %H:%M:%S")
+
+data$diff.time <- difftime(data$end.time, data$start.time, units = "mins")
+data$diff.time <- as.numeric(data$diff.time)
+
+boxplot(data$diff.time ~ data$project_type)
+
+table(data[data$project_type == "pp", ]$diff.time, useNA = "always")
+data[data$diff.time >300, ]  # remove redcapid 6035
+
+rc.time <- data[!data$redcapid %in% 6035, ]  # remove the outlier
+boxplot(rc.time$diff.time ~ rc.time$project_type)
+hist(rc.time$diff.time, breaks = 100)
+```
+
+```{r}
+tapply(rc.time$diff.time, rc.time$project_type, summary)
+tapply(rc.time$diff.time, rc.time$project_type, sd)
+
+
+```
+
