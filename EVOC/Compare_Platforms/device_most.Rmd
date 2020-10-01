@@ -20,9 +20,9 @@ data <- data.origin
 ```
 
 ```{r}
-FreqPerc.Sub <- function(varname, subset){
-  freq <- table(subset[, varname], subset[, "project_type"], useNA = "always")
-  perct <- round(prop.table(freq, margin = 2) * 100, 1)
+FreqPerc <- function(varname){
+  freq <- table(varname, data$project_type, useNA = "always")
+  perct <- round(prop.table(table(varname, data$project_type, useNA = "always"), margin = 2) * 100, 1)
   nperct <- paste(freq, " ", "(", perct, "%", ")", sep = "")
   
   nperct <- as.data.frame(matrix(nperct, ncol = 6))
@@ -30,7 +30,7 @@ FreqPerc.Sub <- function(varname, subset){
   colnames(nperct) <- c(colnames(freq)[1:length(colnames(freq)) - 1], "Missing")
   rownames(nperct) <- c(rownames(freq)[1:length(rownames(freq)) - 1], "Missing")
 
-  return(nperct)  
+  return(nperct)
 }
 ```
 
@@ -47,6 +47,8 @@ most.device <- colnames(data)[endsWith(colnames(data), "_most")]
 data$sum.most.device <- rowSums(data[, most.device], na.rm = T)  # count of devices used most often in the past 30 days
 table(data$sum.most.device, useNA = "always")
 
+data[data$sum.last.30.device > 0 & data$sum.most.device %in% 0, c(last.30.device, most.device)] 
+
 table(data[data$last_30_ecig_dispose %in% 1, "sum.most.device"], useNA = "always")
 table(data[data$last_30_ecig_pen %in% 1, "sum.most.device"], useNA = "always")  # one missing 
 table(data[data$last_30_ecig_mod %in% 1, "sum.most.device"], useNA = "always")
@@ -60,22 +62,22 @@ data[data$redcapid %in% 1001, "pen_most"] <- 1  # assume he used pen most often
 
 data[data$last_30_ecig_juul %in% 1 & data$sum.most.device %in% 0, c("redcapid", last.30.device, most.device)]  # redcapid 1111
 data[data$redcapid %in% 1111, "juul_most"] <- 1  # assume he used juul most often
+
+data[data$sum.last.30.device > 0 & data$sum.most.device %in% 0, c(last.30.device, most.device)] 
+
+## create variables
+data <- mutate(data, device_most = ifelse(disp_most %in% 1, 1,
+                                  ifelse(pen_most %in% 1, 2,
+                                         ifelse(mod_most %in% 1, 3,
+                                                ifelse(box_most %in% 1, 4,
+                                                       ifelse(juul_most %in% 1, 5,
+                                                              ifelse(pod_most %in% 1, 6,
+                                                                     ifelse(other_most %in% 1, 7, NA))))))))
+
 ```
 
 ```{r}
-most.device
-last.30.device
-
-tab3_most_device <- data.frame(matrix(nrow = 0, ncol = 6))
-colnames(tab3_most_device) <- c(levels(data$project_type), "Missing")
-
-for (i in 1:length(most.device)) {
-  var <- most.device[i]
-  sub <- data[data[, last.30.device[i]] %in% 1, ]
-  tempt.tab <- FreqPerc.Sub(var, sub)
-  rownames(tempt.tab) <- paste(most.device[i], "=", rownames(tempt.tab), sep = "")
-  tab3_most_device <- rbind(tab3_most_device, tempt.tab)
-}
+tab3_most_device <- FreqPerc(data[, "device_most"])
 
 tab3_most_device
 
