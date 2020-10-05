@@ -1,0 +1,115 @@
+---
+title: "HH_check_codebook"
+author: "Yi"
+date: "10/2/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/HH/Temp_09252020/HH_W9_Scored_ForCleaning.csv", na.strings = c("NA", " "))
+```
+
+```{r lifetime and past 6 month use}
+lifetime <- c("W9_Life_Use_Sub_1a","W9_Life_Use_Sub_2a","W9_Life_Use_Sub_3a","W9_Life_Use_Sub_29a","W9_Life_Use_Sub_31a","W9_Life_Use_Sub_32a","W9_Life_Use_Sub_5a","W9_Life_Use_Sub_6a","W9_Life_Use_Sub_7a","W9_Life_Use_Sub_8a","W9_Life_Use_Sub_10a","W9_Life_Use_Sub_25a","W9_Life_Use_Sub_27a","W9_Life_Use_Sub_26a","W9_Life_Use_Sub_30a","W9_Life_Use_Sub_11a","W9_Life_Use_Sub_12a","W9_Life_Use_Sub_13a","W9_Life_Use_Sub_14a","W9_Life_Use_Sub_17a","W9_Life_Use_Sub_20a","W9_Life_Use_Sub_23a","W9_Life_Use_Sub_21a","W9_Life_Use_Sub_18a","W9_Life_Use_Sub_24a")
+
+select(data, all_of(lifetime)) %>% apply(., 2, table, useNA = "always")
+
+```
+
+```{r past 30 days}
+past_30_days <- c("W9_Alc_Use_Last30","W9_Cig_Use_Last30","W9_Mj_Use_Last30","W9_RxStim_Use_Last30","W9_RxPain_Use_Last30","W9_Other_Use_Last30","W9_Other_Use_Last30_Specify","W9_eCig_Use_Last30","W9_eMj_Use_Last30","W9_MjFood_Use_Last30","W9_eCig_noNic_Use_Last30","W9_Hookah_Use_Last30","W9_Cigar_Use_Last30","W9_Blunt_Use_Last30","W9_Dabbing_Use_Last30","W9_CigPuff_Use_Last30","W9_Juul_Use_Last30","W9_Other_Vape_Use_Last30","W9_Cigarillo_Use_Last30","W9_sMj_Use_Last30","W9_Inhale_Use_Last30","W9_Cocaine_Use_Last30","W9_Meth_Use_Last30","W9_Ecstacy_Use_Last30","W9_Sedative_Use_Last30","W9_Heroin_Use_Last30")
+
+select(data, all_of(past_30_days)) %>% apply(., 2, table, useNA = "always")
+```
+
+```{r susceptibillity indices}
+sus_indices <- c("W9_Alc_Offered","W9_Alc_Intention","W9_Alc_Curious","W9_Cig_Offered","W9_Cig_Intention","W9_Cig_Curious","W9_Mj_Offered","W9_Mj_Intention","W9_Mj_Curious","W9_RxStim_Offered","W9_RxStim_Intention","W9_RxStim_Curious","W9_RxPain_Offered","W9_RxPain_Intention","W9_RxPain_Curious","W9_eCig_Offered","W9_eCig_Intention","W9_eCig_Curious","W9_Juul_Offered","W9_Juul_Intention","W9_Juul_Curious","W9_MjFood_Offered","W9_MjFood_Intention","W9_MjFood_Curious","W9_eMj_Offered","W9_eMj_Intention","W9_eMj_Curious","W9_eCig_noNic_Offered","W9_eCig_noNic_Intention","W9_eCig_noNic_Curious","W9_Hookah_Offered","W9_Hookah_Intention","W9_Hookah_Curious","W9_Sedative_Offered","W9_Sedative_Intention","W9_Sedative_Curious")
+
+select(data, all_of(sus_indices)) %>% apply(., 2, table, useNA = "always")
+
+```
+
+```{r Activity}
+activity <- "W9_Phys_Intend"
+
+table(data[, "W9_Phys_Intend"], useNA = "always")
+```
+
+```{r dependence}
+dependence <- c("W9_Nic_Urges_Week","W9_Mj_Urges_Week")
+
+select(data, all_of(dependence)) %>% apply(., 2, table, useNA = "always")
+
+```
+
+```{r first vape}
+table(data[, "W9_First_Vape_Type"], useNA = "always")
+```
+
+```{r past 30 days device}
+past_30_days_device <- c("W9_eCig_Disp_Last30","W9_eCig_Pen_Last30","W9_eCig_Mod_Last30","W9_eCig_Box_Mod_Last30","W9_eCig_Juul_Last30","W9_eCig_Pod_Last30","W9_eCig_Other_eNic_Last30")
+
+select(data, all_of(past_30_days_device)) %>% apply(., 2, table, useNA = "always")
+```
+
+```{r number of days device}
+number_days_device <- c("W9_eCig_Disp_Use_Last30","W9_eCig_Pen_Use_Last30","W9_eCig_Mod_Use_Last30","W9_eCig_Box_Mod_Use_Last30","W9_eCig_Juul_Use_Last30","W9_eCig_Pod_Use_Last30","W9_eCig_Other_eNic_Use_Last30")
+
+select(data, all_of(number_days_device)) %>% apply(., 2, table, useNA = "always")
+```
+
+```{r past 30 days mj}
+past_30_days_mj <- c("W9_Mj_Type_1_Last30","W9_Mj_Type_2_Last30","W9_Mj_Type_3_Last30","W9_Mj_Type_4_Last30","W9_Mj_Type_5_Last30","W9_Mj_Type_6_Last30","W9_Mj_Type_7_Last30","W9_Mj_Type_8_Last30","W9_Mj_Type_9_Last30","W9_Mj_Type_10_Last30","W9_Mj_Type_11_Last30","W9_Mj_Type_12_Last30")
+
+select(data, all_of(past_30_days_mj)) %>% apply(., 2, table, useNA = "always")
+
+```
+
+```{r number of days mj}
+number_days_mj <- c("W9_Mj_Type_1_Use_Last30","W9_Mj_Type_2_Use_Last30","W9_Mj_Type_3_Use_Last30","W9_Mj_Type_4_Use_Last30","W9_Mj_Type_5_Use_Last30","W9_Mj_Type_6_Use_Last30","W9_Mj_Type_7_Use_Last30","W9_Mj_Type_8_Use_Last30","W9_Mj_Type_9_Use_Last30","W9_Mj_Type_10_Use_Last30","W9_Mj_Type_11_Use_Last30","W9_Mj_Type_12_Use_Last30")
+
+select(data, all_of(number_days_mj)) %>% apply(., 2, table, useNA = "always")
+
+```
+
+```{r lung function}
+lung_function <- c("W9_cough_morning","W9_cough_other","W9_congested","W9_bronchitis")
+
+select(data, all_of(lung_function)) %>% apply(., 2, table, useNA = "always")
+
+```
+
+```{r cigarettes}
+table(data[, "W9_Cig_Menthol"], useNA = "always")
+```
+
+```{r policy perception}
+policy_perception <- c("W9_Buy_30day_Cig","W9_Buy_30day_eCig","W9_Buy_30day_Juul","W9_Buy_30day_Pod","W9_Buy_30day_Mj","W9_Buy_30day_eMj","W9_Buy_30day_MjFood","W9_Buy_30day_Alc","W9_Refuse_Cig","W9_Refuse_eCig","W9_Refuse_Juul","W9_Refuse_Pod","W9_Refuse_Mj","W9_Refuse_eMj","W9_Refuse_MjFood","W9_Refuse_Alc")
+
+select(data, all_of(policy_perception)) %>% apply(., 2, table, useNA = "always")
+```
+
+```{r ease compare}
+ease_compare <- c("W9_Year_vs_Now_Cig","W9_Year_vs_Now_eCig","W9_Year_vs_Now_Juul","W9_Year_vs_Now_Pod","W9_Year_vs_Now_Mj","W9_Year_vs_Now_eMj","W9_Year_vs_Now_MjFood","W9_Year_vs_Now_Alc")
+
+select(data, all_of(ease_compare)) %>% apply(., 2, table, useNA = "always")
+```
+
+```{r video compare}
+table(data[, "W9_Vape_Compare_Video"], useNA = "always")
+```
+
+```{r microdosing}
+microdosing <- c("W9_Micro_Other","W9_Micro_Ever_YN")
+
+select(data, all_of(microdosing)) %>% apply(., 2, table, useNA = "always")
+```
+
