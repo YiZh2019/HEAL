@@ -1,0 +1,41 @@
+---
+title: "blood_nicotine_by_condition"
+author: "Yi"
+date: "10/13/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/P4/suppression/P4_Suppression_Blood.sav")
+
+```
+
+```{r}
+valid.sidA <- data %>% group_by(sidA) %>% summarise(count = n()) %>% filter(., count >= 4) %>% select(., sidA)
+valid.data <- data[data$sidA %in% valid.sidA$sidA, ]
+
+blood.nicotine <- select(valid.data, sidA, conditionA, PostAdminNicotinengmLLOQ1.0, PreAdminNicotinengmLLOQ1.0)
+
+blood.nicotine <- blood.nicotine[!is.na(blood.nicotine$sidA), ]
+
+wide <- blood.nicotine %>% group_by(sidA) %>% gather(., key = "variable", value = "value", PostAdminNicotinengmLLOQ1.0, PreAdminNicotinengmLLOQ1.0) %>% arrange(sidA) %>% unite(., newvariable, variable, conditionA, sep = "_") %>% spread(., newvariable, value)
+
+blood.nicotine.wide <- mutate(wide, Nicotine_change_1 = PostAdminNicotinengmLLOQ1.0_1 - PreAdminNicotinengmLLOQ1.0_1,
+       Nicotine_change_2 = PostAdminNicotinengmLLOQ1.0_2 - PreAdminNicotinengmLLOQ1.0_2,
+       Nicotine_change_3 = PostAdminNicotinengmLLOQ1.0_3 - PreAdminNicotinengmLLOQ1.0_3,
+       Nicotine_change_4 = PostAdminNicotinengmLLOQ1.0_4 - PreAdminNicotinengmLLOQ1.0_4)
+```
+
+```{r}
+write_sav(blood.nicotine.wide, "/Users/zhan039/Desktop/USC_HEAL/P4/suppression/YZ/blood_nicotine_wide.sav")
+```
+

@@ -1,0 +1,43 @@
+---
+title: "test_gee"
+author: "Yi"
+date: "10/13/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+library(geepack)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/P4/suppression/P4_Suppression_Blood.sav")
+```
+
+```{r}
+table(data$sidA, useNA = "always")
+Valid.sidA <- data %>% group_by(sidA) %>% summarise(count = n()) %>% filter(count == 4) %>% select(., sidA)
+
+valid.data <- data[data$sidA %in% Valid.sidA$sidA,]
+
+sum(is.na(valid.data$PANAS_PostE_PA_mean))
+sum(is.na(valid.data$PANAS_PreE_PA_mean))
+
+factor(valid.data$conditionA, levels = c(1:4))
+```
+
+```{r}
+PANAS.PA.data <- valid.data[!is.na(valid.data$PANAS_PostE_PA_mean) & !is.na(valid.data$PANAS_PreE_PA_mean), ] 
+
+
+fit1 <- geeglm(PANAS_PostE_PA_mean ~ PANAS_PreE_PA_mean + as.factor(conditionA), data = PANAS.PA.data, id = sidA, family = gaussian(link = "identity"), corstr="exchangeable")
+
+summary(fit1)
+anova(fit1)
+```
+
