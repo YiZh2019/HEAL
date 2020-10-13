@@ -1,0 +1,130 @@
+---
+title: "DataManage_past30day"
+author: "Yi"
+date: "10/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/10082020_JC_past30/H_H W1-W9 DATA/HH_W1_to_W9_Scored_06272020.sav")
+```
+
+```{r confirm variable names}
+w9 <- c("W9_Alc_Use_Last30","W9_Cig_Use_Last30","W9_Mj_Use_Last30","W9_RxStim_Use_Last30","W9_RxPain_Use_Last30","W9_Other_Use_Last30","W9_Other_Use_Last30_Specify","W9_eCig_Use_Last30","W9_eMj_Use_Last30","W9_MjFood_Use_Last30","W9_eCig_noNic_Use_Last30","W9_Hookah_Use_Last30","W9_Cigar_Use_Last30","W9_Blunt_Use_Last30","W9_Dabbing_Use_Last30","W9_CigPuff_Use_Last30","W9_Juul_Use_Last30","W9_Other_Vape_Use_Last30","W9_Cigarillo_Use_Last30","W9_sMj_Use_Last30","W9_Inhale_Use_Last30","W9_Cocaine_Use_Last30","W9_Meth_Use_Last30","W9_Ecstacy_Use_Last30","W9_Sedative_Use_Last30","W9_Heroin_Use_Last30")
+
+w9a <- c("W9_CigPuff_Use_Last30a","W9_Cig_Use_Last30a","W9_eCig_Use_Last30a","W9_eCig_noNic_Use_Last30a","W9_Juul_Use_Last30a","W9_Other_Vape_Use_Last30a","W9_Cigar_Use_Last30a","W9_Cigarillo_Use_Last30a","W9_Hookah_Use_Last30a","W9_Blunt_Use_Last30a","W9_Mj_Use_Last30a","W9_MjFood_Use_Last30a","W9_eMj_Use_Last30a","W9_sMj_Use_Last30a","W9_Dabbing_Use_Last30a","W9_Alc_Use_Last30a","W9_Inhale_Use_Last30a","W9_Cocaine_Use_Last30a","W9_Meth_Use_Last30a","W9_Ecstacy_Use_Last30a","W9_RxPain_Use_Last30a","W9_RxStim_Use_Last30a","W9_Sedative_Use_Last30a","W9_Heroin_Use_Last30a","W9_Other_Use_Last30a")  # variables needs to be recoded
+
+test <- substr(w9a, 1, nchar(w9a)-1)
+
+sum(test %in% w9)
+w9[!w9 %in% test]
+
+rm.w9 <- test  # variables needs to be removed
+```
+
+```{r frequency tables}
+apply(data[, rm.w9], 2, table, useNA = "always")
+apply(data[, w9a], 2, table, useNA = "always")
+```
+
+```{r recode w9 past 30 days use}
+temp.data <- select(data, -all_of(rm.w9))
+
+for (i in 1:length(w9a)) {
+  oldvar <- w9a[i]
+  newvar <- substr(oldvar, 1, nchar(oldvar)-1)
+  temp.data <- mutate(temp.data, temp.var = ifelse(get(oldvar) %in% 0, 0,
+                                      ifelse(get(oldvar) %in% 1, 1,
+                                             ifelse(get(oldvar) %in% 2, 2,
+                                                    ifelse(get(oldvar) %in% 3, 3,
+                                                           ifelse(get(oldvar) %in% 4, 4,
+                                                                  ifelse(get(oldvar) %in% 6, 5,
+                                                                         ifelse(get(oldvar) %in% 8, 6, NA))))))))
+  
+  colnames(temp.data)[colnames(temp.data) == "temp.var"] <- newvar
+}
+
+select(temp.data, all_of(w9a),  all_of(rm.w9)) %>% select(sort(names(.))) %>% lapply(., table, useNA = "always")
+```
+
+```{r add labels to w9 past 30 days use and remove old variables}
+temp.data[, rm.w9] <- apply(temp.data[, rm.w9], 2, as.integer)
+temp.data[, rm.w9] <- lapply(temp.data[, rm.w9], labelled, labels = c("0 days" = 0, "1 or 2 days" = 1, "3 to 5 days" = 2, "6 to 9 days" = 3, "10 to 19 days" = 4, "20-29 days" = 5, "All 30 days" = 6))
+
+
+# val_lab(temp.data[, rm.w9]) = num_lab("
+#                                    0 O days
+#                                    1 1 or 2 days
+#                                    2 3 to 5 days
+#                                    3 6 to 9 days
+#                                    4 10 to 19 days
+#                                    5 20-29 days
+#                                    6 All 30 days")
+
+table(temp.data$W9_Alc_Use_Last30, useNA = "always")
+
+
+temp.data <- select(temp.data, -all_of(w9a))
+```
+
+```{r w1-8 frequency tables}
+w1_8 <- c("W1_Alc_Use_Last30","W1_Cig_Use_Last30","W1_Mj_Use_Last30","W1_Stim_Use_Last30","W1_RxStim_Use_Last30","W1_RxPain_Use_Last30","W1_Other_Use_Last30","W2_Alc_Use_Last30","W2_Cig_Use_Last30","W2_Mj_Use_Last30","W2_Stim_Use_Last30","W2_RxStim_Use_Last30","W2_RxPain_Use_Last30","W2_Other_Use_Last30","W3_Alc_Use_Last30","W3_Cig_Use_Last30","W3_Mj_Use_Last30","W3_Stim_Use_Last30","W3_RxStim_Use_Last30","W3_RxPain_Use_Last30","W3_Other_Use_Last30","W3_eCig_Use_Last30","W4_Alc_Use_Last30","W4_Cig_Use_Last30","W4_Mj_Use_Last30","W4_Stim_Use_Last30","W4_RxStim_Use_Last30","W4_RxPain_Use_Last30","W4_Other_Use_Last30","W4_eCig_Use_Last30","W4_eMj_Use_Last30","W4_MjFood_Use_Last30","W5_Alc_Use_Last30","W5_Cig_Use_Last30","W5_Mj_Use_Last30","W5_Stim_Use_Last30","W5_RxStim_Use_Last30","W5_RxPain_Use_Last30","W5_eCig_Use_Last30","W5_eMj_Use_Last30","W5_MjFood_Use_Last30","W5_eCig_noNic_Use_Last30","W5_Hookah_Use_Last30","W5_Cigars_Use_Last30","W5_Blunts_Use_Last30","W6_Alc_Use_Last30","W6_Cig_Use_Last30","W6_Mj_Use_Last30","W6_Stim_Use_Last30","W6_RxStim_Use_Last30","W6_RxPain_Use_Last30","W6_eCig_Use_Last30","W6_eMj_Use_Last30","W6_MjFood_Use_Last30","W6_eCig_noNic_Use_Last30","W6_Hookah_Use_Last30","W6_Cigars_Use_Last30","W6_Blunts_Use_Last30","W6_Dabbing_Use_Last30","W7_Alc_Use_Last30","W7_Cig_Use_Last30","W7_Mj_Use_Last30","W7_Stim_Use_Last30","W7_RxStim_Use_Last30","W7_RxPain_Use_Last30","W7_eCig_Use_Last30","W7_eMj_Use_Last30","W7_MjFood_Use_Last30","W7_eCig_noNic_Use_Last30","W7_Hookah_Use_Last30","W7_Cigars_Use_Last30","W7_Blunts_Use_Last30","W7_Dabbing_Use_Last30","W8_Alc_Use_Last30","W8_Cig_Use_Last30","W8_Mj_Use_Last30","W8_Stim_Use_Last30","W8_RxStim_Use_Last30","W8_RxPain_Use_Last30","W8_eCig_Use_Last30","W8_eMj_Use_Last30","W8_MjFood_Use_Last30","W8_eCig_noNic_Use_Last30","W8_Hookah_Use_Last30","W8_Cigars_Use_Last30","W8_Blunts_Use_Last30","W8_Dabbing_Use_Last30")
+
+select(temp.data, all_of(w1_8)) %>% apply(., 2, table, useNA = "always")
+
+```
+
+```{r recode w1-8 past 30 days use}
+
+for (i in 1:length(w1_8)) {
+  oldvar <- w1_8[i]
+  newvar <- paste(oldvar, "_7level", sep = "")
+  temp.data <- mutate(temp.data, temp.var = ifelse(get(oldvar) %in% 0, 0,
+                                      ifelse(get(oldvar) %in% 1, 1,
+                                             ifelse(get(oldvar) %in% 2, 2,
+                                                    ifelse(get(oldvar) %in% 3, 3,
+                                                           ifelse(get(oldvar) %in% 4 | get(oldvar) %in% 5, 4,
+                                                                  ifelse(get(oldvar) %in% 6 | get(oldvar) %in% 7, 5,
+                                                                         ifelse(get(oldvar) %in% 8, 6, NA))))))))
+  colnames(temp.data)[colnames(temp.data) == "temp.var"] <- newvar
+}
+
+select(temp.data, all_of(w1_8), ends_with("7level")) %>% select(sort(names(.))) %>% apply(., 2, table, useNA = "always")
+
+```
+
+```{r add labels to w1-8 past 30 days use 7-level variables}
+
+w1_8_7level <- colnames(temp.data)[endsWith(colnames(temp.data), "7level")]
+
+temp.data[, w1_8_7level] <- apply(temp.data[, w1_8_7level], 2, as.integer)
+temp.data[, w1_8_7level] <- lapply(temp.data[, w1_8_7level], labelled, labels = c("0 days" = 0, "1 or 2 days" = 1, "3 to 5 days" = 2, "6 to 9 days" = 3, "10 to 19 days" = 4, "20-29 days" = 5, "All 30 days" = 6))
+# temp.data[, w1_8_7level] <- sjlabelled::add_labels(temp.data[, w1_8_7level], labels = c("0 days" = 0, "1 or 2 days" = 1, "3 to 5 days" = 2, "6 to 9 days" = 3, "10 to 19 days" = 4, "20-29 days" = 5, "All 30 days" = 6))
+
+
+# val_lab(temp.data[, w1_8_7level]) = num_lab("
+#                                    0 O days
+#                                    1 1 or 2 days
+#                                    2 3 to 5 days
+#                                    3 6 to 9 days
+#                                    4 10 to 19 days
+#                                    5 20-29 days
+#                                    6 All 30 days")
+
+table(temp.data$W1_Alc_Use_Last30_7level, useNA = "always")
+```
+
+```{r save datasets}
+write.csv(temp.data, file = "/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/10082020_JC_past30/YZ/HH_w1_9_10122020_YZ.csv")
+haven::write_sav(temp.data, "/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/10082020_JC_past30/YZ/HH_w1_9_10122020_YZ.sav")
+```
+
