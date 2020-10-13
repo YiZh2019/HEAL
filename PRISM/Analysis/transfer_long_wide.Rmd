@@ -16,7 +16,7 @@ library(lme4)
 ```
 
 ```{r}
-data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/PRISM/08312020_Christie/PRISMCompleters_w_Menthol_Status_31Aug2020.csv", na.strings = c("", "."))
+data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/PRISM/08312020_Christie/PRISMCompleters_w_Menthol_Status_31Aug2020.csv", na.strings = c("", "."), stringsAsFactors = F)
 ```
 
 ```{r}
@@ -78,7 +78,7 @@ summary(axt_long$axt)
 axt_long$axt_f <- factor(axt_long$axt, levels = unique(axt_long$axt), labels = c(1, 10, 11, 2:9))
 axt_long %>% select(sid, blinding_condn, smoking_condition_check, patch_condition, axt, axt_f, everything())
 
-# write_sav(axt_long, "/Users/zhan039/Desktop/USC_HEAL/PRISM/09112020/prism_0921.sav")
+# write_sav(axt_long, "/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/prism_noscore.sav")
 ```
 
 ```{r poms}
