@@ -16,7 +16,7 @@ library(lme4)
 ```
 
 ```{r}
-data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/PRISM/09112020_DataManage/prism_0921_scored.sav")
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/prism_score.sav")
 
 # write.csv(data, file = "/Users/zhan039/Desktop/USC_HEAL/PRISM/09112020/prism_0921_scored.csv", na = "")
 ```
@@ -36,11 +36,12 @@ summary(rowMeans(data[, c("qsu_1", "qsu_2", "qsu_3", "qsu_4", "qsu_5", "qsu_6", 
 data$axt_n <- as.numeric(as.character(factor(data$axt, levels = unique(data$axt), labels = c(1, 10, 11, 2:9))))
 
 select(data, axt, axt_f, axt_n)
+data <- data[, colnames(data) != "axt_f"]
 ```
 
 ```{r}
-write.csv(data, file = "/Users/zhan039/Desktop/USC_HEAL/PRISM/09112020/prism_0923_scored.csv", na = "")
-write_sav(data, "/Users/zhan039/Desktop/USC_HEAL/PRISM/09112020/prism_0923_scored.sav")
+write.csv(data, file = "/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/prism_scores_final.csv", na = "")
+write_sav(data, "/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/prism_scores_final.sav")
 ```
 
 ```{r}
