@@ -15,7 +15,7 @@ library(haven)
 ```
 
 ```{r}
-data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/10082020_JC_past30/H_H W1-W9 DATA/HH_W1_to_W9_Scored_06272020.sav")
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/10082020_past30/H_H W1-W9 DATA/HH_W1_to_W9_Scored_06272020.sav")
 ```
 
 ```{r confirm variable names}
@@ -26,7 +26,7 @@ w9a <- c("W9_CigPuff_Use_Last30a","W9_Cig_Use_Last30a","W9_eCig_Use_Last30a","W9
 test <- substr(w9a, 1, nchar(w9a)-1)
 
 sum(test %in% w9)
-w9[!w9 %in% test]
+w9[!w9 %in% test]  # w9: "W9_Other_Use_Last30_Specify"
 
 rm.w9 <- test  # variables needs to be removed
 ```
