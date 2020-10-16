@@ -1,0 +1,31 @@
+---
+title: "long_mean_scores_change_rm1011"
+author: "Yi"
+date: "10/16/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/wide_mean_score_change.sav")
+```
+
+```{r}
+axt.var <- data %>% select(., contains("axt")) %>% colnames(.)
+
+new.data <- data %>% gather(., key = variable, value = value, all_of(axt.var)) %>% separate(variable, c("axt", "variable"), sep = "_", extra = "merge") %>% spread(., variable, value)
+```
+
+```{r}
+write_sav(new.data, "/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/long_mean_score_change.sav")
+
+new.data.rm1011 <- new.data[!new.data$axt %in% c("axt10", "axt11"), ]
+new.data.rm1011$axt
+
+write_sav(new.data.rm1011, "/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/long_mean_score_change_rmaxt1011.sav")
+
+```
+
