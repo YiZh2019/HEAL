@@ -1,0 +1,70 @@
+---
+title: "wideformat_scores_change_v2"
+author: "Yi"
+date: "10/16/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/prism_scores_final.sav")
+```
+
+```{r}
+ChangeScore <- function(varname) {
+  basevar <- gsub(strsplit(varname, split = "_")[[1]][1], "axt1", varname)
+  newvar <- paste(varname, "_change", sep = "")
+  temp.data <- mutate(temp.data, temp.var = get(basevar) - get(varname))
+  colnames(temp.data)[colnames(temp.data) == "temp.var"] <- newvar
+  return(temp.data)
+}
+```
+
+```{r}
+mnws <- "MNWS_Mean_new"
+qsu <- select(data, contains("qsu") & contains("mean")) %>% colnames(.)
+poms <- select(data, contains("poms") & contains("mean")) %>% colnames(.)
+
+varlist <- c(mnws, qsu, poms)
+
+subset <- select(data, 1:6, all_of(varlist))
+wide.subset <- subset %>% gather(., key = variable, value = value, all_of(varlist)) %>% unite(., "mean_change_axt",axt, variable, sep = "_") %>% spread(., mean_change_axt, value) 
+
+```
+
+```{r}
+mnws.mean <- select(wide.subset, contains("mnws") & !contains("axt1_")) %>% colnames(.)
+qsu.mean <- select(wide.subset, contains("qsu") & !contains("axt1_")) %>% colnames(.)
+poms.mean <- select(wide.subset, contains("poms") & !contains("axt1_")) %>% colnames(.)
+
+temp.data <- wide.subset
+
+for (i in 1:length(mnws.mean)) {
+  varname <- mnws.mean[i]
+  temp.data <- ChangeScore(varname)
+}
+
+for (i in 1:length(qsu.mean)) {
+  varname <- qsu.mean[i]
+  temp.data <- ChangeScore(varname)
+}
+
+for (i in 1:length(poms.mean)) {
+  varname <- poms.mean[i]
+  temp.data <- ChangeScore(varname)
+}
+
+```
+
+```{r}
+write_sav(temp.data, "/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/wide_mean_score_change.sav")
+```
+

@@ -1,0 +1,70 @@
+---
+title: "wideformat_scores_change"
+author: "Yi"
+date: "10/14/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/PRISM/08312020_Christie/PRISMCompleters_w_Menthol_Status_31Aug2020.csv", na.strings = c("", "."), stringsAsFactors = F)
+
+```
+
+```{r}
+ChangeScore <- function(varname) {
+  basevar <- gsub(strsplit(varname, split = "_")[[1]][1], "axt1", varname)
+  newvar <- paste(varname, "_change", sep = "")
+  temp.data <- mutate(temp.data, temp.var = get(basevar) - get(varname))
+  colnames(temp.data)[colnames(temp.data) == "temp.var"] <- newvar
+  return(temp.data)
+}
+```
+
+
+```{r}
+subset <- select(data, sid, blinding_condn, smoking_condition_check, patch_condition, menthol_status, contains(c("mnws", "qsu", "poms")))
+
+temp.data <- subset
+
+mnws <- select(subset, contains("mnws") & !contains("mean") & !contains("axt1_")) %>% colnames(.)
+qsu <- select(subset, contains("qsu") & !contains("mean") & !contains("axt1_")) %>% colnames(.)
+poms <- select(subset, contains("poms") & !contains("mean") & !contains("axt1_")) %>% colnames(.)
+
+
+for (i in 1:length(mnws)) {
+  varname <- mnws[i]
+  temp.data <- ChangeScore(varname)
+}
+
+for (i in 1:length(qsu)) {
+  varname <- qsu[i]
+  temp.data <- ChangeScore(varname)
+}
+
+for (i in 1:length(poms)) {
+  varname <- poms[i]
+  temp.data <- ChangeScore(varname)
+}
+
+select(temp.data, axt1_poms_sf_10, axt11_poms_sf_10, axt11_poms_sf_10_change)
+```
+
+```{r}
+
+```
+
+
+
+```{r}
+write_sav(temp.data, "/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/wide_score_change.sav")
+```
+
