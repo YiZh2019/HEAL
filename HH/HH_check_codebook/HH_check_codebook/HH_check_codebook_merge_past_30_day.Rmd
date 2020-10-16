@@ -1,0 +1,46 @@
+---
+title: "HH_check_codebook_merge_past_30_day"
+author: "Yi"
+date: "10/2/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/HH/Temp_09252020/HH_W9_Scored_ForCleaning.csv", na.strings = c("NA", " "), stringsAsFactors = FALSE)
+
+data_recode <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/10082020_past30/YZ/HH_w1_9_10122020_YZ.sav")
+```
+
+```{r past 30 days}
+past_30_days <- c("W9_Alc_Use_Last30","W9_Cig_Use_Last30","W9_Mj_Use_Last30","W9_RxStim_Use_Last30","W9_RxPain_Use_Last30","W9_Other_Use_Last30","W9_Other_Use_Last30_Specify","W9_eCig_Use_Last30","W9_eMj_Use_Last30","W9_MjFood_Use_Last30","W9_eCig_noNic_Use_Last30","W9_Hookah_Use_Last30","W9_Cigar_Use_Last30","W9_Blunt_Use_Last30","W9_Dabbing_Use_Last30","W9_CigPuff_Use_Last30","W9_Juul_Use_Last30","W9_Other_Vape_Use_Last30","W9_Cigarillo_Use_Last30","W9_sMj_Use_Last30","W9_Inhale_Use_Last30","W9_Cocaine_Use_Last30","W9_Meth_Use_Last30","W9_Ecstacy_Use_Last30","W9_Sedative_Use_Last30","W9_Heroin_Use_Last30")
+
+select(data, all_of(past_30_days)) %>% apply(., 2, table, useNA = "always")
+```
+
+```{r}
+
+new_w9 <- c("W9_Alc_Use_Last30","W9_Cig_Use_Last30","W9_Mj_Use_Last30","W9_RxStim_Use_Last30","W9_RxPain_Use_Last30","W9_Other_Use_Last30","W9_eCig_Use_Last30","W9_eMj_Use_Last30","W9_MjFood_Use_Last30","W9_eCig_noNic_Use_Last30","W9_Hookah_Use_Last30","W9_Cigar_Use_Last30","W9_Blunt_Use_Last30","W9_Dabbing_Use_Last30","W9_CigPuff_Use_Last30","W9_Juul_Use_Last30","W9_Other_Vape_Use_Last30","W9_Cigarillo_Use_Last30","W9_sMj_Use_Last30","W9_Inhale_Use_Last30","W9_Cocaine_Use_Last30","W9_Meth_Use_Last30","W9_Ecstacy_Use_Last30","W9_Sedative_Use_Last30","W9_Heroin_Use_Last30")
+
+w1_8 <- c("W1_Alc_Use_Last30","W1_Cig_Use_Last30","W1_Mj_Use_Last30","W1_Stim_Use_Last30","W1_RxStim_Use_Last30","W1_RxPain_Use_Last30","W1_Other_Use_Last30","W2_Alc_Use_Last30","W2_Cig_Use_Last30","W2_Mj_Use_Last30","W2_Stim_Use_Last30","W2_RxStim_Use_Last30","W2_RxPain_Use_Last30","W2_Other_Use_Last30","W3_Alc_Use_Last30","W3_Cig_Use_Last30","W3_Mj_Use_Last30","W3_Stim_Use_Last30","W3_RxStim_Use_Last30","W3_RxPain_Use_Last30","W3_Other_Use_Last30","W3_eCig_Use_Last30","W4_Alc_Use_Last30","W4_Cig_Use_Last30","W4_Mj_Use_Last30","W4_Stim_Use_Last30","W4_RxStim_Use_Last30","W4_RxPain_Use_Last30","W4_Other_Use_Last30","W4_eCig_Use_Last30","W4_eMj_Use_Last30","W4_MjFood_Use_Last30","W5_Alc_Use_Last30","W5_Cig_Use_Last30","W5_Mj_Use_Last30","W5_Stim_Use_Last30","W5_RxStim_Use_Last30","W5_RxPain_Use_Last30","W5_eCig_Use_Last30","W5_eMj_Use_Last30","W5_MjFood_Use_Last30","W5_eCig_noNic_Use_Last30","W5_Hookah_Use_Last30","W5_Cigars_Use_Last30","W5_Blunts_Use_Last30","W6_Alc_Use_Last30","W6_Cig_Use_Last30","W6_Mj_Use_Last30","W6_Stim_Use_Last30","W6_RxStim_Use_Last30","W6_RxPain_Use_Last30","W6_eCig_Use_Last30","W6_eMj_Use_Last30","W6_MjFood_Use_Last30","W6_eCig_noNic_Use_Last30","W6_Hookah_Use_Last30","W6_Cigars_Use_Last30","W6_Blunts_Use_Last30","W6_Dabbing_Use_Last30","W7_Alc_Use_Last30","W7_Cig_Use_Last30","W7_Mj_Use_Last30","W7_Stim_Use_Last30","W7_RxStim_Use_Last30","W7_RxPain_Use_Last30","W7_eCig_Use_Last30","W7_eMj_Use_Last30","W7_MjFood_Use_Last30","W7_eCig_noNic_Use_Last30","W7_Hookah_Use_Last30","W7_Cigars_Use_Last30","W7_Blunts_Use_Last30","W7_Dabbing_Use_Last30","W8_Alc_Use_Last30","W8_Cig_Use_Last30","W8_Mj_Use_Last30","W8_Stim_Use_Last30","W8_RxStim_Use_Last30","W8_RxPain_Use_Last30","W8_eCig_Use_Last30","W8_eMj_Use_Last30","W8_MjFood_Use_Last30","W8_eCig_noNic_Use_Last30","W8_Hookah_Use_Last30","W8_Cigars_Use_Last30","W8_Blunts_Use_Last30","W8_Dabbing_Use_Last30")
+
+w1_8_7_level <- paste(w1_8, "_7level", sep = "")
+
+data_recode_for_merge <- data_recode[, c("SID", new_w9, w1_8_7_level)]
+data_for_merge <- data[, !colnames(data) %in% new_w9]
+
+new_data <- merge(data_for_merge, data_recode_for_merge, by.x = "SID", by.y = "SID", all.x = T)
+```
+
+```{r}
+write_sav(new_data, "/Users/zhan039/Desktop/USC_HEAL/HH/Temp_09252020/Yi/10152020/HH_W9_Scored_ForCleaning_merge.sav")
+```
+
