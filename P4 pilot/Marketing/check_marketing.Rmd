@@ -1,0 +1,93 @@
+---
+title: "marketing"
+author: "Yi"
+date: "10/16/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(stringr)
+```
+
+```{r}
+data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/P4/Marketing&Abuse/P4VAPERAim1Marketing_DATA_2020-10-16_1519.csv", )
+```
+
+```{r prepare frs data}
+data_frs <- select(data, id, participant_type_2, contains("frs_") & contains(c("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8")))
+
+frs_var <- select(data, contains("frs_") & contains(c("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8"))) %>% colnames()
+
+long.frs <- data_frs %>% gather(., key = "variable", value = "value", all_of(frs_var)) %>% separate(variable, c("frs", "Ecig_type"), sep = "_c") %>% spread(., frs, value)
+```
+
+```{r prepare package information data}
+data_package <- select(data, id, block_1_sample_1,
+block_1_sample_2,
+block_2_sample_3,
+block_2_sample_4,
+block_3_sample_5,
+block_3_sample_6,
+block_4_sample_7,
+block_4_sample_8) 
+
+long.package <- data_package %>% gather(., key = "variable", value = "package", block_1_sample_1,
+block_1_sample_2,
+block_2_sample_3,
+block_2_sample_4,
+block_3_sample_5,
+block_3_sample_6,
+block_4_sample_7,
+block_4_sample_8) %>% separate(variable, c("block", "Ecig_type"), sep = -1)
+
+```
+
+```{r add labels of package}
+long.frs %>% group_by(id) %>% summarise(count = n())
+long.package %>% group_by(id) %>% summarise(count = n())
+
+long.package$package_f <- factor(long.package$package, levels = c(1:16), labels = c("Blueberry", "Blueberry Lollipop", "Blue Raspberry", "Blue Raspberry Cotton Candy", "Caramel", "Caramel Chews", "Green Apple", "Green Apple Jelly Beans", "Mango", "Mango Gummy Bears", "Strawberry", "Strawberry Taffy", "Vanilla", "Vanilla Chews", "Watermelon", "Watermelon Hard Candy")) 
+
+long.package <- select(long.package, -block)
+
+```
+
+
+```{r merge data and analyze mean and sd}
+newdata <- merge(long.frs, long.package, by.x = c("id", "Ecig_type"), by.y = c("id", "Ecig_type"))
+
+newdata <- newdata %>% select(., id, Ecig_type, package_f, package, participant_type_2, frs_1, frs_2 : frs_9, everything())
+
+frs <- newdata %>% select(., frs_1 : frs_12) %>% colnames(.)
+  
+result_mean <- aggregate(newdata[, frs], list(newdata$participant_type_2, newdata$package_f), mean, na.rm = T) %>% arrange(Group.1) 
+result_sd <- aggregate(newdata[, frs], list(newdata$participant_type_2, newdata$package_f), sd, na.rm = T) %>% arrange(Group.1)
+
+sd(newdata[newdata$participant_type_2 %in% 1 & newdata$package %in% 1, "frs_1"], na.rm = T)
+
+
+length(unique(newdata[newdata$participant_type_2 %in% 5, "package"]))
+
+```
+
+```{r save results}
+write_csv(result_mean, "/Users/zhan039/Desktop/USC_HEAL/P4/Marketing&Abuse/YZ/market_result_mean.csv", na = "")
+write_csv(result_sd, "/Users/zhan039/Desktop/USC_HEAL/P4/Marketing&Abuse/YZ/market_result_sd.csv", na = "")
+```
+
+```{r check}
+data[data$participant_type_2 %in% 5, ] %>% select(., id, participant_type_2, block_1_sample_1,
+block_1_sample_2,
+block_2_sample_3,
+block_2_sample_4,
+block_3_sample_5,
+block_3_sample_6,
+block_4_sample_7,
+block_4_sample_8) %>% apply(., 2,  table)
+```
+
