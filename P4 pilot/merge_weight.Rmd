@@ -1,0 +1,57 @@
+---
+title: "merge_weight"
+author: "Yi"
+date: "10/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+weight <- read.csv("/Users/zhan039/Desktop/USC_HEAL/P4/suppression/Natalia/10192020/E-cig Weights_SS Pilot_rm_redundant.csv", na.strings = "", stringsAsFactors = F)
+
+wide <- read_sav("/Users/zhan039/Desktop/USC_HEAL/P4/suppression/Natalia/10192020/blood_nicotine_wide.sav")
+long <- read_sav("/Users/zhan039/Desktop/USC_HEAL/P4/suppression/Natalia/10192020/P4_Suppression_Blood.sav")
+```
+
+```{r}
+length(unique(weight$SID_weight))
+
+length(unique(long$sid))
+length(unique(wide$sidA))
+
+long_merge <- merge(long, weight, by.x = c("sid", "session"), by.y = c("SID_weight", "Session.number"), all.x = T)
+
+write_sav(long_merge, "/Users/zhan039/Desktop/USC_HEAL/P4/suppression/YZ/merge_weight/P4_Suppression_Blood_weight.sav")
+write.csv(long_merge, "/Users/zhan039/Desktop/USC_HEAL/P4/suppression/YZ/merge_weight/P4_Suppression_Blood_weight.csv", na = "")
+```
+
+```{r}
+data <- long_merge
+valid.sidA <- data %>% group_by(sidA) %>% summarise(count = n()) %>% filter(., count >= 4) %>% select(., sidA)
+valid.data <- data[data$sidA %in% valid.sidA$sidA, ]
+
+colnames(weight)
+
+blood.nicotine.weight <- select(valid.data, sid, conditionA, PostAdminNicotinengmLLOQ1.0, PreAdminNicotinengmLLOQ1.0, Weigh.e.Cigarette.Before.Use..g., Weigh.e.Cigarette.After.Use..g., Difference.in.Post.Weight.and.Pre.Weight..g.)
+
+wide <- blood.nicotine.weight %>% group_by(sid) %>% gather(., key = "variable", value = "value", PostAdminNicotinengmLLOQ1.0, PreAdminNicotinengmLLOQ1.0, Weigh.e.Cigarette.Before.Use..g., Weigh.e.Cigarette.After.Use..g., Difference.in.Post.Weight.and.Pre.Weight..g.) %>% arrange(sid) %>% unite(., newvariable, variable, conditionA, sep = "_") %>% spread(., newvariable, value)
+
+blood.nicotine.weight.wide <- mutate(wide, Nicotine_change_1 = PostAdminNicotinengmLLOQ1.0_1 - PreAdminNicotinengmLLOQ1.0_1,
+       Nicotine_change_2 = PostAdminNicotinengmLLOQ1.0_2 - PreAdminNicotinengmLLOQ1.0_2,
+       Nicotine_change_3 = PostAdminNicotinengmLLOQ1.0_3 - PreAdminNicotinengmLLOQ1.0_3,
+       Nicotine_change_4 = PostAdminNicotinengmLLOQ1.0_4 - PreAdminNicotinengmLLOQ1.0_4)
+```
+
+```{r}
+write_sav(blood.nicotine.weight.wide, "/Users/zhan039/Desktop/USC_HEAL/P4/suppression/YZ/merge_weight/blood_nicotine_weight_wide.sav")
+write.csv(blood.nicotine.weight.wide, "/Users/zhan039/Desktop/USC_HEAL/P4/suppression/YZ/merge_weight/blood_nicotine_weight_wide.csv", na = "")
+```
+
