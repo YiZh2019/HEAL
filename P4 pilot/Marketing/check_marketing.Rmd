@@ -11,11 +11,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(tidyverse)
-library(stringr)
 ```
 
 ```{r}
-data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/P4/Marketing&Abuse/P4VAPERAim1Marketing_DATA_2020-10-16_1519.csv", )
+data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/P4/Marketing&Abuse/P4VAPERAim1Marketing_DATA_2020-10-16_1519.csv", stringsAsFactors = F, na.strings = "")
 ```
 
 ```{r prepare frs data}
