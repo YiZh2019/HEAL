@@ -42,5 +42,7 @@ new_data <- merge(data_for_merge, data_recode_for_merge, by.x = "SID", by.y = "S
 
 ```{r}
 write_sav(new_data, "/Users/zhan039/Desktop/USC_HEAL/HH/Temp_09252020/Yi/10152020/HH_W9_Scored_ForCleaning_merge.sav")
+
+write_csv(new_data, "/Users/zhan039/Desktop/USC_HEAL/HH/Temp_09252020/Yi/10152020/HH_W9_Scored_ForCleaning_merge.csv", na = "")
 ```
 
