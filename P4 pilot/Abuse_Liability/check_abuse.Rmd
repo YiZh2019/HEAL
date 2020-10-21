@@ -1,0 +1,91 @@
+---
+title: "Abue_Liability"
+author: "Yi"
+date: "10/20/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/P4/Marketing&Abuse/P4VAPERAim2AbuseLiab_DATA_2020-10-16_1519.csv", stringsAsFactors = F, na.strings = "")
+```
+
+```{r frs}
+select(data, id, participant_type_2, contains("frs_"))
+
+
+frs <- paste("frs", 1:12, sep = "_")
+sum(is.na(data[, frs]))
+
+frs.data <- select(data, id, participant_type_2, all_of(frs))
+frs.mean <- aggregate(frs.data[, frs], list(frs.data$participant_type_2), mean, na.rm = T)
+frs.sd <- aggregate(frs.data[, frs], list(frs.data$participant_type_2), sd, na.rm = T)
+```
+
+```{r}
+write_csv(frs.mean, "/Users/zhan039/Desktop/USC_HEAL/P4/Marketing&Abuse/YZ/abuse_result_mean.csv", na = "")
+write_csv(frs.sd, "/Users/zhan039/Desktop/USC_HEAL/P4/Marketing&Abuse/YZ/abuse_result_sd.csv", na = "")
+
+```
+
+```{r}
+sum(is.na(data$c_rat_ec_delay_time))
+rat.delay.mean <- aggregate(data$c_rat_ec_delay_time, list(data$participant_type_2), mean)
+rat.delay.sd <- aggregate(data$c_rat_ec_delay_time, list(data$participant_type_2), sd)
+
+write.csv(rat.delay.mean, "/Users/zhan039/Desktop/USC_HEAL/P4/Marketing&Abuse/YZ/abuse_result_rat_delay_mean.csv", na = "")
+write.csv(rat.delay.sd, "/Users/zhan039/Desktop/USC_HEAL/P4/Marketing&Abuse/YZ/abuse_result_rat_delay_sd.csv", na = "")
+```
+
+```{r}
+FreqPerc <- function(varname){
+  freq <- table(data$participant_type_2, varname, useNA = "always")
+  perct <- round(prop.table(freq, margin = 1) * 100, 1)
+  nperct <- paste(freq, " ", "(", perct, "%", ")", sep = "")
+  
+  nperct <- as.data.frame(matrix(nperct, ncol = 3))
+  
+  colnames(nperct) <- c(colnames(freq)[1:length(colnames(freq)) - 1], "Missing")
+  rownames(nperct) <- c(rownames(freq)[1:length(rownames(freq)) - 1], "Missing")
+
+  return(nperct)
+}
+```
+
+```{r rat}
+select(data, id, participant_type_2, contains("c_rat_ec"))
+
+self.ad.var <- paste("c_rat_ec_", c(1:7), sep = "")
+
+sum(is.na(data[, self.ad.var]))
+apply(data[, self.ad.var], 2, table, useNA = "always")
+
+tab1_self_ad <- data.frame(matrix(nrow = 6, ncol = 0))
+
+for (i in 1:length(self.ad.var)) {
+  var <- data[, self.ad.var[i]]
+  tempt.tab <- FreqPerc(var)
+  colnames(tempt.tab) <- paste(self.ad.var[i], "=", colnames(tempt.tab), sep = "")
+  tab1_self_ad <- cbind(tab1_self_ad, tempt.tab)
+}
+
+tab1_self_ad 
+```
+
+```{r}
+write_csv(tab1_self_ad , "/Users/zhan039/Desktop/USC_HEAL/P4/Marketing&Abuse/YZ/abuse_self_admin_result.csv", na = "")
+
+```
+
+```{r}
+table(data$participant_type_2, data$c_rat_ec_1, useNA = "always")
+table(data$participant_type_2, data$c_rat_ec_2, useNA = "always")
+```
+
