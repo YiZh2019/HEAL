@@ -87,6 +87,8 @@ block_2_sample_4,
 block_3_sample_5,
 block_3_sample_6,
 block_4_sample_7,
-block_4_sample_8) %>% apply(., 2,  table)
+block_4_sample_8) 
+
+data %>% filter(., id %in% c(3, 5)) %>% select(., frs_2_c6, frs_2_c7)
 ```
 
