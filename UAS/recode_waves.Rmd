@@ -1,0 +1,64 @@
+---
+title: "recode_waves"
+author: "Yi"
+date: "10/22/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/UAS/10212020/covidpanel_us_stata_oct_14_2020.sav")
+```
+
+```{r wave_7days} 
+table(data$start_date)
+
+class(data$wave)
+
+select(data, start_date, wave)
+
+unique.date <- sort(unique(data$start_date))
+length(unique.date)/7
+index_start <- sort(rep(seq(1, length(unique.date), 7), 7))
+index_end <- sort(rep(seq(7, length(unique.date), 7), 7))
+date_start <- unique.date[index_start]
+date_end <- unique.date[index_end]
+
+wave_7days_labels <- paste(date_start, "~", date_end, sep = "")
+
+
+as.numeric(data$start_date)
+
+data$wave_7days <- factor(as.numeric(data$start_date), levels = as.numeric(unique.date), labels = wave_7days_labels)
+
+select(data, uasid, start_date, wave, wave_7days)
+```
+
+```{r wave_14days}
+length(unique.date)
+length(unique.date)/14
+210/14
+index_14_start <- sort(rep(seq(1, 210, 14), 14))
+index_14_end <- sort(rep(seq(14, 210, 14), 14))
+date_14_start <- c(unique.date[index_14_start], rep(unique.date[211], 7))
+date_14_end <- c(unique.date[index_14_end], rep(as.Date("2020-10-19"), 7))
+
+wave_14days_labels <- paste(date_14_start, "~", date_14_end, sep = "")
+
+data$wave_14days <- factor(as.numeric(data$start_date), levels = as.numeric(unique.date), labels = wave_14days_labels)
+
+select(data, uasid, start_date, wave, wave_14days)
+```
+
+```{r}
+write_sav(data, "/Users/zhan039/Desktop/USC_HEAL/UAS/10212020/recode_waves/UAS_recode_waves_YZ.sav")
+```
+
