@@ -1,0 +1,36 @@
+---
+title: "merge_time_invariant"
+author: "Yi"
+date: "10/13/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+time.variant <- read_sav("/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/long_mean_score_change_rmaxt1011.sav")
+
+demo.data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/PRISMBaselineSession_DATA_2020-10-23_1421.csv", na.strings = "", stringsAsFactors = F)
+```
+
+```{r}
+# age gender shq_3 ftnd: s1_piq_2, s1_piq_1, s1_shq_3, s1_ftnd_ 1 to 6
+# demo <- select(demo.data, s1_sid, s1_piq_2, s1_piq_1, s1_shq_3, starts_with("s1_ftnd"))
+
+new_data <- merge(time.variant, demo.data, by.x = "sid", by.y = "s1_sid", all.x = T)
+
+select(new_data, sid, s1_piq_2, s1_piq_1, s1_shq_3, starts_with("s1_ftnd")) 
+```
+
+```{r}
+write_sav(new_data, "/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/PRISM_scores_demo.sav")
+
+```
+
