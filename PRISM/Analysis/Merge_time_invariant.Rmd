@@ -31,6 +31,4 @@ select(new_data, sid, s1_piq_2, s1_piq_1, s1_shq_3, starts_with("s1_ftnd"))
 
 ```{r}
 write_sav(new_data, "/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/PRISM_scores_demo.sav")
-
 ```
-
