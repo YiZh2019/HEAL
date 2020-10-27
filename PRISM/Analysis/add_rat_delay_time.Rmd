@@ -1,0 +1,35 @@
+---
+title: "add_rat_delay_time"
+author: "Yi"
+date: "10/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+
+```{r rat delay time}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/PRISM_scores_demo.sav")
+all.data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/PRISM/08312020_Christie/PRISMCompleters_w_Menthol_Status_31Aug2020.csv", na.strings = c("", "."), stringsAsFactors = F)
+```
+
+```{r}
+rat.delay.time <- select(all.data, sid, blinding_condn, rat_delay_time)
+
+newdata <- merge(data, rat.delay.time, by.x = c("sid", "blinding_condn"), by.y = c("sid", "blinding_condn"), all.x = T)
+
+newdata %>% group_by(sid) %>% summarise(count = length(unique(rat_delay_time))) %>% arrange(count)
+```
+
+```{r}
+write_sav(newdata, "/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/PRISM_scores_demo_rat.sav")
+
+```
+
