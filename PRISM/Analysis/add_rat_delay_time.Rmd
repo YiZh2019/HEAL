@@ -28,6 +28,16 @@ newdata <- merge(data, rat.delay.time, by.x = c("sid", "blinding_condn"), by.y =
 newdata %>% group_by(sid) %>% summarise(count = length(unique(rat_delay_time))) %>% arrange(count)
 ```
 
+```{r create the numeric axt}
+unique(newdata$axt)
+
+newdata$axt_n <- as.numeric(as.character(factor(newdata$axt, levels = unique(newdata$axt), labels = c(1:9))))
+
+select(newdata, sid, axt, axt_n)
+table(newdata$axt, useNA = "always")
+table(newdata$axt_n, useNA = "always")
+```
+
 ```{r}
 write_sav(newdata, "/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/PRISM_scores_demo_rat_new.sav")
 
