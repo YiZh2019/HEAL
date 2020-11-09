@@ -21,7 +21,7 @@ all.data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/PRISM/08312020_Christie/PR
 ```
 
 ```{r}
-rat.delay.time <- select(all.data, sid, blinding_condn, rat_delay_time)
+rat.delay.time <- select(all.data, sid, blinding_condn, rat_delay_time, rat_cig_smkd)
 
 newdata <- merge(data, rat.delay.time, by.x = c("sid", "blinding_condn"), by.y = c("sid", "blinding_condn"), all.x = T)
 
@@ -29,7 +29,7 @@ newdata %>% group_by(sid) %>% summarise(count = length(unique(rat_delay_time))) 
 ```
 
 ```{r}
-write_sav(newdata, "/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/PRISM_scores_demo_rat.sav")
+write_sav(newdata, "/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/PRISM_scores_demo_rat_new.sav")
 
 ```
 
