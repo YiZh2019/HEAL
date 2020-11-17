@@ -19,11 +19,11 @@ data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/UAS/10272020/JC/UAS DATA/UAS_r
 ```
 
 ```{r}
-time_variant <- select(data, uasid,wave,Binge_drinking,Binge_drinkingA,coping_cannabis,coping_drinking4,coping_drinking7,coping_drugs,coping_exercise,coping_meditate,cr026a2,cr026a2A,disabled,drinkingTotal,employmenttype,final_weight,Heavy_drinking,hourswork,laborstatus,lf_other,phq4_anxious,phq4_depressed,phq4_littleinterest,phq4_worry,retired,sick_leave,start_date,unemp_layoff,unemp_look,wave_7days,wave_14days,workfullpart,working)
+time_variant <- select(data, uasid,wave,Binge_drinking,Binge_drinkingA,coping_cannabis,coping_drinking,coping_drinking4,coping_drinking7,coping_drugs,coping_exercise,coping_meditate,cr026a2,cr026a2A,disabled,drinkingTotal,employmenttype,final_weight,Heavy_drinking,hourswork,laborstatus,lf_other,phq4_anxious,phq4_depressed,phq4_littleinterest,phq4_worry,retired,sick_leave,start_date,unemp_layoff,unemp_look,wave_7days,wave_14days,workfullpart,working)
 
 demo <- select(data, uasid, wave, gender,maritalstatusD1,maritalstatusD2,educationD1,educationD2,educationD3,hhincomeM,hhincomeQ,poverty100,poverty150,age,age3Ga,age4Ga,age4Gb,RACEHSP,RACEHSP4G,RACEHSP5G,immigrant_status,maritalstatus,livewithpartner,education,hisplatino,hisplatino_group,white,black,nativeamer,asian,pacific,race,hhincome,hhmembernumber,Householdnumber,statereside)
 
-all <- select(data, uasid,wave,Binge_drinking,Binge_drinkingA,coping_cannabis,coping_drinking4,coping_drinking7,coping_drugs,coping_exercise,coping_meditate,cr026a2,cr026a2A,disabled,drinkingTotal,employmenttype,final_weight,Heavy_drinking,hourswork,laborstatus,lf_other,phq4_anxious,phq4_depressed,phq4_littleinterest,phq4_worry,retired,sick_leave,start_date,unemp_layoff,unemp_look,wave_7days,wave_14days,workfullpart,working, gender,maritalstatusD1,maritalstatusD2,educationD1,educationD2,educationD3,hhincomeM,hhincomeQ,poverty100,poverty150,age,age3Ga,age4Ga,age4Gb,RACEHSP,RACEHSP4G,RACEHSP5G,immigrant_status,maritalstatus,livewithpartner,education,hisplatino,hisplatino_group,white,black,nativeamer,asian,pacific,race,hhincome,hhmembernumber,Householdnumber,statereside)
+all <- select(data, uasid,wave,Binge_drinking,Binge_drinkingA,coping_cannabis,coping_drinking,coping_drinking4,coping_drinking7,coping_drugs,coping_exercise,coping_meditate,cr026a2,cr026a2A,disabled,drinkingTotal,employmenttype,final_weight,Heavy_drinking,hourswork,laborstatus,lf_other,phq4_anxious,phq4_depressed,phq4_littleinterest,phq4_worry,retired,sick_leave,start_date,unemp_layoff,unemp_look,wave_7days,wave_14days,workfullpart,working, gender,maritalstatusD1,maritalstatusD2,educationD1,educationD2,educationD3,hhincomeM,hhincomeQ,poverty100,poverty150,age,age3Ga,age4Ga,age4Gb,RACEHSP,RACEHSP4G,RACEHSP5G,immigrant_status,maritalstatus,livewithpartner,education,hisplatino,hisplatino_group,white,black,nativeamer,asian,pacific,race,hhincome,hhmembernumber,Householdnumber,statereside)
 ```
 
 ```{r transform time-variant only}
@@ -41,6 +41,6 @@ order_col_all <- c(sapply(colnames(all)[-c(1,2)], paste, c(1:14), sep = "_"))
 
 all_wide <- select(all_wide, uasid, all_of(order_col_all))
 
-write_sav(all_wide, "/Users/zhan039/Desktop/USC_HEAL/UAS/10272020/UAS_wide_YZ.sav")
+write_sav(all_wide, "/Users/zhan039/Desktop/USC_HEAL/UAS/11162020/UAS_wide_YZ.sav")
 ```
 
