@@ -286,19 +286,28 @@ attr(ana.data$RACEa, "label")
 prop.table(table(ana.data$RACEa, useNA = "always"))
 
 table(ana.data$w9_all_mj_use_last30_n, useNA = "always")
+
+pre.w9.age <- data_age_race[, c("SID", "W9_Age_Calc_new_2")]
+ana.data <- merge(ana.data, pre.w9.age, by = "SID", all.x = T)
+
 pre.ana.data <- ana.data[!ana.data$w9_all_mj_use_last30_n %in% c(0, NA), ]
 table(pre.ana.data$w9_all_mj_use_last30_n, useNA = "always")
 487/761
 
-pre.w9.age <- data_age_race[, c("SID", "W9_Age_Calc_new_2")]
-pre.ana.data <- merge(pre.ana.data, pre.w9.age, by = "SID", all.x = T)
-
 mean(pre.w9.age$W9_Age_Calc_new_2, na.rm = T)
+mean(pre.ana.data$W9_Age_Calc_new_2, na.rm = T)
 
 prop.table(table(pre.ana.data$Gender, useNA = "always"))
 
 attr(pre.ana.data$RACEa, "label")
 prop.table(table(pre.ana.data$RACEa, useNA = "always"))
 
+```
+
+```{r}
+# save the data as spss
+write_sav(data_0804, "/Users/zhan039/Desktop/USC_HEAL/Cannabis_Delivery/Yi/hh_w1_to_w10_0804.sav")
+write_sav(data_age_race, "/Users/zhan039/Desktop/USC_HEAL/Cannabis_Delivery/Yi/w10_covid_081020_JC_B.sav")
+write_sav(ana.data, "/Users/zhan039/Desktop/USC_HEAL/Cannabis_Delivery/Yi/Cannabis_Delivery_YZ.sav")
 ```
 
