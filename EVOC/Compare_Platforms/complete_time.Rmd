@@ -45,6 +45,7 @@ hist(rc.time$diff.time, breaks = 100)
 tapply(rc.time$diff.time, rc.time$project_type, summary)
 tapply(rc.time$diff.time, rc.time$project_type, sd)
 
-
+summary(rc.time$diff.time)
+sd(rc.time$diff.time)
 ```
 
