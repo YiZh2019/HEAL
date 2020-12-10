@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(tidyverse)
+library(gmodels)
 ```
 
 
@@ -54,5 +55,10 @@ regions <- FreqPerc(data.region$region)
 ```{r}
 write.csv(states, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Pilot1_Methods_Paper/updated09302020/states.csv")
 write.csv(regions, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Pilot1_Methods_Paper/updated09302020/regions.csv")
+```
+
+```{r}
+CrossTable(data.region$region, data.region$project_type, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, format = "SPSS")
+
 ```
 
