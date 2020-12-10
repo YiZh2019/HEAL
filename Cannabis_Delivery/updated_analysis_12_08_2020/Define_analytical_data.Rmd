@@ -1,0 +1,81 @@
+---
+title: "updated_both_w9_w10"
+author: "Yi"
+date: "12/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+data_0804 <- read_sas("/Users/zhan039/Desktop/USC_HEAL/HH/HH W10 COVID DATA/hh_w1_to_w10_0804.sas7bdat")
+
+data_age_race <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/HH W10 COVID DATA/w10_covid_081020_JC_B.sav")
+```
+
+```{r}
+data <- data_0804
+
+age_race <- data_age_race[, c("SID", "W9_Age_Calc_new_2", "W10_Age_Calc_new_2", "RACEa")]
+
+data <- merge(data, age_race, by = "SID", all.x = T)
+```
+
+```{r prepare analytical data -- w10}
+# create row max of cannibis use in last 30 dyas
+select(data, w10_mj_use_last30, w10_mjfood_use_last30, w10_emj_use_last30, w10_smj_use_last30, w10_dabbing_use_last30) %>% apply(., 2, table, useNA = "always")
+
+data$w10_all_mj_use_last30 = apply(data[, c("w10_mj_use_last30", "w10_mjfood_use_last30", "w10_emj_use_last30", "w10_smj_use_last30", "w10_dabbing_use_last30")], 1, max, na.rm = T)
+
+select(data, w10_mj_use_last30, w10_mjfood_use_last30, w10_emj_use_last30, w10_smj_use_last30, w10_dabbing_use_last30, w10_all_mj_use_last30) 
+table(data$w10_all_mj_use_last30, useNA = "always")
+
+# recode to days and in numeric
+data$w10_all_mj_use_last30_n <- as.numeric(as.character(factor(data$w10_all_mj_use_last30, levels = c(-99, 1:7), labels = c(NA, 0, 2, 4, 8, 15, 25, 30))))
+
+select(data, w10_all_mj_use_last30, w10_all_mj_use_last30_n) %>% apply(., 2, table, useNA = "always")
+
+# ever use any cannaibis products in past 30 days
+data <- mutate(data, w10_ever_any_mj_last30 = ifelse(w10_all_mj_use_last30_n %in% 0, 0, ifelse(w10_all_mj_use_last30_n > 0, 1, NA)))
+
+select(data, w10_all_mj_use_last30, w10_all_mj_use_last30_n, w10_ever_any_mj_last30) %>% apply(., 2, table, useNA = "always")
+
+```
+
+```{r prepare analytical data -- w9}
+# create row max of cannibis use in last 30 dyas
+select(data, W9_Mj_Use_Last30, W9_MjFood_Use_Last30, W9_eMj_Use_Last30, W9_sMj_Use_Last30, W9_Dabbing_Use_Last30) %>% apply(., 2, table, useNA = "always")
+
+data$w9_all_mj_use_last30 <- apply(data[, c("W9_Mj_Use_Last30", "W9_MjFood_Use_Last30", "W9_eMj_Use_Last30", "W9_sMj_Use_Last30", "W9_Dabbing_Use_Last30")], 1, max, na.rm = T)
+
+select(data, W9_Mj_Use_Last30, W9_MjFood_Use_Last30, W9_eMj_Use_Last30, W9_sMj_Use_Last30, W9_Dabbing_Use_Last30, w9_all_mj_use_last30) 
+table(data$w9_all_mj_use_last30, useNA = "always")
+
+# recode to days and in numeric
+data$w9_all_mj_use_last30_n <- as.numeric(as.character(factor(data$w9_all_mj_use_last30, levels = c(-99, 1:7), labels = c(NA, 0, 2, 4, 8, 15, 25, 30))))
+
+select(data, W9_Mj_Use_Last30, W9_MjFood_Use_Last30, W9_eMj_Use_Last30, W9_sMj_Use_Last30, W9_Dabbing_Use_Last30, w9_all_mj_use_last30, w9_all_mj_use_last30_n) 
+
+select(data, w9_all_mj_use_last30, w9_all_mj_use_last30_n) %>% apply(., 2, table, useNA = "always")
+
+# ever use any cannaibis products in past 30 days
+data <- mutate(data, w9_ever_any_mj_last30 = ifelse(w9_all_mj_use_last30_n %in% 0, 0, ifelse(w9_all_mj_use_last30_n > 0, 1, NA)))
+
+select(data, w9_all_mj_use_last30, w9_all_mj_use_last30_n, w9_ever_any_mj_last30) %>% apply(., 2, table, useNA = "always")
+```
+
+```{r define analytical sample}
+# create the sample selection variable
+data <- mutate(data, sample_selection = ifelse(w9_ever_any_mj_last30 %in% 1 & w10_ever_any_mj_last30 %in% 1, 1, 0))
+```
+
+```{r}
+saveRDS(data, "/Users/zhan039/Desktop/USC_HEAL/Cannabis_Delivery/Yi/updated_analysis_12_08_2020/analytical_data.rds")
+```
