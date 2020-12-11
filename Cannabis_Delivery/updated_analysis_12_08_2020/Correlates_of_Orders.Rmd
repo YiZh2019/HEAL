@@ -1,0 +1,127 @@
+---
+title: "Correlates_of_Orders"
+author: "Yi"
+date: "12/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+data <- readRDS("/Users/zhan039/Desktop/USC_HEAL/Cannabis_Delivery/Yi/updated_analysis_12_08_2020/analytical_data_supply_demo.rds")
+all.data <- data
+```
+
+```{r prepare variables}
+# change of max cannabis use frequency in past 30 days from baseline to follow-up
+all.data <- mutate(all.data, increase_n_mj_use_last30 = w10_all_mj_use_last30_n - w9_all_mj_use_last30_n)
+
+select(all.data, w9_all_mj_use_last30_n, w10_all_mj_use_last30_n, increase_n_mj_use_last30)
+all.data %>% filter(., sample_selection %in% 1) %>% select(., w9_all_mj_use_last30_n, w10_all_mj_use_last30_n, increase_n_mj_use_last30)
+
+```
+
+
+```{r Another table 1 Correlates of Orders _ Overall Analytical Sample}
+ana.data <- all.data[all.data$sample_selection %in% 1, ]
+
+# Max Cannabis Use Frequency in Past 30 days
+mean(ana.data$w9_all_mj_use_last30_n, na.rm = T)
+sd(ana.data$w9_all_mj_use_last30_n, na.rm = T)
+
+mean(ana.data$w10_all_mj_use_last30_n, na.rm = T)
+sd(ana.data$w10_all_mj_use_last30_n, na.rm = T)
+
+mean(ana.data$increase_n_mj_use_last30, na.rm = T)
+sd(ana.data$increase_n_mj_use_last30, na.rm = T)
+
+# Baseline - where usually get cannabis
+select(ana.data, starts_with("w9_mj_supply_n")) %>% apply(., 2, table)
+select(ana.data, starts_with("w9_mj_supply_n")) %>% apply(., 2, table) %>% apply(., 2, prop.table)
+
+table(ana.data$W9_Mj_Supply_6, useNA = "always")
+prop.table(table(ana.data$W9_Mj_Supply_6, useNA = "always"))
+
+table(ana.data$W9_Mj_Supply_8, useNA = "always")
+prop.table(table(ana.data$W9_Mj_Supply_8, useNA = "always"))
+
+# Follow-up - where usually get cannabis
+select(ana.data, starts_with("w10_mj_supply_n")) %>% apply(., 2, table)
+select(ana.data, starts_with("w10_mj_supply_n")) %>% apply(., 2, table) %>% apply(., 2, prop.table)
+
+table(ana.data$w10_mj_supply___7, useNA = "always")
+prop.table(table(ana.data$w10_mj_supply___7, useNA = "always"))
+
+table(ana.data$w10_mj_supply___8, useNA = "always")
+prop.table(table(ana.data$w10_mj_supply___8, useNA = "always"))
+
+table(ana.data$w10_mj_supply___7, ana.data$w10_mj_supply___8, useNA = "always")
+
+# Use Cannabis to cope isolation & distancing due to pandemic
+table(ana.data$covid_69___11, useNA = "always")
+prop.table(table(ana.data$covid_69___11, useNA = "always"))
+```
+
+```{r Another table 1 Correlates of Orders _ Order Cannabis in past 2wk at Follow-up}
+table(ana.data$covid_mj_deliv_past2weeks, useNA = "always")
+
+# Max Cannabis Use Frequency in Past 30 days
+ana.data %>% group_by(covid_mj_deliv_past2weeks) %>% summarise(w9_mean = mean(w9_all_mj_use_last30_n, na.rm = T), w9_sd = sd(w9_all_mj_use_last30_n, na.rm = T), w10_mean = mean(w10_all_mj_use_last30_n, na.rm = T), w10_sd = sd(w10_all_mj_use_last30_n, na.rm = T), inc_mean = mean(increase_n_mj_use_last30, na.rm = T), inc_sd = sd(increase_n_mj_use_last30, na.rm = T))
+
+leveneTest(ana.data$w9_all_mj_use_last30_n, group = as.factor(ana.data$covid_mj_deliv_past2weeks), center = mean)
+t.test(ana.data[ana.data$covid_mj_deliv_past2weeks %in% 0, "w9_all_mj_use_last30_n"], ana.data[ana.data$covid_mj_deliv_past2weeks %in% 1, "w9_all_mj_use_last30_n"], var.equal = F)
+
+leveneTest(ana.data$w10_all_mj_use_last30_n, group = as.factor(ana.data$covid_mj_deliv_past2weeks), center = mean)
+t.test(ana.data[ana.data$covid_mj_deliv_past2weeks %in% 0, "w10_all_mj_use_last30_n"], ana.data[ana.data$covid_mj_deliv_past2weeks %in% 1, "w10_all_mj_use_last30_n"], var.equal = T)
+
+leveneTest(ana.data$increase_n_mj_use_last30, group = as.factor(ana.data$covid_mj_deliv_past2weeks), center = mean)
+t.test(ana.data[ana.data$covid_mj_deliv_past2weeks %in% 0, "increase_n_mj_use_last30"], ana.data[ana.data$covid_mj_deliv_past2weeks %in% 1, "increase_n_mj_use_last30"], var.equal = T)
+
+# Baseline - where usually get cannabis
+CrossTable(ana.data$w9_mj_supply_n_selfgrown, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w9_mj_supply_n_share, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w9_mj_supply_n_bfperson, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w9_mj_supply_n_bfdisp_card, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w9_mj_supply_n_bfdisp_nocard, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w9_mj_supply_n_online_deliv, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$W9_Mj_Supply_6, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$W9_Mj_Supply_8, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+# Follow-up - where usually get cannabis
+CrossTable(ana.data$w10_mj_supply_n_selfgrown, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w10_mj_supply_n_share, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w10_mj_supply_n_bfperson, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w10_mj_supply_n_bfdisp_card, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w10_mj_supply_n_bfdisp_nocard, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w10_mj_supply_n_online_deliv, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w10_mj_supply___7, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(ana.data$w10_mj_supply___8, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+# Use Cannabis to cope isolation & distancing due to pandemic
+CrossTable(ana.data$covid_69___11, ana.data$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+```
+
+```{r save the data}
+saveRDS(all.data, "/Users/zhan039/Desktop/USC_HEAL/Cannabis_Delivery/Yi/updated_analysis_12_08_2020/analytical_data_supply_demo_correlates.rds")
+```
+
