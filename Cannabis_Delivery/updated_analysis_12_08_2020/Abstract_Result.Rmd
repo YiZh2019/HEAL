@@ -1,0 +1,39 @@
+---
+title: "Abstract_Result"
+author: "Yi"
+date: "12/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+data <- readRDS("/Users/zhan039/Desktop/USC_HEAL/Cannabis_Delivery/Yi/updated_analysis_12_08_2020/analytical_data_supply_demo_correlates.rds")
+```
+
+```{r}
+ana.data <- data[data$sample_selection %in% 1, ]
+
+length(unique(ana.data$SID))
+mean(ana.data$W10_Age_Calc_new_2)
+sd(ana.data$W10_Age_Calc_new_2)
+
+table(ana.data$Gender, useNA = "always")
+prop.table(table(ana.data$Gender, useNA = "always"))
+
+table(ana.data$RACEa, useNA = "always")
+attr(ana.data$RACEa, "label")
+prop.table(table(ana.data$RACEa, useNA = "always"))
+```
+
+```{r}
+write_sav(data, "/Users/zhan039/Desktop/USC_HEAL/Cannabis_Delivery/Yi/updated_analysis_12_08_2020/analytical_data_final_YZ.sav")
+```
+
