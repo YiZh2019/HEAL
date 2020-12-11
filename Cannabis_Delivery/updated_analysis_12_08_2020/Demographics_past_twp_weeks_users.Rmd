@@ -1,0 +1,93 @@
+---
+title: "Demographics_past_two_weeks_users"
+author: "Yi"
+date: "12/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(car)
+library(gmodels)
+```
+
+```{r}
+data <- readRDS("/Users/zhan039/Desktop/USC_HEAL/Cannabis_Delivery/Yi/updated_analysis_12_08_2020/analytical_data_supply.rds")
+
+ana.data <- data
+```
+
+```{r covid_64j order delivery of mj in past two weeks}
+table(ana.data$covid_64j, useNA = "always")
+
+ana.data <- mutate(ana.data, covid_mj_deliv_past2weeks = ifelse(covid_64j %in% 1, 0, 
+                                                                ifelse(covid_64j > 1, 1, NA)))
+
+select(ana.data, covid_64j, covid_mj_deliv_past2weeks) %>% apply(., 2, table, useNA = "always")
+```
+
+```{r prepare variables of demographics and cannabis use frequency}
+# Pre- and During- COVID cannabis use (times per week)
+ana.data <- mutate(ana.data, w9_n_mj_use_perweek = w9_all_mj_use_last30_n/4, w10_n_mj_use_perweek = w10_all_mj_use_last30_n/4)
+
+select(ana.data, w9_all_mj_use_last30_n, w10_all_mj_use_last30_n, w9_n_mj_use_perweek, w10_n_mj_use_perweek)
+
+# increase in cannabis use during COVID (times per week)
+ana.data <- mutate(ana.data, increase_n_mj_use_perweek = w10_n_mj_use_perweek - w9_n_mj_use_perweek)
+
+select(ana.data, w9_n_mj_use_perweek, w10_n_mj_use_perweek, increase_n_mj_use_perweek)
+filter(ana.data, sample_selection %in% 1) %>% select(., w9_n_mj_use_perweek, w10_n_mj_use_perweek, increase_n_mj_use_perweek)
+```
+
+```{r Table 2 Demographics of respondents who orderd cannabis online in the past two weeks during COVID}
+# select samples
+demo.freq <- ana.data[ana.data$sample_selection %in% 1, ]
+table(demo.freq$covid_mj_deliv_past2weeks, useNA = "always")
+
+# AGE
+demo.freq %>% group_by(covid_mj_deliv_past2weeks) %>% summarise(mean = mean(W10_Age_Calc_new_2, na.rm = T), sd = sd(W10_Age_Calc_new_2, na.rm = T)) 
+
+leveneTest(ana.data$W10_Age_Calc_new_2, group = as.factor(ana.data$covid_mj_deliv_past2weeks), center = mean)
+t.test(ana.data[ana.data$covid_mj_deliv_past2weeks %in% 0, "W10_Age_Calc_new_2"], ana.data[ana.data$covid_mj_deliv_past2weeks %in% 1, "W10_Age_Calc_new_2"], var.equal = T)
+
+# gender
+table(demo.freq$Gender, useNA = "always")
+attr(demo.freq$Gender, "label")
+
+CrossTable(demo.freq$Gender, demo.freq$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+# race
+table(demo.freq$RACEa, useNA = "always")
+attr(demo.freq$RACEa, "label")
+CrossTable(demo.freq$RACEa, demo.freq$covid_mj_deliv_past2weeks, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+# Pre-COVID cannabis use (times per week)
+boxplot(demo.freq$w9_n_mj_use_perweek)
+demo.freq %>% group_by(covid_mj_deliv_past2weeks) %>% summarise(w9_mean = mean(w9_n_mj_use_perweek, na.rm = T), w9_sd = sd(w9_n_mj_use_perweek, na.rm = T))
+
+leveneTest(demo.freq$w9_n_mj_use_perweek, group = as.factor(demo.freq$covid_mj_deliv_past2weeks), center = mean)
+t.test(demo.freq[demo.freq$covid_mj_deliv_past2weeks %in% 0, "w9_n_mj_use_perweek"], demo.freq[demo.freq$covid_mj_deliv_past2weeks %in% 1, "w9_n_mj_use_perweek"], var.equal = F)
+
+# During-COVID cannabis use (times per week)
+boxplot(demo.freq$w10_n_mj_use_perweek)
+demo.freq %>% group_by(covid_mj_deliv_past2weeks) %>% summarise(w10_mean = mean(w10_n_mj_use_perweek, na.rm = T), w10_sd = sd(w10_n_mj_use_perweek, na.rm = T))
+
+leveneTest(demo.freq$w10_n_mj_use_perweek, group = as.factor(demo.freq$covid_mj_deliv_past2weeks), center = mean)
+t.test(demo.freq[demo.freq$covid_mj_deliv_past2weeks %in% 0, "w10_n_mj_use_perweek"], demo.freq[demo.freq$covid_mj_deliv_past2weeks %in% 1, "w10_n_mj_use_perweek"], var.equal = T)
+
+# increase in cannabis use during COVID (times per week)
+boxplot(demo.freq$increase_n_mj_use_perweek)
+demo.freq %>% group_by(covid_mj_deliv_past2weeks) %>% summarise(increase_mean = mean(increase_n_mj_use_perweek, na.rm = T), increase_sd = sd(increase_n_mj_use_perweek, na.rm = T))
+
+leveneTest(demo.freq$increase_n_mj_use_perweek, group = as.factor(demo.freq$covid_mj_deliv_past2weeks), center = mean)
+t.test(demo.freq[demo.freq$covid_mj_deliv_past2weeks %in% 0, "increase_n_mj_use_perweek"], demo.freq[demo.freq$covid_mj_deliv_past2weeks %in% 1, "increase_n_mj_use_perweek"], var.equal = T)
+```
+
+```{r save the data}
+saveRDS(ana.data, "/Users/zhan039/Desktop/USC_HEAL/Cannabis_Delivery/Yi/updated_analysis_12_08_2020/analytical_data_supply_demo.rds")
+```
+
