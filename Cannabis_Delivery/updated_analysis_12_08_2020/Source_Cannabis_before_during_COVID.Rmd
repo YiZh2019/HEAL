@@ -1,0 +1,92 @@
+---
+title: "Sources_Cannabis_before_during_COVID"
+author: "Yi"
+date: "12/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(gmodels)
+```
+
+```{r}
+data <- readRDS("/Users/zhan039/Desktop/USC_HEAL/Cannabis_Delivery/Yi/updated_analysis_12_08_2020/analytical_data.rds")
+
+ana.data <- data
+```
+
+```{r prepare variables from w10}
+# w10
+select(ana.data, starts_with("w10_mj_supply__")) %>% apply(., 2, table, useNA = "always")
+
+
+ana.data <- mutate(ana.data, w10_mj_supply_n_selfgrown = w10_mj_supply___1, 
+                   w10_mj_supply_n_share = w10_mj_supply___2, 
+                   w10_mj_supply_n_bfperson = w10_mj_supply___3, 
+                   w10_mj_supply_n_bfdisp_card = w10_mj_supply___4)
+
+ana.data$w10_mj_supply_n_bfdisp_nocard <- apply(ana.data[, c("w10_mj_supply___5", "w10_mj_supply___6")], 1, max, na.rm = T)
+ana.data$w10_mj_supply_n_online_deliv <- apply(ana.data[, c("w10_mj_supply___7", "w10_mj_supply___8")], 1, max, na.rm = T)
+
+ana.data %>% select(., starts_with("w10_mj_supply__")) %>% apply(., 2, table, useNA = "always")
+ana.data %>% select(., starts_with("w10_mj_supply_n_")) %>% apply(., 2, table, useNA = "always")
+```
+
+```{r prepare variables from w9}
+# w9
+select(ana.data, starts_with("W9_Mj_Supply_"))
+
+ana.data <- mutate(ana.data, w9_mj_supply_n_selfgrown = W9_Mj_Supply_1, 
+                   w9_mj_supply_n_share = W9_Mj_Supply_2, 
+                   w9_mj_supply_n_bfperson = W9_Mj_Supply_3, 
+                   w9_mj_supply_n_bfdisp_card = W9_Mj_Supply_4)
+
+ana.data$w9_mj_supply_n_bfdisp_nocard <- apply(ana.data[, c("W9_Mj_Supply_5", "W9_Mj_Supply_9")], 1, max, na.rm = T)
+ana.data$w9_mj_supply_n_online_deliv <- apply(ana.data[, c("W9_Mj_Supply_6", "W9_Mj_Supply_8")], 1, max, na.rm = T)
+
+ana.data %>% select(., starts_with("W9_Mj_Supply_")) %>% apply(., 2, table, useNA = "always")
+ana.data %>% select(., starts_with("w9_mj_supply_n_")) %>% apply(., 2, table, useNA = "always")
+```
+
+```{r table 1 Usual Sources of Cannabis Before and During COVID}
+# transform the dataset
+mj.supply.waves <- ana.data %>% select(., SID, sample_selection,starts_with("w9_mj_supply_n"), starts_with("w10_mj_supply_n"))
+mj_supply_var <- colnames(mj.supply.waves)[-c(1, 2)]
+
+mj.supply.waves.long <- mj.supply.waves %>% gather(., key = variable, value = value, all_of(mj_supply_var)) %>% separate(variable, c("wave", "mj_supply"), sep = "_", extra = "merge") %>% spread(mj_supply, value)
+
+mj.supply.waves.long$wave_n <- as.numeric(as.character(factor(mj.supply.waves.long$wave, levels = c("w9", "w10"), labels = c(9, 10))))
+
+select(mj.supply.waves.long, wave, wave_n)
+
+table(mj.supply.waves.long$mj_supply_n_bfdisp_nocard, mj.supply.waves.long$wave_n, useNA = "always")
+
+# create the table
+mj.supply.waves.long <- mj.supply.waves.long[mj.supply.waves.long$sample_selection %in% 1, ]
+  
+# mj_supply_var_long <- colnames(mj.supply.waves.long)[-c(1, 2, 9)]
+# apply(mj.supply.waves.long[, mj_supply_var_long], 2, CrossTable, mj.supply.waves.long$wave, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(mj.supply.waves.long$mj_supply_n_selfgrown, mj.supply.waves.long$wave_n, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(mj.supply.waves.long$mj_supply_n_share, mj.supply.waves.long$wave_n, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(mj.supply.waves.long$mj_supply_n_bfperson, mj.supply.waves.long$wave_n, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(mj.supply.waves.long$mj_supply_n_bfdisp_card, mj.supply.waves.long$wave_n, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(mj.supply.waves.long$mj_supply_n_bfdisp_nocard, mj.supply.waves.long$wave_n, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+CrossTable(mj.supply.waves.long$mj_supply_n_online_deliv, mj.supply.waves.long$wave_n, prop.r = F, prop.c = T, prop.t = F, prop.chisq = F, chisq = T, fisher = T, format = "SPSS")
+
+```
+
+```{r save the data}
+saveRDS(ana.data, "/Users/zhan039/Desktop/USC_HEAL/Cannabis_Delivery/Yi/updated_analysis_12_08_2020/analytical_data_supply.rds")
+```
+
