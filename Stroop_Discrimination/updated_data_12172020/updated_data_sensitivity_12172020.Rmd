@@ -1,0 +1,81 @@
+---
+title: "updated_data_12172020_sensitivity"
+author: "Yi"
+date: "12/18/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(tidyverse)
+```
+
+```{r}
+origin <- read_sav("/Users/zhan039/Desktop/USC_HEAL/Stroop/Stroop Discrimination Task Paper - August 2017/Finalized Stroop Dataset & Syntax 7.24.18_USE THIS/Original Dataset (Wide Format)/Stroop Discrimination Dataset MERGED (ORIGINAL) 7.24.18.sav")
+
+grow <- read_sav("/Users/zhan039/Desktop/USC_HEAL/GROW/GROW DATA/REDCap_wTeleform_Merged (scored + sorted)_06212018 (No 2nd survey) with DIFF.sav")
+```
+
+```{r}
+# merge origin with grow
+summary(origin$SID)
+summary(grow$cleaned_SID)
+
+origin.formerge <- mutate(origin, cleaned_SID = 50000 + SID)
+select(origin.formerge, SID, cleaned_SID, everything()) %>% arrange(desc(SID))
+
+intersect(colnames(origin.formerge), colnames(grow))
+
+mergedata <- merge(origin.formerge, grow, all.x = T, by = "cleaned_SID")
+```
+
+```{r}
+# remove unmatched trial
+data <- mergedata[mergedata$Target != "ALWAYS", ]
+length(unique(data$cleaned_SID))
+
+# complete both sessions
+table(data$Session, useNA = "always")
+
+data %>% group_by(cleaned_SID) %>% summarise(n = length(unique(Session)))
+
+remove.session <- data %>% group_by(cleaned_SID) %>% summarise(n = length(unique(Session))) %>% filter(n < 2)
+
+data[data$cleaned_SID %in% remove.session$cleaned_SID, c("cleaned_SID", "Session", "Target")]
+
+data <- data[!data$cleaned_SID %in% remove.session$cleaned_SID, ]
+length(unique(data$cleaned_SID))
+
+# Non-Hispanic AA
+data <- filter(data, piq_5 %in% 0 & (PIQ_6c_T %in% 1 | piq_6___3 %in% 1))
+length(unique(data$cleaned_SID))
+
+# write_sav(data, "/Users/zhan039/Desktop/USC_HEAL/Stroop/Yi/updated_data_12172020/Stroop_sensitivity_with_outliers_YZ.sav")
+```
+
+```{r}
+# outliers (DEFFERENT!!!)
+m.RTime <- mean(data$Reaction_Time)  # 825.8295
+sd.RTime <- sd(data$Reaction_Time)  # 347.8687
+m.RTime  
+sd.RTime  
+upp.RTime <- m.RTime + 2*sd.RTime  
+low.RTime <- m.RTime - 2*sd.RTime  
+
+data.rm.outliers <- filter(data, Reaction_Time >= low.RTime & Reaction_Time <= upp.RTime)
+
+boxplot(data$Reaction_Time)
+hist(data$Reaction_Time, breaks = 100)
+
+boxplot(data.rm.outliers$Reaction_Time)
+hist(data.rm.outliers$Reaction_Time, breaks = 100)
+
+length(unique(data.rm.outliers$cleaned_SID))
+
+# write_sav(data.rm.outliers, "/Users/zhan039/Desktop/USC_HEAL/Stroop/Yi/updated_data_12172020/Stroop_sensitivity_without_outliers_YZ.sav")
+```
+
