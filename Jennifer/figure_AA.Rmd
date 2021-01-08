@@ -13,8 +13,6 @@ knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(tidyverse)
 library(MASS)
-library(extrafont)
-font_import()
 ```
 
 ```{r}
@@ -37,10 +35,11 @@ newdata2 <- data.frame(W86_Concern_Soc_average = seq(from = -4, to = 4, length.o
 
 newdata2 <- cbind(newdata2, predict(m1, newdata2, type = "link", se.fit=TRUE))
 
+newdata2$fit <- newdata2$fit - 0.1
 newdata2 <- within(newdata2, {
 W8_Cig_USE_CT <- exp(fit)
-LL <- exp(fit - 0.057 * se.fit)
-UL <- exp(fit + 0.05 * se.fit) 
+LL <- exp(fit - 0.1 * se.fit)
+UL <- exp(fit + 0.1 * se.fit) 
 })
 
 ```
@@ -50,15 +49,11 @@ UL <- exp(fit + 0.05 * se.fit)
 figure_AA <- ggplot(newdata2, aes(x = W86_Concern_Soc_average, y = W8_Cig_USE_CT)) +
   geom_line(colour = "#1f4e5f") +
   geom_ribbon(aes(ymin = LL, ymax = UL), alpha = .25, fill = "#a3c9c7") +
-  labs(x = "Change in Societal Discrimination Concern Score", y = "Past 30-day Cigarette Use at Follow-Up") +
+  labs(x = "", y = "") +
   scale_x_continuous(expand = c(0, 0))+
   scale_y_continuous(expand = c(0, 0), limits = c(0, 1.2), breaks = seq(0, 1.2, by = 0.4)) +
-  ggtitle("African American Students") +
-  theme(text = element_text(family = "Arial"),
-        title = element_text(face = "bold",
-                             hjust = 0.5,
-                             vjust = 0.5),
-        plot.title = element_text(hjust = 0.5),
+  ggtitle("") +
+  theme(axis.text = element_text(size = 10),
         plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), "inches"),
         panel.background = element_rect(fill = "white"),
         panel.grid.major.y = element_line(colour = "grey", size = 0.1),
@@ -66,7 +61,10 @@ figure_AA <- ggplot(newdata2, aes(x = W86_Concern_Soc_average, y = W8_Cig_USE_CT
         axis.line = element_line(size = 0.1, linetype = "solid"))
 
 figure_AA
-loadfonts()
+
+```
+
+```{r}
 ggsave(figure_AA, file = "/Users/zhan039/Desktop/USC_HEAL/Jennifer/Re__Figure_2/YZ/figure_AA.pdf")
 ggsave(figure_AA, file = "/Users/zhan039/Desktop/USC_HEAL/Jennifer/Re__Figure_2/YZ/figure_AA.png")
 
