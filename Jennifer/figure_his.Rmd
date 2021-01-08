@@ -18,11 +18,7 @@ font_import()
 ```
 
 ```{r}
-setwd("/Users/zhan039/Desktop/USC_HEAL/Jennifer/Re__Figure_2")
-```
-
-```{r}
-mydata <- read.csv("Social Concern study_5_his.csv", stringsAsFactors = FALSE)
+mydata <- read.csv("/Users/zhan039/Desktop/USC_HEAL/Jennifer/Re__Figure_2/Social Concern study_5_his.csv", stringsAsFactors = FALSE)
 head(mydata)  # check first few observations
 dim(mydata)  # check the size of data set d
 colnames(mydata)   # check column names of d
@@ -53,11 +49,15 @@ UL <- exp(fit + se.fit)
 figure_his <- ggplot(newdata2, aes(x = W86_Concern_Soc_average, y = W8_Cig_USE_CT)) +
   geom_line(colour = "#1f4e5f") +
   geom_ribbon(aes(ymin = LL, ymax = UL), alpha = .25, fill = "#a3c9c7") +
-  labs(x = "Change in Societal Discrimination Concern Score", y = "Cigarette Use at Follow-up, d") +
+  labs(x = "Change in Societal Discrimination Concern Score", y = "Past 30-day Cigarette Use at Follow-Up") +
   scale_x_continuous(expand = c(0, 0))+
   scale_y_continuous(expand = c(0, 0), limits = c(0, 1.2), breaks = seq(0, 1.2, by = 0.4)) +
-  ggtitle("Hispanic students") +
+  ggtitle("Hispanic Students") +
   theme(text = element_text(family = "Arial"),
+        title = element_text(face = "bold",
+                             hjust = 0.5,
+                             vjust = 0.5),
+        plot.title = element_text(hjust = 0.5),
         plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), "inches"),
         panel.background = element_rect(fill = "white"),
         panel.grid.major.y = element_line(colour = "grey", size = 0.1),
