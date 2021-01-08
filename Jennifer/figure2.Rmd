@@ -1,0 +1,67 @@
+---
+title: "Figure_01072021"
+author: "Yi"
+date: "1/7/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(RColorBrewer)
+library(extrafont)
+font_import()
+```
+
+```{r}
+data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/Jennifer/Figure_2/YZ/table.csv", stringsAsFactors = F)
+```
+
+```{r}
+data$group.new <- factor(data$Group, levels = data$Group, labels = c(0:14))
+data
+data$group_n <- as.numeric(as.character(data$group.new))
+
+figure <- data %>% ggplot(aes(x = group_n, y = Mean)) +
+  geom_line(colour = "#1f4e5f", size = 0.7) +
+  geom_ribbon(aes(ymin = L95, ymax = U95), alpha = 0.2, fill = "#a3c9c7") +
+  scale_x_continuous(expand = c(0, 0), limits = c(0, 14), breaks=data$group_n, labels = str_wrap(data$Group, width = 3)) +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 0.25), labels = scales::percent_format(accuracy = 1)) +
+  xlab("Number of frequent digitital media activities") +
+  ylab("Estimated prevalence of ADHD symptoms") +
+  ggtitle(str_wrap("Mean estimated prevalence of ADHD across follow-ups by baseline high-frequency digital media use level")) +
+  theme(axis.title = element_text(
+          face = "plain", 
+          colour = "black", 
+          size = 10,
+          hjust = .5, 
+          vjust = 0.5, 
+          angle = 0),
+        plot.title = element_text(
+          face = "bold", 
+          colour = "black", 
+          size = 12,
+          hjust = .5, 
+          vjust = 0.5, 
+          angle = 0),
+        axis.text = element_text(
+          face = "plain", 
+          colour = "black", 
+          size = 10,
+          hjust = .5, 
+          vjust = .5, 
+          angle = 0),
+        text = element_text(family = "Arial"),
+        plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), "inches"),
+        panel.background = element_rect(fill = "white"),
+        panel.grid.major.y = element_line(colour = "grey", size = 0.1),
+        panel.grid.major.x = element_blank(),
+        axis.line = element_line(size = 0.1, linetype = "solid"))
+figure
+ggsave(figure, file = "/Users/zhan039/Desktop/USC_HEAL/Jennifer/Figure_2/YZ/figure2_YZ.png", height = 7, width = 8, units = "in")
+```
+
