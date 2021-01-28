@@ -1,0 +1,321 @@
+---
+title: "w11_check_codebook_logic"
+author: "Yi"
+date: "1/26/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+library(gmodels)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/w11_01252021/hh_w11_01252021.sav")
+```
+
+```{r}
+summary(data$record_id)
+```
+
+```{r}
+data %>% select(., contains("life_use_sub")) %>% apply(., 2, table, useNA = "always")
+```
+
+```{r life use & last 30 use}
+life_use <- data %>% select(., contains("life_use_sub")) %>% colnames(.)
+
+cross_1 <- function(var_life){
+  var_last_30 <- gsub("life_use", "last_30", var_life)
+  tab <- table(get(var_life, data), get(var_last_30, data), useNA = "always")
+  return(tab)
+}
+
+sapply(life_use, cross_1)
+```
+
+```{r polyuse}
+# polyuse_1
+polyuse_1 <- paste("w11_last_30_sub_", c(2, 3, 33, 34, 35, 5, 6, 7, 44), "a", sep = "")
+
+data %>% mutate(., poly_use_1_filter = rowSums(.[polyuse_1], na.rm = T)) %>% select(., w11_polyuse_1, polyuse_1, poly_use_1_filter) %>% filter(., poly_use_1_filter == 0) %>% select(., w11_polyuse_1) %>% summary()
+
+data %>% mutate(., poly_use_1_filter = rowSums(.[polyuse_1], na.rm = T)) %>% select(., w11_polyuse_1, polyuse_1, poly_use_1_filter, everything()) %>% filter(., poly_use_1_filter == 0) %>% filter(., !is.na(w11_polyuse_1)) 
+
+# polyuse_2
+polyuse_2 <- paste("w11_last_30_sub_", c(8, 10, 25, 27, 30), "a", sep = "")
+
+data %>% mutate(., poly_use_2_filter = rowSums(.[polyuse_2], na.rm = T)) %>% select(., all_of(polyuse_2), poly_use_2_filter, w11_polyuse_2) %>% filter(., poly_use_2_filter == 0) %>% select(., w11_polyuse_2) %>% summary()
+
+# polyuse_3
+polyuse_3 <- paste("w11_last_30_sub_", c(2, 3, 33, 34, 35, 5, 6, 7, 44, 8, 10, 25, 27, 30), "a", sep = "")
+
+data %>% mutate(., poly_use_3_filter = rowSums(.[polyuse_3], na.rm = T)) %>% select(., all_of(polyuse_3), poly_use_3_filter, w11_polyuse_3) %>% filter(., poly_use_3_filter == 0) %>% select(., w11_polyuse_3) %>% summary()
+
+# polyuse_4
+polyuse_4 <- paste("w11_last_30_sub_", c(3, 44, 27), "a", sep = "")
+
+data %>% mutate(., poly_use_4_filter = rowSums(.[polyuse_4], na.rm = T)) %>% select(., all_of(polyuse_4), poly_use_4_filter, w11_polyuse_4) %>% filter(., poly_use_4_filter == 0) %>% select(., w11_polyuse_4) %>% summary()
+
+```
+
+```{r share puffs}
+share_puffs <- paste("w11_life_use_sub_", c(2, 3, 44, 7, 8, 10, 27), "a", sep = "")
+
+data %>% filter_at(share_puffs, all_vars(!.%in% 3)) %>% select(., all_of(share_puffs))
+
+data %>% filter_at(share_puffs, all_vars(!.%in% 3)) %>% select(., w11_past_6mo_share_puffs) %>% summary()
+```
+
+```{r Ecig ever use}
+Ecig <- paste("w11_life_use_sub_", c(3, 44), "a", sep = "")
+
+Ever_1 <- colnames(data)[startsWith(colnames(data), "w11_ever")][1:8]
+
+data %>% filter_at(Ecig, all_vars(!.%in%3)) %>% select(., all_of(Ecig)) %>% arrange(.)
+
+data %>% filter_at(Ecig, all_vars(!.%in%3)) %>% select(., all_of(Ever_1)) %>% apply(., 2, summary)
+
+table(data$w11_ever_other_enic, data$w11_ever_other_enic_specify, useNA = "always")
+```
+
+```{r Ecig last 30}
+Ever_1
+
+cross_Ecig <- function(var_Ever){
+  var_last30 <- paste(gsub("ever", "ecig", var_Ever), "last30", sep = "_")
+  tab <- table(get(var_Ever, data), get(var_last30, data), useNA = "always")
+  return(tab)
+}
+
+sapply(Ever_1, cross_Ecig)
+
+table(data$w11_ecig_other_enic_last30_specify, data$w11_ecig_other_enic_last30, useNA = "always")
+summary(data$w11_ecig_other_enic_last30_specify)
+```
+
+```{r Ecig nic}
+Ecig
+Ecig_nic <- colnames(data)[startsWith(colnames(data), "w11_nic")]
+
+data %>% filter_at(Ecig, all_vars(!.%in%3)) %>% select(., all_of(Ecig)) %>% arrange(.)
+
+data %>% filter_at(Ecig, all_vars(!.%in%3)) %>% select(., all_of(Ecig_nic)) %>% apply(., 2, summary)
+table(data$w11_nic_formula_amount_salt___0, useNA = "always")
+```
+
+```{r Ecig flavor}
+Ecig
+data %>% filter_at(Ecig, all_vars(!.%in%3)) %>% select(., contains("w11_ecig_flavor_last30___"), w11_ecig_flavor_most) %>% apply(., 2, summary)
+
+table(data$w11_ecig_flavor_last30_specify, data$w11_ecig_flavor_last30___8, useNA = "always")
+```
+
+```{r Ecig attach}
+Ecig
+data %>% filter_at(Ecig, all_vars(!.%in%3)) %>% select(., w11_ecig_attach_yn) %>% summary()
+table(data$w11_ecig_attach_specify___1, data$w11_ecig_attach_yn, useNA = "always")
+table(data$w11_ecig_attach_specify___2, data$w11_ecig_attach_yn, useNA = "always")
+table(data$w11_attach_other, data$w11_ecig_attach_specify___2, useNA = "always")
+table(data$w11_ecig_attach_last30, data$w11_ecig_attach_yn, useNA = "always")
+
+data %>% filter_at(vars(w11_ecig_attach_yn), all_vars(!.%in% 1)) %>% select(., w11_ecig_attach_yn) %>% arrange(desc(w11_ecig_attach_yn))
+
+data %>% filter_at(vars(w11_ecig_attach_yn), all_vars(!.%in% 1)) %>% filter(!is.na(w11_ecig_attach_last30)) %>% select(., record_id, overall_substance_use_timestamp
+, w11_ecig_attach_last30, w11_ecig_attach_yn)
+```
+
+```{r Ecig bout & heaviest vape}
+Ecig
+
+data %>% filter_at(Ecig, all_vars(!.%in%3)) %>% select(., w11_ecig_bout_times_last30, w11_ecig_bout_puffs_last30, w11_heaviest_vape) %>% summary()
+
+```
+
+```{r hovc}
+Ecig
+data %>% filter_at(Ecig, all_vars(!.%in%3)) %>% select(., starts_with("w11_hovc_")) %>% summary()
+
+```
+
+```{r vape}
+Ecig
+data %>% filter_at(Ecig, all_vars(!.%in%3)) %>% select(., starts_with("w11_vape_")) %>% summary()
+
+```
+
+```{r ecig quit}
+Ecig
+data %>% filter_at(Ecig, all_vars(!.%in%3)) %>% select(., w11_ecig_quit_last6mo) %>% summary()
+
+data %>% filter_at(vars(w11_ecig_quit_last6mo), all_vars(!.%in% c(2, 3, 4))) %>% select(., starts_with("w11_ecig_quit")) %>% summary()
+
+table(data$w11_ecig_quit_rxmed_specify, data$w11_ecig_quit_type9, useNA = "always")
+table(data$w11_ecig_quit_other_specify, data$w11_ecig_quit_other, useNA = "always")
+
+sapply(data[, startsWith(colnames(data), "w11_ecig_quit")], table, data$w11_ecig_quit_last6mo, useNA = "always")  # check it again using crosstables
+```
+
+```{r marijuana}
+mj_amount <- paste("w11_life_use_sub_", c(10, 8), "a", sep = "")
+
+data %>% filter_at(mj_amount, all_vars(!. %in% 3)) %>% select(., w11_mj_amount_last30) %>% summary()
+
+emj <- colnames(data)[startsWith(colnames(data), "w11_emj_")][16:18]
+
+sapply(data[, emj], table, data$w11_last_30_sub_27a, useNA = "always")
+
+table(data$w11_emj_flavors_last30, data$w11_emj_flavors_last30_specify, useNA = "always")
+
+mj_purpose <- paste("w11_life_use_sub_", c(10, 25, 27, 30, 8), "a", sep = "")
+
+data %>% filter_at(mj_purpose, all_vars(!. %in% 3)) %>% select(., contains("w11_mj_use_purpose___"), w11_mj_presc) %>% summary()
+
+data %>% filter_at(mj_purpose, all_vars(!. %in% 3)) %>% filter(., !is.na(w11_mj_presc)) %>% select(., record_id,  all_of(mj_purpose), w11_mj_presc)
+
+table(data$w11_mj_use_purpose_specify, data$w11_mj_use_purpose___7, useNA = "always")
+```
+
+```{r cast}
+mj_purpose
+
+data %>% filter_at(mj_purpose, all_vars(!. %in% 3)) %>% select(., contains("w11_cast")) %>% summary()
+```
+
+```{r mj supply}
+mj_purpose
+data %>% filter_at(mj_purpose, all_vars(!. %in% 3)) %>% select(., contains("w11_mj_supply")) %>% summary()
+
+table(data$w11_mj_supply_specify, data$w11_mj_supply___10, useNA = "always")
+```
+
+```{r Cigarette}
+table(data$w11_life_cig_100, data$w11_life_use_sub_2a, useNA = "always")
+table(data$w11_cig_current_use, data$w11_life_use_sub_2a, useNA = "always")
+table(data$w11_cig_bout_number_last30, data$w11_last_30_sub_2a, useNA = "always")
+table(data$w11_cig_menthol_use, data$w11_life_use_sub_2a, useNA = "always")
+
+
+data %>% filter_at(vars(w11_last_30_sub_2a), all_vars(!.%in%3)) %>% filter(., !is.na(w11_cig_bout_number_last30)) %>% select(., w11_last_30_sub_2a, w11_cig_bout_number_last30, record_id, overall_substance_use_timestamp)
+```
+
+```{r honc}
+lapply(data[, grepl("w11_honc", colnames(data))], table, data$w11_life_use_sub_2a, useNA = "always")
+```
+
+```{r cig}
+cig_ <- colnames(data)[startsWith(colnames(data), "w11_cig_")][4:8]
+
+lapply(data[, cig_], table, data$w11_life_use_sub_2a, useNA = "always")
+```
+
+```{r cig quit}
+cig_quit <- colnames(data)[startsWith(colnames(data), "w11_cig_quit")][2:20]
+
+lapply(data[, cig_quit], table, data$w11_cig_quit_last6mo, useNA = "always")
+table(data$w11_cig_quit_rxmed_specify, data$w11_cig_quit_type9, useNA = "always")
+table(data$w11_cig_quit_type_other_specify, data$w11_cig_quit_type_other, useNA = "always")
+
+```
+
+```{r alcohol}
+alc <- colnames(data)[startsWith(colnames(data), "w11_alc_")]
+
+lapply(data[, alc], table, data$w11_last_30_sub_11a, useNA = "always")
+table(data$w11_alc_type_past30_other, data$w11_alc_type_past30___7, useNA = "always")
+table(data$w11_alc_type_past30_other_freq, data$w11_alc_type_past30_freq, useNA = "always")
+table(data$w11_alc_share, data$w11_life_use_sub_11a, useNA = "always")
+
+```
+
+```{r hangover audit}
+hangover <- colnames(data)[startsWith(colnames(data), "w11_hangover")]
+audit <- colnames(data)[startsWith(colnames(data), "w11_audit")]
+
+lapply(data[, hangover], table, data$w11_life_use_sub_11a, useNA = "always")
+lapply(data[, audit], table, data$w11_life_use_sub_11a, useNA = "always")
+
+```
+
+```{r social media}
+table(data$w11_social_other_specify, data$w11_social_other, useNA = "always")
+```
+
+```{r demographics}
+table(data$w11_covid_90_specify, data$w11_covid_90, useNA = "always")
+
+degree <- colnames(data)[startsWith(colnames(data), "w11_dem_degree")][2:4]
+lapply(data[, degree], table, data$w11_dem_degree_program_yn, useNA = "always")
+
+table(data$w11_dem_job_place, data$w11_dem_job_status, useNA = "always")
+
+table(data$w11_dem_gender_identity_specify, data$w11_dem_gender_identity, useNA = "always")
+table(data$w11_dem_sexuality_specify, data$w11_dem_sexuality, useNA = "always")
+
+table(data$w11_queer_out_family, data$w11_dem_sexuality, useNA = "always")
+table(data$w11_queer_out_family, data$w11_dem_gender_identity, useNA = "always")
+table(data$w11_queer_out_other_specify, data$w11_queer_out_other, useNA = "always")
+
+data %>% filter_at(vars(w11_queer_out_other), all_vars(!. %in% c(1, 2, 3))) %>% select(., w11_queer_out_other, w11_queer_out_other_specify, record_id) %>% arrange(desc(w11_queer_out_other_specify))
+```
+
+```{r thoughts and emotions}
+gad <- colnames(data)[startsWith(colnames(data), "w11_gad")][1:7]
+data %>% filter_at(gad, all_vars(!. %in% c(2, 3, 4))) %>% select(., all_of(gad), w11_gad_8) %>% arrange(w11_gad_8) %>% summary()
+```
+
+```{r sexual behavior}
+sex_life <- colnames(data)[grepl("_sex_", colnames(data))][1:4]
+lapply(data[, sex_life], table, data$w11_ever_sex, useNA = "always")
+```
+
+```{r covid}
+table(data$w11_covid_doctor, data$w11_covid_1, useNA = "always")
+table(data$w11_covid_test_result, data$w11_covid_test, useNA = "always")
+
+covid_3 <- colnames(data)[startsWith(colnames(data), "w11_covid_3")]
+lapply(data[, covid_3], table, data$w11_covid_1, useNA = "always")
+
+table(data$w11_covid_feeling, data$w11_covid_1, useNA = "always")
+table(data$w11_covid_8, data$w11_covid_1, useNA = "always")
+
+data %>% filter_at(vars(w11_covid_1), all_vars(. %in% 3)) %>% select(., w11_covid_1, all_of(covid_3), w11_covid_feeling, w11_covid_8)
+
+lapply((data[, grepl("w11_covid_no_med_why", colnames(data))]), table, data$w11_covid_8, useNA = "always")
+
+lapply(data[, grepl("w11_covid_fam_result", colnames(data))], table, data$w11_covid_fam, useNA = "always")
+```
+
+```{r covid-19 vaccine}
+table(data$w11_vac_loc, data$w11_vac_yn, useNA = "always")
+table(data$w11_vac_loc_spec, data$w11_vac_loc, useNA = "always")
+table(data$w11_vac_2nd_dose, data$w11_vac_yn, useNA = "always")
+table(data$w11_vac_2nd_dose_when, data$w11_vac_2nd_dose, useNA = "always")
+table(data$w11_vac_type, data$w11_vac_yn, useNA = "always")
+table(data$w11_vac_type_spec_2, data$w11_vac_type, useNA = "always")
+
+table(data$w11_vac_info_trust_13, data$w11_dem_job_status, useNA = "always")
+table(data$w11_vac_info_trust_14, data$w11_dem_degree_program_yn, useNA = "always")
+```
+
+```{r behavior covid}
+covid_cig <- colnames(data)[startsWith(colnames(data), "w11_covid_cig")]
+
+lapply(data[, covid_cig], table, data$w11_life_use_sub_2a, useNA = "always")
+
+data %>% filter_at(vars(w11_life_use_sub_3a, w11_life_use_sub_44a), all_vars(!. %in% 3)) %>% select(., starts_with("w11_covid_ecig")) %>% summary()
+
+data %>% filter_at(vars(w11_life_use_sub_8a, w11_life_use_sub_10a, w11_life_use_sub_25a, w11_life_use_sub_27a, w11_life_use_sub_30a), all_vars(!. %in% 3)) %>% select(., starts_with("w11_covid_mj")) %>% summary()
+
+lapply(data[, grepl("w11_covid_alc", colnames(data))], table, data$w11_life_use_sub_11a, useNA = "always")
+```
+
+```{r perceptions of covid}
+lapply(data[, c("w11_covid_88a", "w11_covid_88b", "w11_covid_88c")], table, data$children, useNA = "always")
+```
+
