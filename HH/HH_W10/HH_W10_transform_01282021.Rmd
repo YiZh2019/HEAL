@@ -1,0 +1,31 @@
+---
+title: "HH_W10_transform_01282021"
+author: "Yi"
+date: "1/28/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+```
+
+```{r}
+data <- read.csv("/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/w10_01252021/hh_w10_01252021.csv", na.strings = "NA")
+```
+
+```{r}
+keep <- names(data)[!names(data) %in% c("W10_eMj_flavor_Last30_Specify", "W10_OtherMjDeliv_Use_Specify", "W10_DEM_Degree_Type_Specify", "W10_DEM_Sexuality_Specify", "W10_Queer_Out_Other_Specify")]
+
+fix_data <- data[, keep]
+```
+
+
+```{r}
+
+write_sav(fix_data, "/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/w10_01252021/YZ/hh_w10_01252021_rm_specify.sav")
+```
+
