@@ -1,0 +1,48 @@
+---
+title: "w1_9_w10_merge"
+author: "Yi"
+date: "1/29/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+w1_9 <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/w1_9/YZ/HH_W1_9_01292021_YZ.sav")
+w10 <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/w10_01252021/YZ/hh_w10_01252021_rm_specify.sav")
+```
+
+```{r check variable names}
+intersect_names <- intersect(colnames(w10), colnames(w1_9))
+
+w1_9_formerge <- w1_9
+newnames_w1_9 <- paste("W9_", colnames(w1_9_formerge)[colnames(w1_9_formerge) %in% intersect_names[-1]], sep = "")
+colnames(w1_9_formerge)[colnames(w1_9_formerge) %in% intersect_names[-1]] <- newnames_w1_9
+
+w10_formerge <- w10
+newnames_w10 <- paste("W10_", colnames(w10_formerge)[colnames(w10_formerge) %in% intersect_names[-1]], sep = "")
+colnames(w10_formerge)[colnames(w10_formerge) %in% intersect_names[-1]] <- newnames_w10
+
+intersect(colnames(w1_9_formerge), colnames(w10_formerge))
+
+   
+```
+
+```{r merge}
+length(unique(w1_9_formerge$SID))
+length(unique(w10_formerge$sid))
+
+w1_10 <- merge(w1_9_formerge, w10_formerge, by.x = c("SID", "record_id"), by.y = c("sid", "record_id"), all.x = T, all.y = T)
+```
+
+```{r}
+write_sav(w1_10, "/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/w1_10/YZ/HH_W1_10_01292021_YZ.sav")
+```
+
