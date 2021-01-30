@@ -1,0 +1,61 @@
+---
+title: "w1_8_recode_w9_merge"
+author: "Yi"
+date: "1/25/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+recode_data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/Temp_09252020/Yi/10152020/HH_W9_Scored_ForCleaning_merge.sav")  # contains all w9 variables and w1_8 past 30 day 7 level 
+
+olddata <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/10082020_past30/YZ/HH_w1_9_10122020_YZ.sav")
+```
+
+```{r random check}
+lifetime <- c("W9_Life_Use_Sub_1a","W9_Life_Use_Sub_2a","W9_Life_Use_Sub_3a","W9_Life_Use_Sub_29a","W9_Life_Use_Sub_31a","W9_Life_Use_Sub_32a","W9_Life_Use_Sub_5a","W9_Life_Use_Sub_6a","W9_Life_Use_Sub_7a","W9_Life_Use_Sub_8a","W9_Life_Use_Sub_10a","W9_Life_Use_Sub_25a","W9_Life_Use_Sub_27a","W9_Life_Use_Sub_26a","W9_Life_Use_Sub_30a","W9_Life_Use_Sub_11a","W9_Life_Use_Sub_12a","W9_Life_Use_Sub_13a","W9_Life_Use_Sub_14a","W9_Life_Use_Sub_17a","W9_Life_Use_Sub_20a","W9_Life_Use_Sub_23a","W9_Life_Use_Sub_21a","W9_Life_Use_Sub_18a","W9_Life_Use_Sub_24a")
+
+select(recode_data, all_of(lifetime)) %>% apply(., 2, table, useNA = "always")
+select(olddata, all_of(lifetime)) %>% apply(., 2, table, useNA = "always")
+```
+
+```{r}
+# check variable names
+names_recode_data <- colnames(recode_data)
+names_olddata <- colnames(olddata)
+
+intersect_names <- intersect(names_recode_data, names_olddata)
+
+names_recode_data[!names_recode_data %in% names_olddata]
+names_recode_data[names_recode_data %in% names_olddata]
+
+length(unique(olddata$SID))
+length(unique(recode_data$SID))
+
+merge(olddata[, c("SID", "record_id")], recode_data[, c("SID", "record_id")], by = "SID", all.x = T, all.y = T) %>% filter(., !record_id.x %in% record_id.y)
+```
+
+```{r}
+names_rm <- intersect_names[3:length(intersect_names)]  # remove all intersected variables except SID and record id
+length(names_rm)
+
+olddata_formerge <- olddata[, !names_olddata %in% names_rm]
+
+head(recode_data)
+recode_data_formerge <- recode_data[, -3]  # remove the record id, so the record id would be from the old data
+
+newdata <- merge(olddata_formerge, recode_data_formerge, by.x = "SID", by.y = "SID", all.x = T, all.y = T)
+```
+
+```{r}
+write_sav(newdata, "/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/w1_9/YZ/HH_W1_9_01292021_YZ.sav")
+```
+
