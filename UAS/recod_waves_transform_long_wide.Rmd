@@ -1,0 +1,116 @@
+---
+title: "recode_waves_transform_long_wide"
+author: "Yi"
+date: "2/2/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/UAS/02022021/data/covidpanel_us_stata_jan_20_2021.sav")
+
+```
+
+```{r wave 7 days}
+table(data$start_date)
+
+class(data$wave)
+
+select(data, start_date, wave) %>% arrange(desc(wave))
+
+unique.date <- sort(unique(data$start_date))
+
+length(unique.date)/7  # 45 weeks in total
+
+index_start <- sort(rep(seq(1, length(unique.date), 7), 7))  # The same group/week repeats 7 days
+index_end <- sort(rep(seq(7, length(unique.date), 7), 7))
+date_start <- unique.date[index_start]
+date_end <- unique.date[index_end]
+
+wave_7days_labels <- paste(date_start, "~", date_end, sep = "")
+
+as.numeric(data$start_date)
+
+data$wave_7days <- factor(as.numeric(data$start_date), levels = as.numeric(unique.date), labels = wave_7days_labels)
+
+select(data, uasid, start_date, wave, wave_7days)
+select(data, uasid, start_date, wave, wave_7days) %>% arrange(desc(wave_7days))
+
+```
+
+```{r wave 14 days}
+length(unique.date)
+length(unique.date)/14  # 22.5 groups in total
+315/14
+14 * 22  # 22 groups among 308 days
+index_14_start <- sort(rep(seq(1, 308, 14), 14))
+index_14_end <- sort(rep(seq(14, 308, 14), 14))
+date_14_start <- c(unique.date[index_14_start], rep(unique.date[309], 7))
+date_14_end <- c(unique.date[index_14_end], rep(as.Date("2021-01-25"), 7))
+
+wave_14days_labels <- paste(date_14_start, "~", date_14_end, sep = "")
+
+data$wave_14days <- factor(as.numeric(data$start_date), levels = as.numeric(unique.date), labels = wave_14days_labels)
+
+select(data, uasid, start_date, wave, wave_14days)
+
+select(data, uasid, start_date, wave, wave_14days) %>% arrange(desc(wave_14days))
+
+```
+
+```{r}
+write_sav(data, "/Users/zhan039/Desktop/USC_HEAL/UAS/02022021/YZ/UAS_recode_waves_YZ.sav")
+
+```
+
+
+```{r}
+select(data, uasid,wave,coping_cannabis,coping_drinking,coping_drugs,coping_exercise,coping_meditate,cr026a2,disabled,employmenttype,final_weight,hourswork,laborstatus,lf_other,phq4_anxious,phq4_depressed,phq4_littleinterest,phq4_worry,retired,sick_leave,start_date,unemp_layoff,unemp_look,wave_7days,wave_14days,workfullpart,working)
+
+select(data, uasid, wave, gender,age,immigrant_status,maritalstatus,livewithpartner,education,hisplatino,hisplatino_group,white,black,nativeamer,asian,pacific,race,hhincome,hhmembernumber,statereside)
+```
+
+```{r}
+new_data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/UAS/02022021/YZ/UAS_recode_waves_create_vars_YZ.sav")
+```
+
+```{r}
+time_variant <- select(new_data, uasid,wave,Binge_drinking,Binge_drinkingA,coping_cannabis,coping_drinking,coping_drinking4,coping_drinking7,coping_drugs,coping_exercise,coping_meditate,cr026a2,cr026a2A,disabled,drinkingTotal,employmenttype,final_weight,Heavy_drinking,hourswork,laborstatus,lf_other,phq4_anxious,phq4_depressed,phq4_littleinterest,phq4_worry,retired,sick_leave,start_date,unemp_layoff,unemp_look,wave_7days,wave_14days,workfullpart,working)
+
+demo <- select(new_data, uasid, wave, gender,maritalstatusD1,maritalstatusD2,educationD1,educationD2,educationD3,hhincomeM,hhincomeQ,poverty100,poverty150,age,age3Ga,age4Ga,age4Gb,RACEHSP,RACEHSP4G,RACEHSP5G,immigrant_status,maritalstatus,livewithpartner,education,hisplatino,hisplatino_group,white,black,nativeamer,asian,pacific,race,hhincome,hhmembernumber,Householdnumber,statereside)
+
+all <- select(new_data, uasid,wave,Binge_drinking,Binge_drinkingA,coping_cannabis,coping_drinking,coping_drinking4,coping_drinking7,coping_drugs,coping_exercise,coping_meditate,cr026a2,cr026a2A,disabled,drinkingTotal,employmenttype,final_weight,Heavy_drinking,hourswork,laborstatus,lf_other,phq4_anxious,phq4_depressed,phq4_littleinterest,phq4_worry,retired,sick_leave,start_date,unemp_layoff,unemp_look,wave_7days,wave_14days,workfullpart,working, gender,maritalstatusD1,maritalstatusD2,educationD1,educationD2,educationD3,hhincomeM,hhincomeQ,poverty100,poverty150,age,age3Ga,age4Ga,age4Gb,RACEHSP,RACEHSP4G,RACEHSP5G,immigrant_status,maritalstatus,livewithpartner,education,hisplatino,hisplatino_group,white,black,nativeamer,asian,pacific,race,hhincome,hhmembernumber,Householdnumber,statereside)
+```
+
+```{r transfrorm time-variant only}
+time_variant_wide <- time_variant %>% group_by(uasid) %>% gather(., key = variable, value = value, -c(1, 2)) %>% unite(., newvariable, variable, wave, sep = "_") %>% spread(., newvariable, value) 
+
+order_col <- c(sapply(colnames(time_variant)[-c(1,2)], paste, c(1:21), sep = "_"))
+
+time_variant_wide <- select(time_variant_wide, uasid, all_of(order_col))
+```
+
+```{r transform all variables}
+all_wide <- all %>% group_by(uasid) %>% gather(., key = variable, value = value, -c(1, 2)) %>% unite(., newvariable, variable, wave, sep = "_") %>% spread(., newvariable, value) 
+
+order_col_all <- c(sapply(colnames(all)[-c(1,2)], paste, c(1:21), sep = "_"))
+
+all_wide <- select(all_wide, uasid, all_of(order_col_all))
+```
+
+```{r}
+select(all_wide, contains("gender"))
+```
+
+```{r}
+write_sav(all_wide, "/Users/zhan039/Desktop/USC_HEAL/UAS/02022021/YZ/UAS_recode_waves_create_vars_wide_YZ.sav")
+```
+
