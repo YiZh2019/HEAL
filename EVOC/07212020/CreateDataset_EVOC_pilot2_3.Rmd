@@ -77,7 +77,8 @@ table(data$attention_check, useNA = "always")
 data <- mutate(data, att_success = ifelse(is.na(attention_check), 0, ifelse(attention_check <= 25, 1, 0)))
 table(data$att_success, useNA = "always")
 
-data <- mutate(data, att1_success = ifelse(data$att_check1___1 %in% 1 & data$att_check1___4 %in% 1 & data$att_check1___5 %in% 1, 1, 0))
+select(data, starts_with("att_check1___")) %>% apply(., 2, table, useNA = "always")
+data <- mutate(data, att1_success = ifelse(data$att_check1___1 %in% 1 & data$att_check1___3 %in% 0 & data$att_check1___4 %in% 1 & data$att_check1___5 %in% 1, 1, 0))
 select(data, starts_with("att_check1"), att1_success)
 select(data, starts_with("att_check1"), att1_success) %>% summary
 table(data$att1_success, useNA = "always")
@@ -121,11 +122,11 @@ table(newdata$sum_att_failure_3item, useNA = "always")
 ```
 
 ```{r save datasets}
-write.csv(newdata, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Final_Data/EVOC_pilot2_3/EVOC_pilot2_3_09152020.csv", na = "")
+write.csv(newdata, file = "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/02052021_fix_Final_Data/EVOC_pilot2_3_02052021.csv", na = "")
 
-write_sav(newdata, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Final_Data/EVOC_pilot2_3/EVOC_pilot2_3_09152020.sav")
+# write_sav(newdata, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Final_Data/EVOC_pilot2_3/EVOC_pilot2_3_09152020.sav")
 
-write_dta(newdata, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Final_Data/EVOC_pilot2_3/EVOC_pilot2_3_09152020.dta")
+# write_dta(newdata, "/Users/zhan039/Desktop/USC_HEAL/EVOC (CONJOINT)/Final_Data/EVOC_pilot2_3/EVOC_pilot2_3_09152020.dta")
 
 ```
 
