@@ -1,0 +1,556 @@
+---
+title: "Check_codebook"
+author: "Yi"
+date: "2/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+library(gmodels)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/ADVANCE/check_codebook/YZ/ADVANCEW1Survey_DATA_2021-01-07_1310.sav")
+```
+
+```{r}
+head(data)
+```
+
+```{r a1 substance use}
+table(data$a1_life_use_sub_other, data$a1_life_use_sub_other_spec, useNA = "always")
+
+table(data$a1_first_sub_drug_other, data$a1_first_sub_drug_other_spec, useNA = "always")
+table(data$a1_first_sub_drug_other, useNA = "always")
+
+lapply(data[, c("a1_life_use_sub_20a___1", "a1_life_use_sub_23a___1", "a1_life_use_sub_21a___1")], table, data$a1_life_use_sub_43a, useNA = "always")
+
+lapply(data[, c("a1_life_use_sub_38a___1", "a1_life_use_sub_39a___1", "a1_life_use_sub_40a___1", "a1_life_use_sub_41a___1", "a1_life_use_sub_18a___1", "a1_life_use_sub_42a___1", "a1_life_use_sub_drug_other___1")], table, data$a1_life_use_sub_24a, useNA = "always")
+
+table(data$a1_life_use_sub_drug_other_spec, data$a1_life_use_sub_drug_other___1, useNA = "always")
+
+table(data$a1_life_use_sub_drug_other___1, data$a1_life_use_sub_drug_other_spec, useNA = "always")
+
+#  Which substance did you use first? [38]-[65]
+life_use <- select(data, contains("a1_life_use_sub_")) %>% select(., -c(a1_life_use_sub_43a, a1_life_use_sub_24a, contains("spec"))) %>% colnames(.)
+
+first_use <- c()
+  
+for (i in 1:length(life_use)) {
+  
+  life_use_n <- life_use[i]
+  if (grepl("___1", life_use_n)) {
+    life_use_n <- substr(life_use_n, 1, nchar(life_use_n)-4)
+  }
+  
+  first_use[i] <- sub("life_use", "first", life_use_n)
+}
+
+life_use
+first_use
+
+for (i in 1:length(life_use)) {
+  table_life_first <- data %>% group_by(get(life_use[i]), get(first_use[i])) %>% summarise(n = n()) %>% spread(2, 3) 
+
+  print(table_life_first)
+}  # 12, 13, 17 have problems
+
+life_use[c(12, 13, 17)]
+
+table(data$a1_life_use_sub_10a, data$a1_first_sub_10a, useNA = "always")
+table(data$a1_life_use_sub_25a, data$a1_first_sub_25a, useNA = "always")
+table(data$a1_life_use_sub_11a, data$a1_first_sub_11a, useNA = "always")
+
+# [66]
+table(data$a1_first_sub_other, data$a1_first_sub_other_spec, useNA = "always")
+
+# In the past 30 days, how many days total have youused...? [67]-[94]
+past_30_use <- c()
+  
+for (i in 1:length(life_use)) {
+  
+  life_use_n <- life_use[i]
+  if (grepl("___1", life_use_n)) {
+    life_use_n <- substr(life_use_n, 1, nchar(life_use_n)-4)
+  }
+  
+  if (i %in% c(1, 2, 18:length(life_use))) {
+    past_30_use[i] <- sub("life", "past_30", life_use_n)
+  } else{
+    past_30_use[i] <- sub("life_use", "past_30", life_use_n)
+  }
+  
+}
+
+life_use
+past_30_use
+
+for (i in 1:length(life_use)) {
+  table_life_past_30 <- data %>% group_by(get(life_use[i]), get(past_30_use[i])) %>% summarise(n = n()) %>% spread(2, 3) 
+
+  print(table_life_past_30)
+}  # 13 has problems
+
+life_use[13]
+
+table(data$a1_life_use_sub_25a, data$a1_past_30_sub_25a, useNA = "always")
+
+# [95]-[96]
+table(data$a1_past_30_use_sub_other, data$a1_past_30_use_sub_other_spec, useNA = "always")
+table(data$a1_past_30_use_sub_drug_other, data$a1_past_30_use_sub_drug_other_spec, useNA = "always")
+
+# Would you try any of the following substances if one of your best friends ordered it to you ?[97]-[103]
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), any_vars(. %in% 1)) %>% select(., record_id, a1_life_use_sub_1a, a1_life_use_sub_2a) %>% arrange(desc(a1_life_use_sub_1a), desc(a1_life_use_sub_2a))
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), any_vars(. %in% 1)) %>% group_by(a1_try_friend_cig) %>% summarise(n = n())
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), all_vars(!.%in% 1)) %>% group_by(a1_try_friend_cig) %>% summarise(n = n())
+
+table(data$a1_life_use_sub_3a, data$a1_try_friend_ecig, useNA = "always")
+table(data$a1_life_use_sub_10a, data$a1_try_friend_mj, useNA = "always")
+table(data$a1_life_use_sub_25a, data$a1_try_friend_mjfood, useNA = "always")
+table(data$a1_life_use_sub_27a, data$a1_try_friend_e_mj, useNA = "always")
+table(data$a1_life_use_sub_30a, data$a1_try_friend_mj_conc, useNA = "always")
+table(data$a1_life_use_sub_11a, data$a1_try_friend_alc, useNA = "always")
+
+
+# Do you think you would use any of the followingsubstances in the next year? [104]-[110]
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), any_vars(. %in% 1)) %>% group_by(a1_use_next_yr_cig) %>% summarise(n = n())
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), all_vars(!.%in% 1)) %>% group_by(a1_use_next_yr_cig) %>% summarise(n = n())
+
+table(data$a1_life_use_sub_3a, data$a1_use_next_yr_ecig, useNA = "always")
+table(data$a1_life_use_sub_10a, data$a1_use_next_yr_mj, useNA = "always")
+table(data$a1_life_use_sub_25a, data$a1_use_next_yr_mjfood, useNA = "always")
+table(data$a1_life_use_sub_27a, data$a1_use_next_yr_e_mj, useNA = "always")
+table(data$a1_life_use_sub_30a, data$a1_use_next_yr_mj_conc, useNA = "always")
+table(data$a1_life_use_sub_11a, data$a1_use_next_yr_alc, useNA = "always")
+
+
+# Are you curious about using any of the followingsubstances? [111]-[117]
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), any_vars(. %in% 1)) %>% group_by(a1_curious_cig) %>% summarise(n = n())
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), all_vars(!.%in% 1)) %>% group_by(a1_curious_cig) %>% summarise(n = n())
+
+table(data$a1_life_use_sub_3a, data$a1_curious_ecig, useNA = "always")
+table(data$a1_life_use_sub_10a, data$a1_curious_mj, useNA = "always")
+table(data$a1_life_use_sub_25a, data$a1_curious_mjfood, useNA = "always")
+table(data$a1_life_use_sub_27a, data$a1_curious_e_mj, useNA = "always")
+table(data$a1_life_use_sub_30a, data$a1_curious_mj_conc, useNA = "always")
+table(data$a1_life_use_sub_11a, data$a1_curious_alc, useNA = "always")
+
+# I think I might enjoy, experience pleasure, or feel goodusing the following substances...[118]-[124]
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), any_vars(. %in% 1)) %>% group_by(a1_enjoy_cig) %>% summarise(n = n())
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), all_vars(!.%in% 1)) %>% group_by(a1_enjoy_cig) %>% summarise(n = n())
+
+table(data$a1_life_use_sub_3a, data$a1_enjoy_ecig, useNA = "always")
+table(data$a1_life_use_sub_10a, data$a1_enjoy_mj, useNA = "always")
+table(data$a1_life_use_sub_25a, data$a1_enjoy_mjfood, useNA = "always")
+table(data$a1_life_use_sub_27a, data$a1_enjoy_e_mj, useNA = "always")
+table(data$a1_life_use_sub_30a, data$a1_enjoy_mj_conc, useNA = "always")
+table(data$a1_life_use_sub_11a, data$a1_enjoy_alc, useNA = "always")
+
+
+# I think I might feel bad, sick, or embarrassed using thefollowing substances...[125]-[131]
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), any_vars(. %in% 1)) %>% group_by(a1_feel_bad_cig) %>% summarise(n = n())
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), all_vars(!.%in% 1)) %>% group_by(a1_feel_bad_cig) %>% summarise(n = n())
+
+table(data$a1_life_use_sub_3a, data$a1_feel_bad_ecig, useNA = "always")
+table(data$a1_life_use_sub_10a, data$a1_feel_bad_mj, useNA = "always")
+table(data$a1_life_use_sub_25a, data$a1_feel_bad_mjfood, useNA = "always")
+table(data$a1_life_use_sub_27a, data$a1_feel_bad_e_mj, useNA = "always")
+table(data$a1_life_use_sub_30a, data$a1_feel_bad_mj_conc, useNA = "always")
+table(data$a1_life_use_sub_11a, data$a1_feel_bad_alc, useNA = "always")
+
+
+# During the past 30 days, did anyone refuse to sell youthese items because of your age? [153]-[157]
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), any_vars(. %in% c(2, 3))) %>% group_by(a1_past30sell_1) %>% summarise(n = n())
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), all_vars(!. %in% c(2, 3))) %>% group_by(a1_past30sell_1) %>% summarise(n = n())
+
+table(data$a1_life_use_sub_27a, data$a1_past30sell_2, useNA = "always")
+
+data %>% filter_at(vars(a1_life_use_sub_8a, a1_life_use_sub_10a, a1_life_use_sub_25a, a1_life_use_sub_27a, a1_life_use_sub_26a, a1_life_use_sub_30a), any_vars(. %in% c(2, 3))) %>% group_by(a1_past30sell_3) %>% summarise(n = n())
+
+data %>% filter_at(vars(a1_life_use_sub_8a, a1_life_use_sub_10a, a1_life_use_sub_25a, a1_life_use_sub_27a, a1_life_use_sub_26a, a1_life_use_sub_30a), all_vars(!. %in% c(2, 3))) %>% group_by(a1_past30sell_3) %>% summarise(n = n())
+
+table(data$a1_life_use_sub_11a, data$a1_past30sell_4, useNA = "always")
+table(data$a1_life_use_sub_6a, data$a1_past30sell_5, useNA = "always")
+
+```
+
+```{r Ecig}
+# Have you ever used the following electronic nicotinedevices? [194]-[202]
+Ecig_Ever <- colnames(data)[startsWith(colnames(data), "a1_ever")][1:8]
+
+lapply(data[, Ecig_Ever], table, data$a1_life_use_sub_3a, useNA = "always")
+
+table(data$a1_ever_other_enic, data$a1_ever_other_enic_spec, useNA = "always")
+
+# Which substance did you use firrst? (Select one)[203]-[211]
+Ecig_First <- paste(Ecig_Ever, "first", sep = "_")
+
+Ecig_Ever
+Ecig_First
+
+for (i in 1:length(Ecig_Ever)) {
+  table_ever_first <- table(get(Ecig_Ever[i], data), get(Ecig_First[i], data), useNA = "always")
+  cat(Ecig_Ever[i], Ecig_First[i])
+  print(table_ever_first)
+  cat("\n")
+}
+
+table(data$a1_ever_other_enic_first, data$a1_ever_other_enic_first_spec, useNA = "always")
+
+# In the past 30 days, how many days have you used thefollowing types of electronic nicotine devices? [212]-[220]
+Ecig_Past30 <- paste(gsub("ever", "ecig", Ecig_Ever), "last30", sep = "_")
+
+Ecig_Ever
+Ecig_Past30
+
+for (i in 1:length(Ecig_Ever)) {
+  table_ever_past30 <- table(get(Ecig_Ever[i], data), get(Ecig_Past30[i], data), useNA = "always")
+  cat(Ecig_Ever[i], Ecig_First[i])
+  print(table_ever_past30)
+  cat("\n")
+}
+
+table(data$a1_ecig_other_enic_last30, data$a1_ecig_other_enic_last30_spec, useNA = "always")
+
+# These next few questions are about your experiences withe-cigarettes. [221]-[226]
+Ecig_Experience <- c(colnames(data)[startsWith(colnames(data), "a1_ecig")][27:34], colnames(data)[startsWith(colnames(data), "a1_nic")])
+
+lapply(data[, Ecig_Experience], table, data$a1_life_use_sub_3a, useNA = "always")
+
+table(data$a1_ecig_access___8, data$a1_ecig_access_spec, useNA = "always")
+
+# The following questions are regarding the flavor of e-liquids you use in your device. [227]-[231]
+Ecig_Flavor <- colnames(data)[startsWith(colnames(data), "a1_ecig_flavor")]
+
+lapply(data[, Ecig_Flavor], table, data$a1_life_use_sub_3a, useNA = "always")
+
+table(data$a1_ecig_flavor_last30___8, data$a1_ecig_flav_last30_spec, useNA = "always")
+table(data$a1_ecig_flavor_first, data$a1_ecig_flav_first_spec, useNA = "always")
+
+# attachment [232]-[234]
+data %>% select(., contains("a1_ecig_attach_yn___")) %>% lapply(., table, data$a1_life_use_sub_3a, useNA = "always")
+
+table(data$a1_ecig_attach_yn___2, data$a1_ecig_attach_specify, useNA = "always")
+
+data %>% filter_at(vars(a1_ecig_attach_yn___1, a1_ecig_attach_yn___2), any_vars(. %in% 1)) %>% filter_at(vars(a1_past_30_sub_3a), all_vars(. %in% c(2:7))) %>% group_by(a1_ecig_attach_last30) %>% summarise(n = n())
+table(data$a1_ecig_attach_last30, useNA = "always")
+
+# bout [235]-[236]
+table(data$a1_life_use_sub_3a, data$a1_ecig_bout_times_last30, useNA = "always")
+table(data$a1_life_use_sub_3a, data$a1_ecig_bout_puffs_last30, useNA = "always")
+
+# spend [237]
+table(data$a1_life_use_sub_3a, data$a1_ecig_spend, useNA = "always")
+
+# How would you rate the following from your first experience vaping nicotine? [238]-[249] 
+Ecig_ese <- colnames(data)[startsWith(colnames(data), "a1_ese_ecig")]
+
+lapply(data[, Ecig_ese], table, data$a1_life_use_sub_3a, useNA = "always")
+
+table(data$a1_life_use_sub_3a, data$a1_ecig_quit_6mo, useNA = "always")
+table(data$a1_ecig_quit_6mo, data$a1_ecig_quit_6mo_times, useNA = "always")
+
+# hovc: The following questions are regarding your experience inthe last 6 months with use of electronic nicotine devices, NOT marijuana.Questions regarding marijuana will be asked in a later part of the survey. Inthe last 6 months, [250]-[259]
+data %>% select(., starts_with("a1_hovc_")) %>% lapply(., table, data$a1_life_use_sub_3a, useNA = "always")
+
+# stop vape: Many people experience problems when they stop or cutdown on their tobacco use. During the past 6 months, did you use any ofthe following to try to stop vaping nicotine ? [260]-[269]
+data %>% select(., starts_with("a1_stop_vape_")) %>% lapply(., table, data$a1_ecig_quit_6mo, useNA = "always")
+data %>% group_by(a1_ecig_quit_6mo, a1_stop_vape_face) %>% summarise(n = n())
+
+table(data$a1_stop_vape_rx_med, data$a1_stop_vape_rx_med_spec, useNA = "always")
+table(data$a1_stop_vape_another, data$a1_stop_vape_another_spec, useNA = "always")
+
+# Ecig label : The following questions will ask your opinions about anelectronic vaping solution for e-cigarettes because we are interested howteens perceive them. We would like to know your opinions, even if you havenever vaped. Imagine if you saw these e-liquid solutions and how youmight react. [270]-[288]
+data %>% select(., starts_with("a1_ecig_label_")) %>% lapply(., table, data$random_ecig_label, useNA = "always")
+
+```
+
+```{r Cigarette}
+# The following questions are regarding your experience withuse of cigarettes. [292]-[298]
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), any_vars(. %in% c(2, 3))) %>% group_by(a1_life_cig_100) %>% summarise(n = n())
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), all_vars(!. %in% c(2, 3))) %>% group_by(a1_life_cig_100) %>% summarise(n = n())
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), any_vars(. %in% c(2, 3))) %>% group_by(a1_cig_current_use) %>% summarise(n = n())
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), all_vars(!. %in% c(2, 3))) %>% group_by(a1_cig_current_use) %>% summarise(n = n())
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), any_vars(. %in% c(2, 3))) %>% group_by(a1_cig_bout_number_last30) %>% summarise(n = n())
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), all_vars(!. %in% c(2, 3))) %>% group_by(a1_cig_bout_number_last30) %>% summarise(n = n())
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), any_vars(. %in% 3)) %>% group_by(a1_cig_menthol_use) %>% summarise(n = n())
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), all_vars(!. %in% 3)) %>% group_by(a1_cig_menthol_use) %>% summarise(n = n())
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), any_vars(. %in% 3)) %>% group_by(a1_cig_flav_use) %>% summarise(n = n())
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), all_vars(!. %in% 3)) %>% group_by(a1_cig_flav_use) %>% summarise(n = n())
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), any_vars(. %in% c(2, 3))) %>% group_by(a1_cig_first_flav) %>% summarise(n = n())
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), all_vars(!. %in% c(2, 3))) %>% group_by(a1_cig_first_flav) %>% summarise(n = n())
+
+table(data$a1_cig_first_flav, data$a1_cig_first_flav_specify, useNA = "always")
+
+# Cig ese: How would you rate the following from your firstexperience smoking a cigarette? [299]-[308]
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), any_vars(. %in% c(2, 3))) %>% select(., starts_with("a1_ese_cig")) %>% lapply(., table, useNA = "always")
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), all_vars(!. %in% c(2, 3))) %>% select(., starts_with("a1_ese_cig")) %>% lapply(., table, useNA = "always")
+
+# Cig quit: During the PAST 6 MONTHS, have you stopped smokingcigarettes for ONE DAY or longer BECAUSE YOU WERETRYING TO QUIT SMOKING? [309]-[310]
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), any_vars(. %in% c(2, 3))) %>% select(., a1_cig_quit_last6mo) %>% table(., useNA = "always")
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), all_vars(!. %in% c(2, 3))) %>% select(., a1_cig_quit_last6mo) %>% table(., useNA = "always")
+
+# honc [311]-[320]
+data %>% group_by(a1_life_use_sub_1a, a1_life_use_sub_2a) %>% summarise(n = n())
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), any_vars(. %in% 3)) %>% select(., starts_with("a1_honc_")) %>% lapply(., table, useNA = "always")
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), all_vars(!. %in% 3)) %>% select(., starts_with("a1_honc_")) %>% lapply(., table, useNA = "always")
+
+# cig quit: Many people experience problems when they stop or cutdown on their tobacco use. During the past 6 months, after stopping orcutting down on your use of cigarettes, did you EVER... [321]-[341]
+Cig_Quit <- colnames(data)[startsWith(colnames(data), "a1_cig_quit")][3:21]
+lapply(data[, Cig_Quit], table, data$a1_cig_quit_last6mo, useNA = "always")
+
+table(data$a1_cig_quit_type6, data$a1_cig_quit_rxmed_spec, useNA = "always")
+table(data$a1_cig_quit_type_other, data$a1_cig_quit_type_other_spec, useNA = "always")
+
+# flav past 30 During the past 30 days, which flavors did you usually use inyour little cigars or cigarillos?[342]
+data %>% filter_at(vars(a1_past_30_sub_5a, a1_past_30_sub_6a), any_vars(. %in% c(2:7))) %>% select(., contains("a1_cigarillo_flav_past30")) %>% lapply(., table, useNA = "always")
+
+data %>% filter_at(vars(a1_past_30_sub_5a, a1_past_30_sub_6a), all_vars(!. %in% c(2:7))) %>% select(., contains("a1_cigarillo_flav_past30")) %>% lapply(., table, useNA = "always")
+
+data %>% select(., contains("a1_cigarillo_flav_past30")) %>% lapply(., table, useNA = "always")
+
+table(data$a1_past_30_sub_5a, useNA = "always")
+table(data$a1_past_30_sub_6a, useNA = "always")
+table(data$a1_life_use_sub_5a, useNA = "always")
+table(data$a1_life_use_sub_6a, useNA = "always")
+
+select(data, record_id, a1_past_30_sub_5a, a1_past_30_sub_6a, contains("a1_cigarillo_flav_past30"))
+```
+
+```{r marijuana}
+Mj_life <- paste("a1_life_use_sub_", c(8, 10, 25, 27, 26, 30), "a", sep = "")
+
+# Which type of marijuana did you use first? [345]-[352]
+Mj_type_first <- paste("a1_mj_type_", c(1:6), "_first", sep = "")
+
+Mj_life
+Mj_type_first
+
+for (i in 1:length(Mj_type_first)) {
+  table_Mj_life_type_first <- table(get(Mj_life[i], data), get(Mj_type_first[i], data), useNA = "always")
+  cat(Mj_life[i], Mj_type_first[i])
+  print(table_Mj_life_type_first)
+  cat("\n")
+}
+
+data %>% filter_at(Mj_life, any_vars(. %in% c(2, 3))) %>% select(., a1_mj_type_11_first) %>% table(., useNA = "always")
+data %>% filter_at(Mj_life, all_vars(!. %in% c(2, 3))) %>% select(., a1_mj_type_11_first) %>% table(., useNA = "always")
+table(data$a1_mj_type_11_first, useNA = "always")
+table(data$a1_mj_type_11_first, data$a1_mj_type_11_first_spec, useNA = "always")
+
+# Which type of marijuana do you use most often? (Pleaseselect one) [353]-[360]
+Mj_type_most <- paste("a1_mj_type_", c(1:6), "_most", sep = "")
+
+Mj_life
+Mj_type_most
+
+for (i in 1:length(Mj_type_most)) {
+  table_Mj_life_type_most <- table(get(Mj_life[i], data), get(Mj_type_most[i], data), useNA = "always")
+  cat(Mj_life[i], Mj_type_most[i])
+  print(table_Mj_life_type_most)
+  cat("\n")
+}
+
+data %>% filter_at(Mj_life, any_vars(. %in% c(2, 3))) %>% select(., a1_mj_type_11_most) %>% table(., useNA = "always")
+data %>% filter_at(Mj_life, all_vars(!. %in% c(2, 3))) %>% select(., a1_mj_type_11_most) %>% table(., useNA = "always")
+table(data$a1_mj_type_11_most, useNA = "always")
+table(data$a1_mj_type_11_most, data$a1_mj_type_11_most_spec, useNA = "always")
+
+# How would you rate your first experience vapingmarijuana ?[361]-[370]
+Emj_experience <- colnames(data)[startsWith(colnames(data), "a1_emj_mlbse")]
+lapply(data[, Emj_experience], table, data$a1_life_use_sub_27a, useNA = "always")
+
+# How would you rate your first experience smokingmarijuana? [371]-[380]
+Mjsmoke_experience <- colnames(data)[startsWith(colnames(data), "a1_mjsmoke_mlbse")]
+lapply(data[, Mjsmoke_experience], table, data$a1_life_use_sub_10a, useNA = "always")
+
+# How would you rate your first experience using ediblemarijuana? [381]-[390]
+EdibleMj_experience <- colnames(data)[startsWith(colnames(data), "a1_edible_mj_mlbse")]
+lapply(data[, EdibleMj_experience], table, data$a1_life_use_sub_25a, useNA = "always")
+
+# During the past 30 days, on the days you smokedmarijuana, about how many marijuana cigarettes, joints,blunts, bowls, or the equivalent, did you usually have? [391]
+data %>% filter_at(vars(a1_past_30_sub_10a, a1_past_30_sub_8a), any_vars(. %in% c(2:7))) %>% select(., a1_mj_amount_last30) %>% table(., useNA = "always")
+
+data %>% filter_at(vars(a1_past_30_sub_10a, a1_past_30_sub_8a), all_vars(!. %in% c(2:7))) %>% select(., a1_mj_amount_last30) %>% table(., useNA = "always")
+
+# emj bout [392]-[393]
+table(data$a1_past_30_sub_27a, data$a1_emj_bout_times_last30, useNA = "always")
+table(data$a1_past_30_sub_27a, data$a1_emj_bout_puffs_last30, useNA = "always")
+
+# emj flav [394]-[395]
+table(data$a1_past_30_sub_27a, data$a1_emj_flav_last30, useNA = "always")
+table(data$a1_emj_flav_last30, data$a1_emj_flav_last30_spec, useNA = "always")
+
+# In a typical month when you use marijuana, how muchmarijuana do you usually use ? [396]
+data %>% filter_at(Mj_life, any_vars(. %in% c(2, 3))) %>% select(., a1_dfaq_4) %>% table(., useNA = "always")
+data %>% filter_at(Mj_life, all_vars(!. %in% c(2, 3))) %>% select(., a1_dfaq_4) %>% table(., useNA = "always")
+
+# spend [397]
+data %>% filter_at(Mj_life, any_vars(. %in% c(2, 3))) %>% select(., a1_mj_spend_last30) %>% table(., useNA = "always")
+data %>% filter_at(Mj_life, all_vars(!. %in% c(2, 3))) %>% select(., a1_mj_spend_last30) %>% table(., useNA = "always")
+
+# use [398]-[399]
+data %>% filter_at(Mj_life, any_vars(. %in% c(2, 3))) %>% select(., contains("a1_mj_use_purpose___")) %>% lapply(., table, useNA = "always")
+data %>% filter_at(Mj_life, all_vars(!. %in% c(2, 3))) %>% select(., contains("a1_mj_use_purpose___")) %>% lapply(., table, useNA = "always")
+
+table(data$a1_mj_use_purpose___7, data$a1_mj_use_purpose_specify, useNA = "always")
+
+# cast [400]-[405]
+data %>% filter_at(Mj_life, any_vars(. %in% 3)) %>% select(., contains("a1_cast_")) %>% lapply(., table, useNA = "always")
+data %>% filter_at(Mj_life, all_vars(!. %in% 3)) %>% select(., contains("a1_cast_")) %>% lapply(., table, useNA = "always")
+
+# mj access [406]-[407]
+data %>% filter_at(Mj_life, any_vars(. %in% c(2, 3))) %>% select(., contains("a1_mj_access___")) %>% lapply(., table, useNA = "always")
+data %>% filter_at(Mj_life, all_vars(!. %in% c(2, 3))) %>% select(., contains("a1_mj_access___")) %>% lapply(., table, useNA = "always")
+
+table(data$a1_mj_access___9, data$a1_mj_access_specify, useNA = "always")
+
+# [408]
+data %>% filter_at(Mj_life, any_vars(. %in% c(2, 3))) %>% select(., a1_mj_presc_ever) %>% table(., useNA = "always")
+data %>% filter_at(Mj_life, all_vars(!. %in% c(2, 3))) %>% select(., a1_mj_presc_ever) %>% table(., useNA = "always")
+
+# [409]
+data %>% select(., contains("a1_mj_vape_reason___")) %>% lapply(., table, data$a1_life_use_sub_27a, useNA = "always")
+
+# [410]
+data %>% select(., contains("a1_mj_conc_reason___")) %>% lapply(., table, data$a1_life_use_sub_30a, useNA = "always")
+
+# [411]
+data %>% select(., contains("a1_mj_edible_reason___")) %>% lapply(., table, data$a1_life_use_sub_25a, useNA = "always")
+```
+
+```{r alcohol}
+# [415]-[420]
+Alc <- colnames(data)[startsWith(colnames(data), "a1_alc")][c(1:9, 11)]
+lapply(data[, Alc], table, data$a1_past_30_sub_11a, useNA = "always")
+
+table(data$a1_alc_type_now___7, data$a1_alc_type_now_other, useNA = "always")
+table(data$a1_alc_type_freq, data$a1_alc_type_freq_other, useNA = "always")
+
+# rapi: Different things happen to people while they are drinkingalcohol or because of their alcohol drinking. Several of these things arelisted below. Indicate how many times each of these things happened toyou within the last 12 months. [421]-[436]
+Rapi <- colnames(data)[startsWith(colnames(data), "a1_rapi")]
+lapply(data[, Rapi], table, data$a1_life_use_sub_11a, useNA = "always")
+```
+
+```{r medications}
+# dast: [445]-[454]
+data %>% filter_at(vars(a1_life_use_sub_43a, a1_life_use_sub_24a), any_vars(. %in% c(2, 3))) %>% select(., contains("a1_dast10_")) %>% lapply(., table, useNA = "always")
+
+data %>% filter_at(vars(a1_life_use_sub_43a, a1_life_use_sub_24a), all_vars(!. %in% c(2, 3))) %>% select(., contains("a1_dast10_")) %>% lapply(., table, useNA = "always")
+```
+
+```{r respiratory effects}
+table(data$a1_wheeze_1, data$a1_wheeze_12mo, useNA = "always")
+table(data$a1_asthma_dr, data$a1_asthma_age, useNA = "always")
+
+data %>% select(., starts_with("a1_breath_1")) %>% lapply(., table, data$a1_breath_1, useNA = "always")
+
+```
+
+```{r demographics}
+table(data$a1_gender, useNA = "always")
+table(data$a1_gender_specify, useNA = "always")
+
+table(data$a1_sexuality, data$a1_sex_orient_specify, useNA = "always")
+table(data$a1_sexuality, data$a1_lgbt_age, useNA = "always")
+
+data %>% filter_at(vars(a1_sexuality), all_vars(. %in% c(2:9))) %>% select(., a1_lgbt_out_family) %>% table(., useNA = "always")
+
+table(data$a1_lgbt_out_family, useNA = "always")
+table(data$a1_sex_birth, data$a1_lgbt_out_family, useNA = "always")
+
+data %>% filter_at(vars(a1_sexuality), all_vars(. %in% c(2:9))) %>% filter_at(vars(a1_lgbt_out_family), all_vars(!is.na(.))) %>% select(., a1_sex_birth)
+
+data %>% filter(., a1_sex_birth %in% 1 & !is.na(a1_lgbt_out_family)) %>% select(., a1_sexuality, a1_lgbt_out_family)
+
+select(data, starts_with("a1_lgbt"))
+```
+
+```{r Act and Feel}
+Rcads <- colnames(data)[startsWith(colnames(data), "a1_rcads")][1:47]
+
+data %>% filter_at(Rcads, any_vars(. %in% c(2:4))) %>% select(., a1_rcads_47_difficulty) %>% table(., useNA = "always")
+
+data %>% filter_at(Rcads, all_vars(!. %in% c(2:4))) %>% select(., a1_rcads_47_difficulty) %>% table(., useNA = "always")
+
+```
+
+```{r Covid}
+table(data$a1_covid_yesno, data$a1_covid_doctor, useNA = "always")
+table(data$a1_covid_test, data$a1_covid_test_result, useNA = "always")
+lapply(data[, c("a1_covid_feeling", "a1_covid_care")], table, data$a1_covid_yesno, useNA = "always")
+
+data %>% filter(., !a1_covid_yesno %in% c(1, 3) & !is.na(a1_covid_feeling)) %>% select(., record_id, a1_covid_yesno, a1_covid_feeling)
+
+data %>% select(., starts_with("a1_covid_care_no___")) %>% lapply(., table, data$a1_covid_care, useNA = "always")
+
+data %>% select(., starts_with("a1_covid_care_yes___")) %>% lapply(., table, data$a1_covid_care, useNA = "always")
+
+table(data$a1_covid_care_yes___7, data$a1_covid_care_yes_other, useNA = "always")
+
+table(data$a1_covid_why, useNA = "always")
+
+table(data$a1_covid_yesno, data$a1_covid_likelihood, useNA = "always")
+table(data$a1_covid_yesno, data$a1_covid_likelihood_feel, useNA = "always")
+data %>% filter(., !a1_covid_yesno %in% 2 & !is.na(a1_covid_likelihood_feel))
+
+data %>% select(., starts_with("a1_covid_friends_symp")) %>% lapply(., table, data$a1_covid_friends, useNA = "always")
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), any_vars(. %in% c(2, 3))) %>% select(., starts_with("a1_covid_cig_slider")) %>% lapply(., table, useNA = "always")
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a), all_vars(!. %in% c(2, 3))) %>% select(., starts_with("a1_covid_cig_slider")) %>% lapply(., table, useNA = "always")
+
+data %>% filter_at(vars(a1_life_use_sub_3a), any_vars(. %in% c(2, 3))) %>% select(., starts_with("a1_covid_ecig_slider")) %>% lapply(., table, useNA = "always")
+
+data %>% filter_at(vars(a1_life_use_sub_3a), all_vars(!. %in% c(2, 3))) %>% select(., starts_with("a1_covid_ecig_slider")) %>% lapply(., table, useNA = "always")
+
+data %>% filter_at(Mj_life, any_vars(. %in% c(2, 3))) %>% select(., starts_with("a1_covid_mj_slider")) %>% lapply(., table, useNA = "always")
+
+data %>% filter_at(Mj_life, all_vars(!. %in% c(2, 3))) %>% select(., starts_with("a1_covid_mj_slider")) %>% lapply(., table, useNA = "always")
+
+data %>% filter_at(vars(a1_life_use_sub_11a), any_vars(. %in% c(2, 3))) %>% select(., starts_with("a1_covid_alc_slider")) %>% lapply(., table, useNA = "always")
+
+data %>% filter_at(vars(a1_life_use_sub_11a), all_vars(!. %in% c(2, 3))) %>% select(., starts_with("a1_covid_alc_slider")) %>% lapply(., table, useNA = "always")
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a, a1_life_use_sub_3a, a1_life_use_sub_7a, all_of(Mj_life), a1_life_use_sub_11a), any_vars(. %in% c(2, 3))) %>% select(., a1_covid_share_subs) %>% table(., useNA = "always")
+
+data %>% filter_at(vars(a1_life_use_sub_1a, a1_life_use_sub_2a, a1_life_use_sub_3a, a1_life_use_sub_7a, all_of(Mj_life), a1_life_use_sub_11a), all_vars(!. %in% c(2, 3))) %>% select(., a1_covid_share_subs) %>% table(., useNA = "always")
+
+table(data$a1_covid_share_subs, useNA = "always")
+
+table(data$a1_covid_comp, data$a1_covid_comp_no, useNA = "always")
+table(data$a1_covid_comp_no, data$a1_covid_comp_yes, useNA = "always")
+
+table(data$a1_covid_hotspot_school, data$a1_covid_hotspot_school_yes, useNA = "always")
+```
+
+
+
