@@ -1,0 +1,142 @@
+---
+title: "check_scoringcode"
+author: "Yi"
+date: "3/2/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/w1_10/02192021/H_H_DATA_W1-W10_02012021.sav")
+```
+
+```{r}
+table(data$W9_DEM_Ethnicity, useNA = "always")
+
+data %>% filter(., is.na(W9_DEM_Ethnicity)) %>% select(., W9_DEM_Ethnicity, W9_DEM_Native,W9_DEM_Asian,W9_DEM_Black,W9_DEM_Pacific,W9_DEM_White,W9_DEM_Other,W9_DEM_Multi,W9_DEM_Latino_YN) %>% filter_at(vars(W9_DEM_Native,W9_DEM_Asian,W9_DEM_Black,W9_DEM_Pacific,W9_DEM_White,W9_DEM_Other,W9_DEM_Multi,W9_DEM_Latino_YN), any_vars(. %in% 1))
+
+data %>% filter_at(vars(W9_DEM_Native,W9_DEM_Asian,W9_DEM_Black,W9_DEM_Pacific,W9_DEM_White,W9_DEM_Other,W9_DEM_Multi,W9_DEM_Latino_YN), any_vars(is.na(.))) %>% select(., W9_DEM_Native,W9_DEM_Asian,W9_DEM_Black,W9_DEM_Pacific,W9_DEM_White,W9_DEM_Other,W9_DEM_Multi,W9_DEM_Latino_YN)
+
+table(data$W9_DEM_Ethnicity, useNA = "always")
+table(data$W9_DEM_Latino_YN, useNA = "always")
+
+data %>% filter(., is.na(W9_DEM_Latino_YN)) %>% filter_at(vars(W9_DEM_Native,W9_DEM_Asian,W9_DEM_Black,W9_DEM_Pacific,W9_DEM_White,W9_DEM_Other,W9_DEM_Multi), any_vars(. %in% 1))
+
+data %>% filter_at(vars(W9_DEM_Native,W9_DEM_Asian,W9_DEM_Black,W9_DEM_Pacific,W9_DEM_White,W9_DEM_Other,W9_DEM_Multi), all_vars(. %in% 0))
+
+data %>% filter_at(vars(W9_DEM_Asian,W9_DEM_Black,W9_DEM_Pacific,W9_DEM_White,W9_DEM_Other,W9_DEM_Multi,W9_DEM_Latino_YN), all_vars(. %in% 0)) %>% filter(., W9_DEM_Native %in% 1) %>% select(., SID, W9_DEM_Ethnicity, W9_DEM_Native,W9_DEM_Asian,W9_DEM_Black,W9_DEM_Pacific,W9_DEM_White,W9_DEM_Other,W9_DEM_Multi,W9_DEM_Latino_YN)
+```
+
+```{r}
+select(data, starts_with("W9_Past_6mo")) %>% lapply(., table, useNA = "always")
+
+select(data, W9_Past_6mo_Alc,W9_Past_6mo_Stim,W9_Past_6mo_IllicitStim,W9_Past_6mo_RxStim,W9_Past_6mo_Opioids,W9_Past_6mo_RxDrugs,W9_Past_6mo_SoftDrugs,W9_Past_6mo_IllicitDrugs,W9_Past_6mo_PsychedelicDrugs,W9_Past_6mo_HardDrugs,W9_Past_6mo_DrugOrAlc,W9_Past_6mo_eCig_Any,W9_Past_6mo_eCig_Any_2,W9_Past_6mo_eCig_Nic,W9_Past_6mo_eCig_noNic,W9_Past_6mo_Cig,W9_Past_6mo_Cigar,W9_Past_6mo_Combust,W9_Past_6mo_Combust_no_Blunts,W9_Past_6mo_Nic,W9_Past_6mo_Nic_no_Blunts,W9_Past_6mo_Tob,W9_Past_6mo_Tob_no_Blunts,W9_Past_6mo_Mj_Any_2,W9_Past_6mo_Mj_Any_4) %>% lapply(., table, useNA = "always")
+```
+
+```{r}
+select(data, starts_with("W9_Life_Use")) %>% lapply(., table, useNA = "always")
+
+table(data$W9_Life_Total_Subs, useNA = "always")
+
+x <-  rowSums(data[, c('W9_Life_Use_Sub_1', 'W9_Life_Use_Sub_2', 'W9_Life_Use_Sub_3', 'W9_Life_Use_Sub_29', 'W9_Life_Use_Sub_31', 'W9_Life_Use_Sub_32', 'W9_Life_Use_Sub_5', 'W9_Life_Use_Sub_6', 'W9_Life_Use_Sub_7', 'W9_Life_Use_Sub_8','W9_Life_Use_Sub_10', 'W9_Life_Use_Sub_25', 'W9_Life_Use_Sub_27', 'W9_Life_Use_Sub_26', 'W9_Life_Use_Sub_30', 'W9_Life_Use_Sub_11', 'W9_Life_Use_Sub_12', 'W9_Life_Use_Sub_13', 'W9_Life_Use_Sub_14', 'W9_Life_Use_Sub_17', 'W9_Life_Use_Sub_20', 'W9_Life_Use_Sub_23', 'W9_Life_Use_Sub_21', 'W9_Life_Use_Sub_18', 'W9_Life_Use_Sub_24' )], na.rm = TRUE)
+
+table(data$W9_Life_Total_Subs, useNA = "always")
+table(x, useNA = "always")
+select(data, 'W9_Life_Use_Sub_1', 'W9_Life_Use_Sub_2', 'W9_Life_Use_Sub_3', 'W9_Life_Use_Sub_29', 'W9_Life_Use_Sub_31', 'W9_Life_Use_Sub_32', 'W9_Life_Use_Sub_5', 'W9_Life_Use_Sub_6', 'W9_Life_Use_Sub_7', 'W9_Life_Use_Sub_8','W9_Life_Use_Sub_10', 'W9_Life_Use_Sub_25', 'W9_Life_Use_Sub_27', 'W9_Life_Use_Sub_26', 'W9_Life_Use_Sub_30', 'W9_Life_Use_Sub_11', 'W9_Life_Use_Sub_12', 'W9_Life_Use_Sub_13', 'W9_Life_Use_Sub_14', 'W9_Life_Use_Sub_17', 'W9_Life_Use_Sub_20', 'W9_Life_Use_Sub_23', 'W9_Life_Use_Sub_21', 'W9_Life_Use_Sub_18', 'W9_Life_Use_Sub_24', W9_Life_Total_Subs)
+
+data %>% filter_at(vars('W9_Life_Use_Sub_1', 'W9_Life_Use_Sub_2', 'W9_Life_Use_Sub_3', 'W9_Life_Use_Sub_29', 'W9_Life_Use_Sub_31', 'W9_Life_Use_Sub_32', 'W9_Life_Use_Sub_5', 'W9_Life_Use_Sub_6', 'W9_Life_Use_Sub_7', 'W9_Life_Use_Sub_8','W9_Life_Use_Sub_10', 'W9_Life_Use_Sub_25', 'W9_Life_Use_Sub_27', 'W9_Life_Use_Sub_26', 'W9_Life_Use_Sub_30', 'W9_Life_Use_Sub_11', 'W9_Life_Use_Sub_12', 'W9_Life_Use_Sub_13', 'W9_Life_Use_Sub_14', 'W9_Life_Use_Sub_17', 'W9_Life_Use_Sub_20', 'W9_Life_Use_Sub_23', 'W9_Life_Use_Sub_21', 'W9_Life_Use_Sub_18', 'W9_Life_Use_Sub_24'), all_vars(is.na(.)))
+
+data %>% filter_at(vars('W9_Life_Use_Sub_1', 'W9_Life_Use_Sub_2', 'W9_Life_Use_Sub_3', 'W9_Life_Use_Sub_29', 'W9_Life_Use_Sub_31', 'W9_Life_Use_Sub_32', 'W9_Life_Use_Sub_5', 'W9_Life_Use_Sub_6', 'W9_Life_Use_Sub_7', 'W9_Life_Use_Sub_8','W9_Life_Use_Sub_10', 'W9_Life_Use_Sub_25', 'W9_Life_Use_Sub_27', 'W9_Life_Use_Sub_26', 'W9_Life_Use_Sub_30', 'W9_Life_Use_Sub_11', 'W9_Life_Use_Sub_12', 'W9_Life_Use_Sub_13', 'W9_Life_Use_Sub_14', 'W9_Life_Use_Sub_17', 'W9_Life_Use_Sub_20', 'W9_Life_Use_Sub_23', 'W9_Life_Use_Sub_21', 'W9_Life_Use_Sub_18', 'W9_Life_Use_Sub_24'), all_vars(. %in% 1))
+
+data %>% filter(., SID == "110010523") %>% select(., 'W9_Life_Use_Sub_1', 'W9_Life_Use_Sub_2', 'W9_Life_Use_Sub_3', 'W9_Life_Use_Sub_29', 'W9_Life_Use_Sub_31', 'W9_Life_Use_Sub_32', 'W9_Life_Use_Sub_5', 'W9_Life_Use_Sub_6', 'W9_Life_Use_Sub_7', 'W9_Life_Use_Sub_8','W9_Life_Use_Sub_10', 'W9_Life_Use_Sub_25', 'W9_Life_Use_Sub_27', 'W9_Life_Use_Sub_26', 'W9_Life_Use_Sub_30', 'W9_Life_Use_Sub_11', 'W9_Life_Use_Sub_12', 'W9_Life_Use_Sub_13', 'W9_Life_Use_Sub_14', 'W9_Life_Use_Sub_17', 'W9_Life_Use_Sub_20', 'W9_Life_Use_Sub_23', 'W9_Life_Use_Sub_21', 'W9_Life_Use_Sub_18', 'W9_Life_Use_Sub_24', W9_Life_Total_Subs) 
+data %>% filter(., SID == "110010523") %>% select(., 'W9_Life_Use_Sub_1a', 'W9_Life_Use_Sub_2a', 'W9_Life_Use_Sub_3a', 'W9_Life_Use_Sub_29a', 'W9_Life_Use_Sub_31a', 'W9_Life_Use_Sub_32a', 'W9_Life_Use_Sub_5a', 'W9_Life_Use_Sub_6a', 'W9_Life_Use_Sub_7a', 'W9_Life_Use_Sub_8a','W9_Life_Use_Sub_10a', 'W9_Life_Use_Sub_25a', 'W9_Life_Use_Sub_27a', 'W9_Life_Use_Sub_26a', 'W9_Life_Use_Sub_30a', 'W9_Life_Use_Sub_11a', 'W9_Life_Use_Sub_12a', 'W9_Life_Use_Sub_13a', 'W9_Life_Use_Sub_14a', 'W9_Life_Use_Sub_17a', 'W9_Life_Use_Sub_20a', 'W9_Life_Use_Sub_23a', 'W9_Life_Use_Sub_21a', 'W9_Life_Use_Sub_18a', 'W9_Life_Use_Sub_24a', W9_Life_Total_Subs) 
+
+table(data$W9_CigPuff_Use_Last30, useNA = "always")
+
+select(data, starts_with("W9_") & ends_with("Use_Last30_Any")) %>% lapply(., table, useNA = "always")
+select(data, starts_with("W9_") & ends_with("Use_Last30_Any")) %>% colnames(.) %>% as.data.frame(.)
+
+select(data, contains("W9_") & contains("Volume")) %>% lapply(., table, useNA = "always")
+select(data, contains("W9_") & contains("Quantity")) %>% lapply(., table, useNA = "always")
+
+select(data, contains("W9_") & contains("Willingness")) %>% lapply(., table, useNA = "always")
+select(data, contains("W9_") & contains("Expectation")) %>% lapply(., table, useNA = "always")
+
+alc_expectation <- ((5 - data$W9_Alc_Benefit) + data$W9_Alc_Risk)/2
+table(alc_expectation, useNA = "always")
+
+data %>% filter(., is.na(W9_Alc_Expectation)) %>% filter_at(vars(W9_Alc_Benefit, W9_Alc_Risk), any_vars(!is.na(.))) %>% select(., SID, W9_Alc_Benefit, W9_Alc_Risk, W9_Alc_Expectation)
+```
+
+```{r}
+table(data$W9_DAST_1, useNA = "always")
+
+select(data, W9_DAST_Sum, W9_DAST_Wsum, W9_DAST_Mean, W9_DAST_Degree, W9_DAST_WDegree) %>% lapply(., table, useNA = "always")
+```
+
+```{r}
+select(data, W9_HONC_Sum, W9_HONC_Wsum, W9_HONC_Cutoff, W9_HONC_wCutoff) %>% lapply(., table, useNA = "always")
+
+honcsum <- rowSums(data[, c('W9_HONC_1', 'W9_HONC_2' ,'W9_HONC_3' ,'W9_HONC_4' ,'W9_HONC_5','W9_HONC_6' ,'W9_HONC_7' ,'W9_HONC_8','W9_HONC_9', 'W9_HONC_10')], na.rm = TRUE)
+
+table(honcsum)
+
+select(data, W9_HOJC_Sum, W9_HOJC_Wsum, W9_HOJC_Cutoff, W9_HOJC_Wcutoff) %>% lapply(., table, useNA = "always")
+
+table(data$W9_HOJC_Wcutoff, useNA = "always")
+```
+
+```{r}
+select(data, W9_CAST_Sum, W9_CAST_Wsum, W9_CAST_Mean, W9_CAST_Cutoff, W9_CAST_Wcutoff, contains("W9_CAST_BI_")) %>% lapply(., table, useNA = "always")
+
+
+table(rowSums(is.na(data[, c('W9_CAST_1', 'W9_CAST_2' ,'W9_CAST_3' ,'W9_CAST_4' ,'W9_CAST_5','W9_CAST_6')])))
+
+castsum <- rowSums(data[, c('W9_CAST_1', 'W9_CAST_2' ,'W9_CAST_3' ,'W9_CAST_4' ,'W9_CAST_5','W9_CAST_6')], na.rm = FALSE)
+
+table(castsum, useNA = "always")
+```
+
+```{r}
+select(data, W9_UPPSP_Sen4_Sum, W9_UPPSP_Sen4_wSum, W9_UPPSP_Sen4_Mean) %>% lapply(., table, useNA = "always")
+```
+
+```{r}
+select(data, contains("W9_ePES_Activity"), contains("W9_ePES_Pleasure")) %>% lapply(., table, useNA = "always")
+
+select(data, W9_ePES_CR_Sum, W9_ePES_CR_wSum, W9_ePES_CR_Mean, W9_ePES_SR_Sum, W9_ePES_SR_wSum, W9_ePES_SR_Mean) %>% lapply(., table, useNA = "always")
+
+select(data, W9_ePES_CR_Activity_Sum, W9_ePES_CR_Activity_Mean, W9_ePES_CR_Activity_wSum) %>% lapply(., table, useNA = "always")
+
+select(data, W9_ePES_CR_Pleasure_Sum, W9_ePES_CR_Pleasure_wSum, W9_ePES_CR_Pleasure_Mean) %>% lapply(., table, useNA = "always")
+
+select(data, W9_ePES_CR_Product_Sum, W9_ePES_CR_Product_wSum, W9_ePES_CR_Product_Mean) %>% lapply(., table, useNA = "always")
+
+select(data, W9_ePES_SR_Activity_Sum, W9_ePES_SR_Activity_wSum, W9_ePES_SR_Activity_Mean) %>% lapply(., table, useNA = "always")
+
+table(data$W9_ePES_Product_wSum, useNA = "always")
+table(data$W9_ePES_Product_Mean, useNA = "always")
+
+```
+
+```{r}
+table(data$W9_eCig_flavors_endorsed_sum, useNA = "always")
+table(data$W9_eCig_flavorless_only, useNA = "always")
+```
+
+```{r}
+table(data$W9_Cigar_flavors_endorsed_sum, useNA = "always")
+```
+
+```{r}
+select(data, starts_with("W9_ESE_Cig_Pos")) %>% lapply(., table, useNA = "always")
+```
+
