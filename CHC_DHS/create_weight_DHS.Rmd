@@ -24,9 +24,9 @@ DHS <- data %>% filter(., !DHSSite %in% "")
 ```
 
 ```{r}
-DHS.new <- DHS %>% mutate(., prop = Total/sum(Total))
+DHS.new <- DHS %>% mutate(., sample.frac = Total/sum(Total))
 
-DHS.new <- rename(DHS.new, weight = prop)
+DHS.new <- DHS.new %>% mutate(., weight = 1/sample.frac)
 
 colnames(DHS.new)[startsWith(colnames(DHS.new), "@")] <- gsub("@", "group", colnames(DHS.new)[startsWith(colnames(DHS.new), "@")])
 
@@ -35,6 +35,6 @@ DHS.new
 ```
 
 ```{r}
-write_sav(DHS.new, "/Users/zhan039/Desktop/USC_HEAL/CHC_DHS/YZ/DHS_weight_YZ.sav")
+write_sav(DHS.new, "/Users/zhan039/Desktop/USC_HEAL/CHC_DHS/YZ/DHS_weight_final_YZ.sav")
 ```
 
