@@ -140,3 +140,11 @@ table(data$W9_Cigar_flavors_endorsed_sum, useNA = "always")
 select(data, starts_with("W9_ESE_Cig_Pos")) %>% lapply(., table, useNA = "always")
 ```
 
+```{r}
+table(data$W9_Life_Use_Sub_1, useNA = "always")
+
+data %>% filter(., is.na(W9_Life_Use_Sub_1)) %>% select(., W9_CigPuff_Use_Last30) %>% table(., useNA = "always")
+
+data %>% filter(., !is.na(W9_Life_Use_Sub_1)) %>% filter(., is.na(W9_CigPuff_Use_Last30)) %>% select(., W9_Life_Use_Sub_1, W9_CigPuff_Use_Last30)
+```
+
