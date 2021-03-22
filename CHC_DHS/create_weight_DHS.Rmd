@@ -1,0 +1,41 @@
+---
+title: "create_weight_DHS"
+author: "Yi"
+date: "3/21/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(survey)
+library(tidyverse)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/CHC_DHS/YZ/DHS_YZ.sav")
+```
+
+```{r}
+DHS <- data %>% filter(., !DHSSite %in% "")
+```
+
+```{r}
+DHS.new <- DHS %>% mutate(., prop = Total/sum(Total))
+DHS.new <- DHS.new %>% mutate(., weight = 1/prop)
+
+DHS.new <- DHS.new %>% select(., -prop)
+
+colnames(DHS.new)[startsWith(colnames(DHS.new), "@")] <- gsub("@", "group", colnames(DHS.new)[startsWith(colnames(DHS.new), "@")])
+
+DHS.new
+
+```
+
+```{r}
+write_sav(DHS.new, "/Users/zhan039/Desktop/USC_HEAL/CHC_DHS/YZ/DHS_weight_YZ.sav")
+```
+

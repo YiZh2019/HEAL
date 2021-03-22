@@ -1,0 +1,38 @@
+---
+title: "create_weight"
+author: "Yi"
+date: "3/21/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(survey)
+library(tidyverse)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/CHC_DHS/YZ/CHCs_YZ.sav")
+```
+
+```{r}
+CHC <- data %>% filter(., !ClinicNetwork %in% "")
+```
+
+```{r}
+
+CHC.new <- CHC %>% mutate(., prop = TotalPatients2019/sum(TotalPatients2019))
+
+CHC.new <- CHC.new %>% mutate(., weight = 1/prop)
+
+CHC.new <- CHC.new %>% select(., -prop)
+```
+
+```{r}
+write_sav(CHC.new, "/Users/zhan039/Desktop/USC_HEAL/CHC_DHS/YZ/CHCs_weight_YZ.sav")
+```
+
