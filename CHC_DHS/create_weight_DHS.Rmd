@@ -25,9 +25,8 @@ DHS <- data %>% filter(., !DHSSite %in% "")
 
 ```{r}
 DHS.new <- DHS %>% mutate(., prop = Total/sum(Total))
-DHS.new <- DHS.new %>% mutate(., weight = 1/prop)
 
-DHS.new <- DHS.new %>% select(., -prop)
+DHS.new <- rename(DHS.new, weight = prop)
 
 colnames(DHS.new)[startsWith(colnames(DHS.new), "@")] <- gsub("@", "group", colnames(DHS.new)[startsWith(colnames(DHS.new), "@")])
 

@@ -27,9 +27,10 @@ CHC <- data %>% filter(., !ClinicNetwork %in% "")
 
 CHC.new <- CHC %>% mutate(., prop = TotalPatients2019/sum(TotalPatients2019))
 
-CHC.new <- CHC.new %>% mutate(., weight = 1/prop)
+sum(CHC.new$prop, na.rm = F)
 
-CHC.new <- CHC.new %>% select(., -prop)
+CHC.new <- rename(CHC.new, weight = prop)
+CHC.new
 ```
 
 ```{r}
