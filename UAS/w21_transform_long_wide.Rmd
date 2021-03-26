@@ -1,0 +1,46 @@
+---
+title: "transform_long_wide"
+author: "Yi"
+date: "3/25/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(tidyverse)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/UAS/03252021/JC/UAS DATA/UAS_recode_waves_create_vars_YZ_B.sav")
+```
+
+```{r}
+head(data, 20)
+
+data %>% group_by(uasid, wave) %>% count() %>% filter(n > 1)
+
+data %>% group_by(uasid) %>% summarise(n_wave = n()) %>% arrange(desc(n_wave)) 
+
+```
+
+```{r}
+all <- select(data, 1:82)
+
+all_wide <- all %>% group_by(uasid) %>% gather(., key = variable, value = value, -c(1, 3)) %>% unite(., newvariable, variable, wave, sep = "_") %>% spread(., newvariable, value) 
+
+order_col_all <- c(sapply(colnames(all)[-c(1,3)], paste, c(1:21), sep = "_"))
+
+all_wide <- select(all_wide, uasid, all_of(order_col_all))
+
+
+head(all_wide)
+```
+
+```{r}
+write_sav(all_wide, "/Users/zhan039/Desktop/USC_HEAL/UAS/03252021/YZ/UAS_recode_waves_create_vars_YZ_B_YZ.sav")
+```
+
