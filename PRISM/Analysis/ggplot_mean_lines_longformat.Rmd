@@ -1,0 +1,63 @@
+---
+title: "ggplot_mean_lines_longformat"
+author: "Yi"
+date: "3/29/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(haven)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/PRISM_scores_demo_rat_new.sav")
+```
+
+```{r}
+head(data, 50)
+
+# for each participant, he has 4 blinding conditions, and 9 axt, so 36 records in total
+
+data %>% group_by(sid, menthol_status) %>% summarise(n = n())
+
+data %>% group_by(sid, smoking_condition_check, axt) %>% summarise(n = n())
+
+length(unique(data$sid))
+
+menthol <- data %>% filter(., menthol_status %in% 1)
+length(unique(menthol$sid))
+
+non_menthol <- data %>% filter(., menthol_status %in% 0)
+length(unique(non_menthol$sid))
+```
+
+```{r graph 3}
+MNWS_menthol <- aggregate(menthol$MNWS_Mean_new, list(menthol$blinding_condn, menthol$axt), mean, na.rm = T)
+
+MNWS_menthol <- rename(MNWS_menthol, blinding_condn = Group.1,
+                       axt = Group.2,
+                       MNWS_Mean_New_mean = x)
+
+ggplot(data = MNWS_menthol, mapping = aes(x = axt, y = MNWS_Mean_New_mean, group = blinding_condn, colour = as.factor(blinding_condn))) + 
+  geom_line() + geom_point() + ylab("MNWS_Mean_New_mean") + scale_colour_discrete(name = "Group",  breaks = c(1:4), labels = c("no smoking + placebo patch", "no smoking + active patch", "smoking + placebo patch", "smoking + active patch")) + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5, size = 20, face = "bold")) + labs(title = "MNWS Mean in Menthol Smokers") + guides(colour = guide_legend(nrow = 2))
+```
+
+
+```{r}
+MNWS_menthol_smoking <- aggregate(menthol$MNWS_Mean_new, list(menthol$smoking_condition_check, menthol$axt), mean, na.rm = T)
+
+MNWS_menthol_smoking <- rename(MNWS_menthol_smoking, smoking_condition_check = Group.1,
+                       axt = Group.2,
+                       MNWS_Mean_New_mean = x)
+
+ggplot(data = MNWS_menthol_smoking, mapping = aes(x = axt, y = MNWS_Mean_New_mean, group = smoking_condition_check, colour = as.factor(smoking_condition_check))) + 
+  geom_line() + geom_point() + ylab("MNWS_Mean_New_mean") + scale_colour_discrete(name = "Group",  breaks = c(0, 1), labels = c("no smoking", "smoking")) + theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5, size = 20, face = "bold")) + labs(title = "MNWS Mean in Menthol Smokers") + guides(colour = guide_legend(nrow = 2))
+```
+
