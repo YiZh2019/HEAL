@@ -1,0 +1,44 @@
+---
+title: "PRISM_new_analysis"
+author: "Yi"
+date: "4/6/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/PRISM_scores_demo_rat_new.sav")
+```
+
+```{r}
+data_time <- data
+
+table(data_time$axt, useNA = "always")
+
+data_time[, "time"] <- recode(data$axt, 
+       "axt1" = "08:15", 
+       "axt2" = "08:50", 
+       "axt3" = "09:20",
+       "axt4" = "09:50",
+       "axt5" = "10:20",
+       "axt6" = "10:50",
+       "axt7" = "11:20",
+       "axt8" = "11:50",
+       "axt9" = "12:20")
+
+table(data_time$axt, useNA = "always")
+table(data_time$time, useNA = "always")
+```
+
+```{r}
+write_sav(data_time, "/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/04062021_add_numeric_time/PRISM_scores_demo_rat_new_time.sav")
+```
+
