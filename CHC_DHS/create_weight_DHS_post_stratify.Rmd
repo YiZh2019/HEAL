@@ -1,0 +1,85 @@
+---
+title: "test"
+author: "Yi"
+date: "3/22/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(survey)
+library(tidyverse)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/CHC_DHS/YZ/DHS_YZ.sav")
+
+```
+
+```{r}
+DHS <- data %>% filter(., !DHSSite %in% "")
+
+```
+
+```{r}
+
+DHS.site <- DHS$DHSSite
+
+Active.DHS <- c()
+
+for (i in 1:length(DHS.site)) {
+  Active.DHS <- c(Active.DHS, rep(DHS.site[i], data$ActiveDHS[i]))
+}
+
+Active.DHS <- as.data.frame(Active.DHS)  
+Active.DHS
+
+
+new.DHS <- merge(Active.DHS, DHS, by.x = "Active.DHS", by.y = "DHSSite", all.x = T)
+
+table(new.DHS$Active.DHS, useNA = "always")
+
+DHS.unweighted <- svydesign(ids=~1, data=new.DHS)
+
+patient.dist <- data.frame(Active.DHS = DHS$DHSSite,
+                           Freq = DHS$Total)
+
+DHS.rake <- rake(design = DHS.unweighted, 
+                 sample.margins = list(~Active.DHS),
+                 population.margins = list(patient.dist))
+
+summary(DHS.rake)
+
+DHS.rake$variables
+DHS.rake$prob
+
+prob.data <- cbind(DHS.rake$variables[1], DHS.rake$prob, weights(DHS.rake))
+
+# prob.data <- prob.data %>% group_by(Active.DHS, `DHS.rake$prob`, `weights(DHS.rake)`) %>% summarise(n = n())
+
+DHS.new <- merge(DHS, prob.data, by.x = "DHSSite", by.y = "Active.DHS", all.x = T, all.y = T)
+
+summary(DHS.new$`DHS.rake$prob`)
+
+# DHS.new <- select(DHS.new, -c(n))
+
+colnames(DHS.new)[startsWith(colnames(DHS.new), "@")] <- gsub("@", "group", colnames(DHS.new)[startsWith(colnames(DHS.new), "@")])
+
+DHS.new <- rename(DHS.new, prob = `DHS.rake$prob`,
+                  weight = `weights(DHS.rake)`)
+
+DHS.new
+
+sum(DHS.new$weight)
+svymean(DHS.rake$prob)
+
+```
+
+```{r}
+write_sav(DHS.new, "/Users/zhan039/Desktop/USC_HEAL/CHC_DHS/YZ/DHS_(1)_YZ.sav")
+```
+
