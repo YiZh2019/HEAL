@@ -1,0 +1,83 @@
+---
+title: "w25_recode_waves"
+author: "Yi"
+date: "4/7/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/UAS/04022021_w25/covidpanel_us_stata_mar_31_2021.sav")
+```
+
+```{r wave_7days}
+table(data$start_date)
+
+class(data$wave)
+
+select(data, start_date, wave) %>% arrange(desc(wave))
+
+unique.date <- sort(unique(data$start_date))
+
+length(unique.date)/7  # 55 weeks in total
+
+index_start <- sort(rep(seq(1, length(unique.date), 7), 7))  # The same group/week repeats 7 days
+
+index_end <- sort(rep(seq(7, length(unique.date), 7), 7))
+date_start <- unique.date[index_start]
+date_end <- unique.date[index_end]
+
+date_start_f <- format(date_start, format = "%b %e")
+date_end_f <- format(date_end, format = "%b %e")
+
+
+wave_7days_labels <- paste(date_start_f, "-", date_end_f, sep = " ")
+
+
+as.numeric(data$start_date)
+
+data$wave_7days <- factor(as.numeric(data$start_date), levels = as.numeric(unique.date), labels = wave_7days_labels)
+
+select(data, uasid, start_date, wave, wave_7days)
+
+select(data, uasid, start_date, wave, wave_7days) %>% arrange(desc(wave_7days))
+
+table(data$wave_7days, useNA = "always")
+length(unique(data$wave_7days))
+```
+
+```{r wave_14days}
+length(unique.date)
+length(unique.date)/14  # 27.5 groups in total
+385/14
+14 * 27  # 22 groups among 378 days
+index_14_start <- sort(rep(seq(1, 378, 14), 14))
+index_14_end <- sort(rep(seq(14, 378, 14), 14))
+date_14_start <- c(unique.date[index_14_start], rep(unique.date[379], 7))
+date_14_end <- c(unique.date[index_14_end], rep(as.Date("2021-04-05"), 7))
+
+date_14_start_f <- format(date_14_start, format = "%b %e")
+date_14_end_f <- format(date_14_end, format = "%b %e")
+
+wave_14days_labels <- paste(date_14_start_f, "-", date_14_end_f, sep = " ")
+
+data$wave_14days <- factor(as.numeric(data$start_date), levels = as.numeric(unique.date), labels = wave_14days_labels)
+
+select(data, uasid, start_date, wave, wave_14days)
+
+select(data, uasid, start_date, wave, wave_14days) %>% arrange(desc(wave_14days))
+length(unique(data$wave_14days))
+```
+
+```{r}
+write_sav(data, "/Users/zhan039/Desktop/USC_HEAL/UAS/04022021_w25/YZ/covidpanel_us_stata_mar_31_2021_recode_waves_YZ.sav")
+```
+
