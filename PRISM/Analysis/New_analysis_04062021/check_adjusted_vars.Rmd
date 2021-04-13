@@ -44,14 +44,22 @@ data %>% select(., starts_with("s1_piq_6___")) %>% apply(., 2, table, useNA = "a
 data <- data %>% mutate(., count_race = rowSums(select(., starts_with("s1_piq_6___"))))
 data %>% select(., starts_with("s1_piq_6___"), count_race)
 
+table(data$count_race, useNA = "always")
+data %>% filter(., count_race <= 1) %>% select(., starts_with("s1_piq_6___")) %>% lapply(., table, useNA = "always")
+
 data %>% filter(., s1_piq_6___1 %in% 1) %>% select(., s1_piq_5, s1_piq_6___1)
-data %>% filter_at(vars(starts_with("s1_piq_6___")), all_vars(. %in% 0)) %>% select(., sid, s1_piq_5)
+data %>% filter_at(vars(starts_with("s1_piq_6___")), all_vars(. %in% 0)) %>% select(., sid, s1_piq_5, starts_with("s1_piq_6___"))
 
 
 36+1548+324+108
 
-data %>% filter(., is.na(s1_piq_5)) %>% select(., sid, axt)
-data %>% filter(., s1_shq_2 > 1990) %>% select(., sid, axt, s1_shq_2)
+data %>% filter(., is.na(s1_piq_5)) %>% select(., sid, axt, s1_piq_5, starts_with("s1_piq_6___"))
+
+data %>% filter(., sid %in% "18-00613-036") %>% select(., sid, axt, s1_piq_5, starts_with("s1_piq_6___"))
+
+data %>% filter(., s1_shq_2 > 1990) %>% select(., sid, axt, s1_shq_2, s1_dob, s1_piq_2)
+
+table(data$s1_shq_2, useNA = "always")
 
 3*9*4
 
