@@ -1,0 +1,242 @@
+---
+title: "ggplot"
+author: "Yi"
+date: "4/13/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(haven)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/PRISM/10132020_RecreateData/04062021_add_numeric_time/create_data/PRISM_scores_demo_rat_time_clean_04132021.sav")
+```
+
+```{r}
+head(data, 50)
+
+# for each participant, he has 4 blinding conditions, and 9 axt, so 36 records in total
+
+data %>% group_by(sid, menthol_status) %>% summarise(n = n())
+
+data %>% group_by(sid, smoking_condition_check, axt) %>% summarise(n = n())
+
+length(unique(data$sid))
+head(data$time, 50)
+
+menthol <- data %>% filter(., menthol_status %in% 1)
+length(unique(menthol$sid))
+
+non_menthol <- data %>% filter(., menthol_status %in% 0)
+length(unique(non_menthol$sid))
+
+table(menthol$menthol_status, useNA = "always")
+table(non_menthol$menthol_status, useNA = "always")
+```
+
+```{r}
+
+create_plot <- function(varname, title, subdata){
+  group.name <- ifelse(subdata$menthol_status %in% 1, "Menthol", "Non Menthol")
+  
+  temp.table <- aggregate(select(subdata, varname), list(subdata$blinding_condn, subdata$time_n), mean, na.rm = T)
+
+  temp.table <- rename(temp.table, blinding_condn = Group.1,
+         time_n = Group.2)
+  
+ fig <- ggplot(data = temp.table, mapping = aes(x = time_n, y = get(varname), group = blinding_condn, colour = as.factor(blinding_condn))) + 
+  geom_line() + geom_point() + 
+  ylab("Scores Difference from 08:15") + xlab("Time") + 
+  scale_colour_discrete(name = "Group",  breaks = c(1:4), labels = c("no smoking + placebo patch", "no smoking + active patch", "smoking + placebo patch", "smoking + active patch")) + 
+  theme(legend.position = "bottom", 
+        plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), 
+        plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), "inches"), 
+        axis.title.x = element_text(hjust = 0.5, vjust = -2,size = 10),
+        axis.title.y = element_text(hjust = 0.5, vjust = 2, size = 10),
+        axis.text.x = element_text(size = 9),
+        axis.text.y = element_text(size = 9)) + 
+  labs(title = paste(title ,"Difference in", group.name, "Smokers", sep = " ")) + guides(colour = guide_legend(nrow = 2)) +
+  scale_x_continuous(limits = c(29700, 45900), breaks = seq(from = 29700,by = 1800, length.out = 9), labels = c("08:15", "08:45", "09:15", "09:45", "10:15", "10:45", "11:15", "11:45", "12:15"), expand = c(0,0)) 
+ 
+  return(fig)
+}
+
+```
+
+```{r MNWS Mean, fig.dim=c(7,5)}
+MNWS_menthol <- create_plot("MNWS_Mean_new_change", "MNWS Mean", menthol)
+MNWS_nonmenthol <- create_plot("MNWS_Mean_new_change", "MNWS Mean", non_menthol)
+
+MNWS_menthol
+MNWS_nonmenthol
+
+ggsave(MNWS_menthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/MNWS_menthol.png", width = 7, height = 5, units = "in", dpi = 300)
+
+ggsave(MNWS_nonmenthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/MNWS_nonmenthol.png", width = 7, height = 5, units = "in", dpi = 300)
+```
+
+
+```{r QSU Mean, fig.dim=c(7,5)}
+QSU_menthol <- create_plot("QSU_Mean_new_change", "QSU Mean", menthol)
+QSU_nonmenthol <- create_plot("QSU_Mean_new_change", "QSU Mean", non_menthol)
+
+QSU_menthol
+QSU_nonmenthol
+
+ggsave(QSU_menthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/QSU_menthol.png", width = 7, height = 5, units = "in", dpi = 300)
+
+ggsave(QSU_nonmenthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/QSU_nonmenthol.png", width = 7, height = 5, units = "in", dpi = 300)
+```
+
+```{r QSU Factor 1, fig.dim=c(7,5)}
+QSU_Factor1_menthol <- create_plot("QSU_Factor1_Mean_change", "QSU Factor1 Mean", menthol)
+QSU_Factor1_nonmenthol <- create_plot("QSU_Factor1_Mean_change", "QSU Factor1 Mean", non_menthol)
+
+QSU_Factor1_menthol
+QSU_Factor1_nonmenthol
+
+ggsave(QSU_Factor1_menthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/QSU_Factor1_menthol.png", width = 7, height = 5, units = "in", dpi = 300)
+
+ggsave(QSU_Factor1_nonmenthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/QSU_Factor1_nonmenthol.png", width = 7, height = 5, units = "in", dpi = 300)
+```
+
+```{r QSU Factor 2, fig.dim=c(7,5)}
+QSU_Factor2_menthol <- create_plot("QSU_Factor2_Mean_change", "QSU Factor2 Mean", menthol)
+QSU_Factor2_nonmenthol <- create_plot("QSU_Factor2_Mean_change", "QSU Factor2 Mean", non_menthol)
+
+QSU_Factor2_menthol
+QSU_Factor2_nonmenthol
+
+ggsave(QSU_Factor2_menthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/QSU_Factor2_menthol.png", width = 7, height = 5, units = "in", dpi = 300)
+
+ggsave(QSU_Factor2_nonmenthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/QSU_Factor2_nonmenthol.png", width = 7, height = 5, units = "in", dpi = 300)
+```
+
+```{r POMS Anger, fig.dim=c(7,5)}
+POMS_Anger_menthol <- create_plot("POMS_Anger_Mean_change", "POMS Anger Mean", menthol)
+POMS_Anger_nonmenthol <- create_plot("POMS_Anger_Mean_change", "POMS Anger Mean", non_menthol)
+
+POMS_Anger_menthol
+POMS_Anger_nonmenthol
+
+ggsave(POMS_Anger_menthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_Anger_menthol.png", width = 7, height = 5, units = "in", dpi = 300)
+
+ggsave(POMS_Anger_nonmenthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_Anger_nonmenthol.png", width = 7, height = 5, units = "in", dpi = 300)
+```
+
+```{r POMS Anxiety, fig.dim=c(7,5)}
+POMS_Anxiety_menthol <- create_plot("POMS_Anxiety_Mean_change", "POMS Anxiety Mean", menthol)
+POMS_Anxiety_nonmenthol <- create_plot("POMS_Anxiety_Mean_change", "POMS Anxiety Mean", non_menthol)
+
+POMS_Anxiety_menthol
+POMS_Anxiety_nonmenthol
+
+ggsave(POMS_Anxiety_menthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_Anxiety_menthol.png", width = 7, height = 5, units = "in", dpi = 300)
+
+ggsave(POMS_Anxiety_nonmenthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_Anxiety_nonmenthol.png", width = 7, height = 5, units = "in", dpi = 300)
+```
+
+```{r POMS Confusion, fig.dim=c(7,5)}
+POMS_Confusion_menthol <- create_plot("POMS_Confusion_Mean_change", "POMS Confusion Mean", menthol)
+POMS_Confusion_nonmenthol <- create_plot("POMS_Confusion_Mean_change", "POMS Confusion Mean", non_menthol)
+
+POMS_Confusion_menthol
+POMS_Confusion_nonmenthol
+
+ggsave(POMS_Confusion_menthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_Confusion_menthol.png", width = 7, height = 5, units = "in", dpi = 300)
+
+ggsave(POMS_Confusion_nonmenthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_Confusion_nonmenthol.png", width = 7, height = 5, units = "in", dpi = 300)
+```
+
+```{r POMS Depression, fig.dim=c(7,5)}
+POMS_Depression_menthol <- create_plot("POMS_Depression_Mean_change", "POMS Depression Mean", menthol)
+POMS_Depression_nonmenthol <- create_plot("POMS_Depression_Mean_change", "POMS Depression Mean", non_menthol)
+
+POMS_Depression_menthol
+POMS_Depression_nonmenthol
+
+ggsave(POMS_Depression_menthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_Depression_menthol.png", width = 7, height = 5, units = "in", dpi = 300)
+
+ggsave(POMS_Depression_nonmenthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_Depression_nonmenthol.png", width = 7, height = 5, units = "in", dpi = 300)
+```
+
+```{r POMS Elation, fig.dim=c(7,5)}
+POMS_Elation_menthol <- create_plot("POMS_Elation_Mean_change", "POMS Elation Mean", menthol)
+POMS_Elation_nonmenthol <- create_plot("POMS_Elation_Mean_change", "POMS Elation Mean", non_menthol)
+
+POMS_Elation_menthol
+POMS_Elation_nonmenthol
+
+ggsave(POMS_Elation_menthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_Elation_menthol.png", width = 7, height = 5, units = "in", dpi = 300)
+
+ggsave(POMS_Elation_nonmenthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_Elation_nonmenthol.png", width = 7, height = 5, units = "in", dpi = 300)
+```
+
+```{r POMS Fatigue, fig.dim=c(7,5)}
+POMS_Fatigue_menthol <- create_plot("POMS_Fatigue_Mean_change", "POMS Fatigue Mean", menthol)
+POMS_Fatigue_nonmenthol <- create_plot("POMS_Fatigue_Mean_change", "POMS Fatigue Mean", non_menthol)
+
+POMS_Fatigue_menthol
+POMS_Fatigue_nonmenthol
+
+ggsave(POMS_Fatigue_menthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_Fatigue_menthol.png", width = 7, height = 5, units = "in", dpi = 300)
+
+ggsave(POMS_Fatigue_nonmenthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_Fatigue_nonmenthol.png", width = 7, height = 5, units = "in", dpi = 300)
+```
+
+```{r POMS Friendliness, fig.dim=c(7,5)}
+POMS_Friendliness_menthol <- create_plot("POMS_Friendliness_Mean_change", "POMS Friendliness Mean", menthol)
+POMS_Friendliness_nonmenthol <- create_plot("POMS_Friendliness_Mean_change", "POMS Friendliness Mean", non_menthol)
+
+POMS_Friendliness_menthol
+POMS_Friendliness_nonmenthol
+
+ggsave(POMS_Friendliness_menthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_Friendliness_menthol.png", width = 7, height = 5, units = "in", dpi = 300)
+
+ggsave(POMS_Friendliness_nonmenthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_Friendliness_nonmenthol.png", width = 7, height = 5, units = "in", dpi = 300)
+```
+
+```{r POMS NM, fig.dim=c(7,5)}
+POMS_NM_menthol <- create_plot("POMS_NM_Mean_change", "POMS NM Mean", menthol)
+POMS_NM_nonmenthol <- create_plot("POMS_NM_Mean_change", "POMS NM Mean", non_menthol)
+
+POMS_NM_menthol
+POMS_NM_nonmenthol
+
+ggsave(POMS_NM_menthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_NM_menthol.png", width = 7, height = 5, units = "in", dpi = 300)
+
+ggsave(POMS_NM_nonmenthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_NM_nonmenthol.png", width = 7, height = 5, units = "in", dpi = 300)
+```
+
+```{r POMS PM, fig.dim=c(7,5)}
+POMS_PM_menthol <- create_plot("POMS_PM_Mean_change", "POMS PM Mean", menthol)
+POMS_PM_nonmenthol <- create_plot("POMS_PM_Mean_change", "POMS PM Mean", non_menthol)
+
+POMS_PM_menthol
+POMS_PM_nonmenthol
+
+ggsave(POMS_PM_menthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_PM_menthol.png", width = 7, height = 5, units = "in", dpi = 300)
+
+ggsave(POMS_PM_nonmenthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_PM_nonmenthol.png", width = 7, height = 5, units = "in", dpi = 300)
+```
+
+```{r POMS Vigor, fig.dim=c(7,5)}
+POMS_Vigor_menthol <- create_plot("POMS_Vigor_Mean_change", "POMS Vigor Mean", menthol)
+POMS_Vigor_nonmenthol <- create_plot("POMS_Vigor_Mean_change", "POMS Vigor Mean", non_menthol)
+
+POMS_Vigor_menthol
+POMS_Vigor_nonmenthol
+
+ggsave(POMS_Vigor_menthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_Vigor_menthol.png", width = 7, height = 5, units = "in", dpi = 300)
+
+ggsave(POMS_Vigor_nonmenthol, filename = "/Users/zhan039/Desktop/USC_HEAL/PRISM/04062021Analysis3/Figures/Mean_Difference/POMS_Vigor_nonmenthol.png", width = 7, height = 5, units = "in", dpi = 300)
+```
+
+
