@@ -1,0 +1,43 @@
+---
+title: "fix w9 past 30 day for scoring"
+author: "Yi"
+date: "4/28/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+w1_10 <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/w1_10/02192021/H_H_DATA_W1-W10_02012021.sav")
+
+w9 <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/Temp_09252020/Yi/10152020/HH_W9_Scored_ForCleaning_merge.sav")
+```
+
+
+```{r}
+head(w9)
+head(w1_10)
+
+length(unique(w1_10$SID))
+length(unique(w9$SID))
+
+w1_10 %>% group_by(SID, record_id) %>% summarise(n = n()) %>% arrange(., desc(n))
+w9 %>% group_by(SID, record_id) %>% summarise(n = n()) %>% arrange(., desc(n))
+
+```
+
+```{r}
+w9 %>% select(., W9_Alc_Use_Last30 ,W9_Cig_Use_Last30 ,W9_Mj_Use_Last30 ,W9_RxStim_Use_Last30 ,W9_RxPain_Use_Last30 ,W9_Other_Use_Last30 ,W9_eCig_Use_Last30 ,W9_eMj_Use_Last30 ,W9_MjFood_Use_Last30 ,W9_eCig_noNic_Use_Last30 ,W9_Hookah_Use_Last30 ,W9_Cigar_Use_Last30 ,W9_Blunt_Use_Last30 ,W9_Dabbing_Use_Last30 ,W9_CigPuff_Use_Last30 ,W9_Juul_Use_Last30 ,W9_Other_Vape_Use_Last30 ,W9_Cigarillo_Use_Last30 ,W9_sMj_Use_Last30 ,W9_Inhale_Use_Last30 ,W9_Cocaine_Use_Last30 ,W9_Meth_Use_Last30 ,W9_Ecstacy_Use_Last30 ,W9_Sedative_Use_Last30 ,W9_Heroin_Use_Last30) %>% lapply(., table, useNA = "always")
+
+w1_10 %>% select(., W9_Alc_Use_Last30 ,W9_Cig_Use_Last30 ,W9_Mj_Use_Last30 ,W9_RxStim_Use_Last30 ,W9_RxPain_Use_Last30 ,W9_Other_Use_Last30 ,W9_eCig_Use_Last30 ,W9_eMj_Use_Last30 ,W9_MjFood_Use_Last30 ,W9_eCig_noNic_Use_Last30 ,W9_Hookah_Use_Last30 ,W9_Cigar_Use_Last30 ,W9_Blunt_Use_Last30 ,W9_Dabbing_Use_Last30 ,W9_CigPuff_Use_Last30 ,W9_Juul_Use_Last30 ,W9_Other_Vape_Use_Last30 ,W9_Cigarillo_Use_Last30 ,W9_sMj_Use_Last30 ,W9_Inhale_Use_Last30 ,W9_Cocaine_Use_Last30 ,W9_Meth_Use_Last30 ,W9_Ecstacy_Use_Last30 ,W9_Sedative_Use_Last30 ,W9_Heroin_Use_Last30) %>% lapply(., table, useNA = "always")
+
+# It looks like we don't need to fix it. 
+```
+
