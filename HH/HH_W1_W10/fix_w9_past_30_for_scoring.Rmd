@@ -17,27 +17,101 @@ library(haven)
 ```{r}
 w1_10 <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/w1_10/02192021/H_H_DATA_W1-W10_02012021.sav")
 
-w9 <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/Temp_09252020/Yi/10152020/HH_W9_Scored_ForCleaning_merge.sav")
+w9_recoded <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/Temp_09252020/Yi/10152020/HH_W9_Scored_ForCleaning_merge.sav")
+
+w9_raw <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/w1_10/02192021/Temp_03122021/hh_w9_full_raw.sav")
+```
+
+```{r}
+w9_raw <- rename(w9_raw, SID = sid,
+                 W9_CigPuff_Use_Last30_RAW = cig1_30, 
+                             W9_Cig_Use_Last30_RAW = cig2_30, 
+                             W9_eCig_Use_Last30_RAW = ecig1_30, 
+                             W9_eCig_noNic_Use_Last30_RAW = ecig2_30, 
+                             W9_Juul_Use_Last30_RAW = juul_30, 
+                             W9_Other_Vape_Use_Last30_RAW = other_vape_30, 
+                             W9_Cigar_Use_Last30_RAW = cigar1_30, 
+                             W9_Cigarillo_Use_Last30_RAW = cigar2_30, 
+                             W9_Hookah_Use_Last30_RAW = hookah_30, 
+                             W9_Blunt_Use_Last30_RAW = blunt_30, 
+                             W9_Mj_Use_Last30_RAW = marijuana1_30, 
+                             W9_MjFood_Use_Last30_RAW = marijuana2_30,
+                             W9_eMj_Use_Last30_RAW = electronicmj_30,
+                             W9_sMj_Use_Last30_RAW = syntheticmj_30,
+                             W9_Dabbing_Use_Last30_RAW = dabbing_30,
+                             W9_Alc_Use_Last30_RAW = alcohol_30,
+                             W9_Inhale_Use_Last30_RAW = inhalant_30, 
+                             W9_Cocaine_Use_Last30_RAW = cocaine_30, 
+                             W9_Meth_Use_Last30_RAW = meth_30, 
+                             W9_Ecstacy_Use_Last30_RAW = ecstacy_30, 
+                             W9_RxPain_Use_Last30_RAW = painkillers_30,
+                             W9_RxStim_Use_Last30_RAW = stimulants_30,
+                             W9_Sedative_Use_Last30_RAW = sedatives_30,
+                             W9_Heroin_Use_Last30_RAW = heroin_30,
+                             W9_Other_Use_Last30_RAW = other_product_30)
+
 ```
 
 
 ```{r}
-head(w9)
+head(w9_recoded)
 head(w1_10)
+head(w9_raw)
 
 length(unique(w1_10$SID))
-length(unique(w9$SID))
+length(unique(w9_recoded$SID))
+length(unique(w9_raw$SID))
 
 w1_10 %>% group_by(SID, record_id) %>% summarise(n = n()) %>% arrange(., desc(n))
-w9 %>% group_by(SID, record_id) %>% summarise(n = n()) %>% arrange(., desc(n))
+w9_recoded %>% group_by(SID, record_id) %>% summarise(n = n()) %>% arrange(., desc(n))
+w9_raw %>% group_by(SID, record_id) %>% summarise(n = n()) %>% arrange(., desc(n))
 
 ```
 
 ```{r}
-w9 %>% select(., W9_Alc_Use_Last30 ,W9_Cig_Use_Last30 ,W9_Mj_Use_Last30 ,W9_RxStim_Use_Last30 ,W9_RxPain_Use_Last30 ,W9_Other_Use_Last30 ,W9_eCig_Use_Last30 ,W9_eMj_Use_Last30 ,W9_MjFood_Use_Last30 ,W9_eCig_noNic_Use_Last30 ,W9_Hookah_Use_Last30 ,W9_Cigar_Use_Last30 ,W9_Blunt_Use_Last30 ,W9_Dabbing_Use_Last30 ,W9_CigPuff_Use_Last30 ,W9_Juul_Use_Last30 ,W9_Other_Vape_Use_Last30 ,W9_Cigarillo_Use_Last30 ,W9_sMj_Use_Last30 ,W9_Inhale_Use_Last30 ,W9_Cocaine_Use_Last30 ,W9_Meth_Use_Last30 ,W9_Ecstacy_Use_Last30 ,W9_Sedative_Use_Last30 ,W9_Heroin_Use_Last30) %>% lapply(., table, useNA = "always")
+w9_recoded %>% select(., W9_Alc_Use_Last30 ,W9_Cig_Use_Last30 ,W9_Mj_Use_Last30 ,W9_RxStim_Use_Last30 ,W9_RxPain_Use_Last30 ,W9_Other_Use_Last30 ,W9_eCig_Use_Last30 ,W9_eMj_Use_Last30 ,W9_MjFood_Use_Last30 ,W9_eCig_noNic_Use_Last30 ,W9_Hookah_Use_Last30 ,W9_Cigar_Use_Last30 ,W9_Blunt_Use_Last30 ,W9_Dabbing_Use_Last30 ,W9_CigPuff_Use_Last30 ,W9_Juul_Use_Last30 ,W9_Other_Vape_Use_Last30 ,W9_Cigarillo_Use_Last30 ,W9_sMj_Use_Last30 ,W9_Inhale_Use_Last30 ,W9_Cocaine_Use_Last30 ,W9_Meth_Use_Last30 ,W9_Ecstacy_Use_Last30 ,W9_Sedative_Use_Last30 ,W9_Heroin_Use_Last30) %>% lapply(., table, useNA = "always")
 
 w1_10 %>% select(., W9_Alc_Use_Last30 ,W9_Cig_Use_Last30 ,W9_Mj_Use_Last30 ,W9_RxStim_Use_Last30 ,W9_RxPain_Use_Last30 ,W9_Other_Use_Last30 ,W9_eCig_Use_Last30 ,W9_eMj_Use_Last30 ,W9_MjFood_Use_Last30 ,W9_eCig_noNic_Use_Last30 ,W9_Hookah_Use_Last30 ,W9_Cigar_Use_Last30 ,W9_Blunt_Use_Last30 ,W9_Dabbing_Use_Last30 ,W9_CigPuff_Use_Last30 ,W9_Juul_Use_Last30 ,W9_Other_Vape_Use_Last30 ,W9_Cigarillo_Use_Last30 ,W9_sMj_Use_Last30 ,W9_Inhale_Use_Last30 ,W9_Cocaine_Use_Last30 ,W9_Meth_Use_Last30 ,W9_Ecstacy_Use_Last30 ,W9_Sedative_Use_Last30 ,W9_Heroin_Use_Last30) %>% lapply(., table, useNA = "always")
 
-# It looks like we don't need to fix it. 
+w9_raw %>% select(., W9_Alc_Use_Last30_RAW, W9_Cig_Use_Last30_RAW, W9_Mj_Use_Last30_RAW, W9_RxStim_Use_Last30_RAW, W9_RxPain_Use_Last30_RAW, W9_Other_Use_Last30_RAW, W9_eCig_Use_Last30_RAW, W9_eMj_Use_Last30_RAW, W9_MjFood_Use_Last30_RAW, W9_eCig_noNic_Use_Last30_RAW, W9_Hookah_Use_Last30_RAW, W9_Cigar_Use_Last30_RAW, W9_Blunt_Use_Last30_RAW, W9_Dabbing_Use_Last30_RAW, W9_CigPuff_Use_Last30_RAW, W9_Juul_Use_Last30_RAW, W9_Other_Vape_Use_Last30_RAW, W9_Cigarillo_Use_Last30_RAW, W9_sMj_Use_Last30_RAW, W9_Inhale_Use_Last30_RAW, W9_Cocaine_Use_Last30_RAW, W9_Meth_Use_Last30_RAW, W9_Ecstacy_Use_Last30_RAW, W9_Sedative_Use_Last30_RAW, W9_Heroin_Use_Last30_RAW) %>% lapply(., table, useNA = "always")
+
+
+# Conclude: We should use raw data to fix it. 
+```
+
+```{r}
+rm <- c("W9_Alc_Use_Last30" ,"W9_Cig_Use_Last30" ,"W9_Mj_Use_Last30" ,"W9_RxStim_Use_Last30" ,"W9_RxPain_Use_Last30" ,"W9_Other_Use_Last30" ,"W9_eCig_Use_Last30" ,"W9_eMj_Use_Last30" ,"W9_MjFood_Use_Last30" ,"W9_eCig_noNic_Use_Last30" ,"W9_Hookah_Use_Last30" ,"W9_Cigar_Use_Last30" ,"W9_Blunt_Use_Last30" ,"W9_Dabbing_Use_Last30" ,"W9_CigPuff_Use_Last30" ,"W9_Juul_Use_Last30" ,"W9_Other_Vape_Use_Last30" ,"W9_Cigarillo_Use_Last30" ,"W9_sMj_Use_Last30" ,"W9_Inhale_Use_Last30" ,"W9_Cocaine_Use_Last30" ,"W9_Meth_Use_Last30" ,"W9_Ecstacy_Use_Last30" ,"W9_Sedative_Use_Last30" ,"W9_Heroin_Use_Last30")
+
+new <- paste(rm, "_RAW", sep = "")
+
+w1_10_formerge <- w1_10[, !colnames(w1_10) %in% rm]
+w9_raw_formerge <- select(w9_raw, SID, all_of(new))
+
+w9_raw_formerge[, new] <- w9_raw_formerge[, new] -1
+
+select(w9_raw, all_of(new)) %>% lapply(., table, useNA = "always")
+select(w9_raw_formerge, all_of(new)) %>% lapply(., table, useNA = "always")
+
+testdata <- merge(w1_10_formerge, w9_raw_formerge, by.x = "SID", by.y = "SID", all.x = T, all.y = T)
+
+
+colnames(testdata)[colnames(testdata) %in% new] <- rm
+
+testdata[, rm] <- lapply(testdata[, rm], labelled, labels = c("0 days" = 0, "1 or 2 days" = 1, "3 to 5 days" = 2, "6 to 9 days" = 3, "10 to 19 days" = 4, "20-29 days" = 5, "All 30 days" = 6))
+
+```
+
+```{r}
+write_sav(testdata, "/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/w1_10/02192021/YZ/test_replace.sav")
+```
+
+```{r}
+table(testdata$W9_Life_Use_Sub_2a, useNA = "always")
+
+table(testdata$W9_Cig_Use_Last30, useNA = "always")
+
+testdata %>% filter(., W9_Life_Use_Sub_2a %in% c(0, 1)) %>% filter(., is.na(W9_Cig_Use_Last30)) %>% select(., W9_Life_Use_Sub_2a, W9_Cig_Use_Last30)
+
+2314+67
 ```
 
