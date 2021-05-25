@@ -1,0 +1,44 @@
+---
+title: "w26_transform_long_wide"
+author: "Yi"
+date: "5/25/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(tidyverse)
+```
+
+```{r}
+data <- read_sav("/Users/zhan039/Desktop/USC_HEAL/UAS/05212021_w26/JC/covidpanel_us_stata_apr_28_2021_long.sav")
+```
+
+```{r}
+head(data, 20)
+
+data %>% group_by(uasid, wave) %>% count() %>% filter(n > 1)
+
+data %>% group_by(uasid) %>% summarise(n_wave = n()) %>% arrange(desc(n_wave)) 
+```
+
+```{r}
+all <- select(data, 1:93)
+
+all_wide <- all %>% group_by(uasid) %>% gather(., key = variable, value = value, -c(1, 5)) %>% unite(., newvariable, variable, wave, sep = "_") %>% spread(., newvariable, value) 
+
+order_col_all <- c(sapply(colnames(all)[-c(1,5)], paste, c(1:26), sep = "_"))
+
+all_wide <- select(all_wide, uasid, all_of(order_col_all))
+
+head(all_wide, 20)
+```
+
+```{r}
+write_sav(all_wide, "/Users/zhan039/Desktop/USC_HEAL/UAS/05212021_w26/YZ/covidpanel_us_stata_apr_28_2021_wide_YZ.sav")
+```
+
