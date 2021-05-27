@@ -1,0 +1,89 @@
+---
+title: "w24_merge_cig_questions_wide"
+author: "Yi"
+date: "4/1/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+```
+
+```{r}
+covid <- read_sav("/Users/zhan039/Desktop/USC_HEAL/UAS/03262021_w24/YZ/UAS covidpanel_raw_YZ.sav")
+
+uas20 <- read_sav("/Users/zhan039/Desktop/USC_HEAL/UAS/03262021_w24/UAS20/uas20.sav")
+
+uas95 <- read_sav("/Users/zhan039/Desktop/USC_HEAL/UAS/03262021_w24/UAS95/uas95.sav")
+
+uas182 <- read_sav("/Users/zhan039/Desktop/USC_HEAL/UAS/03262021_w24/UAS182/uas182.sav")
+```
+
+```{r rename variables in uas20}
+length(unique(uas20$uasid))
+
+select(uas20, uasid, start_date, end_date, b122_, c116_, c117_, c118_, c119_, c120_, c121_, c122_, c123_, c124_, c125_, c126_, c127_) %>% lapply(., attr, "label")
+
+uas20_formerge <- select(uas20, uasid, start_date, end_date, b122_, c116_, c117_, c118_, c119_, c120_, c121_, c122_, c123_, c124_, c125_, c126_, c127_)
+
+colnames(uas20_formerge)[-c(1:3)] <- paste(colnames(uas20_formerge)[-c(1:3)], "uas20", sep = "")
+colnames(uas20_formerge)[c(2, 3)] <- paste(colnames(uas20_formerge)[c(2, 3)], "uas20", sep = "_")
+
+head(uas20_formerge)
+```
+
+```{r merge covid with uas20}
+length(intersect(covid$uasid, uas20_formerge$uasid)) # 5695 ppts in both covid and uas20
+
+uas20_formerge <- uas20_formerge[uas20_formerge$uasid %in% covid$uasid, ]  # 5695 records should be updated with new variables
+
+2281 + 15  # the new number of variables should be 2296
+
+head(uas20_formerge)
+
+covid_20 <- merge(covid, uas20_formerge, by.x = c("uasid"), by.y = c("uasid"), all.x = T, all.y = T)
+
+head(covid_20)
+covid_20 %>% select(., uasid, contains("uas20")) %>%arrange(., uasid) %>% head(., 30)
+
+```
+
+```{r rename variables in uas95}
+head(uas95)
+
+length(unique(uas95$uasid))
+
+select(uas95, uasid, start_date, end_date, z205, c117_, c118_, c119_, c120_, c121_, c122_, c123_, c124_) %>% lapply(., attr, "label")
+
+uas95_formerge <- select(uas95, uasid, start_date, end_date, z205, c117_, c118_, c119_, c120_, c121_, c122_, c123_, c124_) 
+
+colnames(uas95_formerge)[-c(1:4)] <- paste(colnames(uas95_formerge)[-c(1:4)], "uas95", sep = "")
+colnames(uas95_formerge)[c(2, 3, 4)] <- paste(colnames(uas95_formerge)[c(2, 3, 4)], "uas95", sep = "_")
+
+head(uas95_formerge)
+```
+
+```{r merge covid_20 with 95}
+length(intersect(covid_20$uasid, uas95_formerge$uasid)) # 3880 ppts in both covid and uas20
+
+uas95_formerge <- uas95_formerge[uas95_formerge$uasid %in% covid_20$uasid, ]  # 3880 records should be updated with new variables
+
+2281 + 15 + 11 # the new number of variables should be 2307
+
+head(uas95_formerge)
+
+covid_20_95 <- merge(covid_20, uas95_formerge, by.x = c("uasid"), by.y = c("uasid"), all.x = T, all.y = T)
+
+head(covid_20_95)
+covid_20_95 %>% select(., uasid, contains("uas95")) %>%arrange(., uasid) %>% head(., 30)
+```
+
+```{r}
+
+```
+
