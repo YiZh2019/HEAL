@@ -1,0 +1,30 @@
+---
+title: "merge_w10"
+author: "Yi"
+date: "5/24/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+library(tidyverse)
+```
+
+```{r}
+olddata <- read_sav("/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/w1_10/02192021/YZ/H_H_DATA_W1-W10_02012021_W9scored_YZ.sav")
+
+w10 <- read.csv("/Users/zhan039/Desktop/USC_HEAL/HH/Data Management/w1_10/05132021/hh_w10_postcc_051321ss.csv", na.strings = "NA")
+```
+
+```{r}
+inter.col <- intersect(colnames(olddata), colnames(w10))
+
+colnames(w10)[!colnames(w10) %in% inter.col]
+
+colnames(olddata)[!colnames(olddata) %in% inter.col][startsWith(colnames(olddata)[!colnames(olddata) %in% inter.col], "W10")]
+```
+
