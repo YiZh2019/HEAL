@@ -33,6 +33,16 @@ data %>% filter(., is.na(W9_DEM_Latino_YN)) %>% filter_at(vars(W9_DEM_Native,W9_
 data %>% filter_at(vars(W9_DEM_Native,W9_DEM_Asian,W9_DEM_Black,W9_DEM_Pacific,W9_DEM_White,W9_DEM_Other,W9_DEM_Multi), all_vars(. %in% 0))
 
 data %>% filter_at(vars(W9_DEM_Asian,W9_DEM_Black,W9_DEM_Pacific,W9_DEM_White,W9_DEM_Other,W9_DEM_Multi,W9_DEM_Latino_YN), all_vars(. %in% 0)) %>% filter(., W9_DEM_Native %in% 1) %>% select(., SID, W9_DEM_Ethnicity, W9_DEM_Native,W9_DEM_Asian,W9_DEM_Black,W9_DEM_Pacific,W9_DEM_White,W9_DEM_Other,W9_DEM_Multi,W9_DEM_Latino_YN)
+
+data <- data %>% rowwise(.) %>% mutate(., W9_multiracial = sum(W9_DEM_Native, W9_DEM_Asian,W9_DEM_Black,W9_DEM_Pacific,W9_DEM_White,W9_DEM_Other,W9_DEM_Multi,W9_DEM_Latino_YN, na.rm = T))
+
+head(data$W9_multiracial)
+
+data %>% filter(., W9_DEM_Latino_YN %in% 0 & W9_DEM_Multi %in% 1) %>% select(., W9_DEM_Native, W9_DEM_Asian,W9_DEM_Black,W9_DEM_Pacific,W9_DEM_White,W9_DEM_Other,W9_DEM_Multi,W9_DEM_Latino_YN)
+
+data %>% filter(., W9_DEM_Latino_YN %in% 0 & W9_multiracial > 1) %>% select(., W9_DEM_Native, W9_DEM_Asian,W9_DEM_Black,W9_DEM_Pacific,W9_DEM_White,W9_DEM_Other,W9_DEM_Multi,W9_DEM_Latino_YN)
+
+data %>% filter(., W9_DEM_Latino_YN %in% 0 & W9_multiracial > 1 & W9_DEM_Multi %in% 1) %>% select(., W9_DEM_Native, W9_DEM_Asian,W9_DEM_Black,W9_DEM_Pacific,W9_DEM_White,W9_DEM_Other,W9_DEM_Multi,W9_DEM_Latino_YN)
 ```
 
 ```{r}
